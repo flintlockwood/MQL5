@@ -1,0 +1,36 @@
+# exclude files
+*.dat
+log.txt
+*.ex4
+*.ex5
+*.cpp
+*.vcxproj
+*.dll
+*.bmp
+
+# exclude directories completely
+Images
+Indicators
+Libraries
+Logs
+Presets
+Profiles
+Services
+"Shared Projects"
+Levels
+Params
+.vscode
+
+# include directory contents
+!Experts/
+!Files/
+!Include/
+!Indicators/
+!Scripts/
+!Libraries/
+
+#include only file with extension .mq5, .mqh, .ex5 and ignore the others
+!*.mq4
+!*.mq5
+!*.mqh
+!*.tpl
