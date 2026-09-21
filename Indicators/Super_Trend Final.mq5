@@ -11,14 +11,13 @@
 #property indicator_plots 2
 #define INDICATOR_TEXT "SuperTrend"
 
-#property indicator_label1  "Filling"
-#property indicator_type1   DRAW_FILLING
+#property indicator_label1  "Uptrend Buy"
+#property indicator_type1   DRAW_COLOR_LINE
 #property indicator_color1  clrBisque, clrPaleGreen
 
-#property indicator_label2  "SuperTrend"
+#property indicator_label2  "Downtrend Sell"
 #property indicator_type2   DRAW_COLOR_LINE
 #property indicator_color2  clrDeepSkyBlue, clrDeepPink
-#property indicator_width2 2 
 
 input int    Periode=13;
 input double Multiplier=1.5;
