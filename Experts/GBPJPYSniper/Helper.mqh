@@ -108,7 +108,7 @@ void MAOnBuffer(const int rates_total,const int prev_calculated,const int begin,
     }
 }
 
-void CopyRatesCustom(string symbol, ENUM_TIMEFRAMES_CUSTOM timeframe, int start_pos, int count, MqlRates &rates[]){
+void CopyRatesCustom(string symbol, ENUM_TIMEFRAMES timeframe, int start_pos, MqlRates &rates[]){
     int bars = Bars(symbol, PERIOD_M1);
     MqlRates rates_m1[];
     CopyRates(symbol, PERIOD_M1, 0, bars, rates_m1);
