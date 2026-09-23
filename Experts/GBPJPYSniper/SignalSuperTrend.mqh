@@ -8,15 +8,16 @@
 #property version   "1.00"
 
 #include <Expert/ExpertSignal.mqh>
-#include "../../Indicators/Helper.mqh"
+#include "Helper.mqh"
+#include "IndicatorSuperTrend.mqh"
 
 class SignalSuperTrend: public CExpertSignal {
     protected:
-        CiCustom          m_st_handle;
+        CiSuperTrend      m_st_handle;
         
         //--- adjusted signal & indicator parameters
         string            m_sig_symbol;
-        ENUM_TIMEFRAMES_CUSTOM m_sig_timeframe;
+        int               m_sig_timeframe;
         int               m_st_period;
         double            m_st_multiplier;
         ENUM_MA_METHOD    m_st_ma_method;
@@ -33,7 +34,7 @@ class SignalSuperTrend: public CExpertSignal {
 
         //--- methods of setting adjustable indicator parameters
         void              SignalSymbol(string value)          { m_sig_symbol=value;         }
-        void              SignalTimeframe(ENUM_TIMEFRAMES_CUSTOM value) { m_sig_timeframe=value; }
+        void              SignalTimeframe(int value)          { m_sig_timeframe=value; }
         void              PeriodMA(int value)                 { m_st_period=value;          }
         void              Multiplier(double value)            { m_st_multiplier=value;      }
         void              MaMethod(ENUM_MA_METHOD value)      { m_st_ma_method=value;       }
@@ -61,7 +62,7 @@ class SignalSuperTrend: public CExpertSignal {
 //| Constructor                                                      |
 //+------------------------------------------------------------------+
 SignalSuperTrend::SignalSuperTrend(void) : m_sig_symbol("GBPJPY"),
-                            m_sig_timeframe(PERIOD_M30_CUSTOM),
+                            m_sig_timeframe(PERIOD_M30),
                             m_st_period(10),
                             m_st_multiplier(3.1),
                             m_st_ma_method(ENUM_MA_METHOD::MODE_SMMA),
@@ -129,7 +130,7 @@ bool SignalSuperTrend::InitSuperTrend(CIndicators *indicators) {
     ind_params[3].integer_value = m_st_ma_method;
     ind_params[4].type = TYPE_INT;
     ind_params[4].integer_value = m_st_applied_price;
-    if(!m_st_handle.Create(m_sig_symbol,m_sig_timeframe,IND_CUSTOM,5,ind_params)) {
+    if(!m_st_handle.Create(m_sig_symbol,(ENUM_TIMEFRAMES)m_sig_timeframe,IND_CUSTOM,5,ind_params)) {
         printf(__FUNCTION__+": error initializing object");
         return(false);
     }

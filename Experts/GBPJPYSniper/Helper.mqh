@@ -135,13 +135,17 @@ void CopyRatesCustom(string symbol, ENUM_TIMEFRAMES_CUSTOM timeframe, int start_
     }
 }
 
-int GetPeriodSeconds(ENUM_TIMEFRAMES_CUSTOM timeframe) {
-    switch (timeframe)
-    {
-    case PERIOD_M45_CUSTOM:
-        return 45 * 60;
-    default:
-        return 0;
+int GetPeriodSeconds(int timeframe) {
+    if (timeframe < 100) {
+        return PeriodSeconds((ENUM_TIMEFRAMES)timeframe);
+    }
+    else {
+        switch (timeframe) {
+            case PERIOD_M45:
+                return 45 * 60;
+            default:
+                return 0;
+        }
     }
 }
 
@@ -151,7 +155,7 @@ void ArrayAppend(MqlRates &rates[], MqlRates &value) {
     rates[n] = value;
 }
 
-void ArrayAppend(double &rates[], double &value) {
+void ArrayAppend(double &rates[], double value) {
     int n = ArraySize(rates);
     ArrayResize(rates, n+1);
     rates[n] = value;

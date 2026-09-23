@@ -10,6 +10,7 @@
 //| Include                                                          |
 //+------------------------------------------------------------------+
 #include <Expert/Expert.mqh>
+#include "Helper.mqh"
 //--- available signals
 #include "SignalSuperTrend.mqh"
 #include "SignalStochRSI.mqh"
@@ -42,21 +43,21 @@ input double             Signal_ST_Multiplier          =3.1;
 input ENUM_MA_METHOD     Signal_ST_MaMethod            =MODE_SMMA;
 input ENUM_APPLIED_PRICE Signal_ST_AppliedPrice        =PRICE_OPEN;
 //--- inputs for Stochastic RSI indicator
-input string             Signal_StochRsi_Symbol        ="GBPJPY";
-input ENUM_TIMEFRAMES    Signal_StochRsi_Timeframe     =PERIOD_M30;
-input int                Signal_StochRsi_RsiPeriod     =22;
-input int                Signal_StochRsi_StochLength   =2;
-input int                Signal_StochRsi_K             =19;
-input int                Signal_StochRsi_D             =2;
-input ENUM_APPLIED_PRICE Signal_StochRsi_AppliedPrice  =PRICE_HIGH;
-input string             Signal_StochRsi_KDOperator    =">";
+// input string             Signal_StochRsi_Symbol        ="GBPJPY";
+// input ENUM_TIMEFRAMES    Signal_StochRsi_Timeframe     =PERIOD_M30;
+// input int                Signal_StochRsi_RsiPeriod     =22;
+// input int                Signal_StochRsi_StochLength   =2;
+// input int                Signal_StochRsi_K             =19;
+// input int                Signal_StochRsi_D             =2;
+// input ENUM_APPLIED_PRICE Signal_StochRsi_AppliedPrice  =PRICE_HIGH;
+// input string             Signal_StochRsi_KDOperator    =">";
 //--- inputs for atr indicator
-input string             Signal_ATR_Symbol             ="GBPJPY";
-input ENUM_TIMEFRAMES    Signal_ATR_Timeframe          =PERIOD_M45;
-input int                Signal_ATR_Period             =3;
-input ENUM_MA_METHOD     Signal_ATR_MaMethod           =MODE_SMMA;
-input bool               Signal_ATR_EnableATRDirection =true;
-input bool               Signal_ATR_EnableATRIncrease  =true;
+// input string             Signal_ATR_Symbol             ="GBPJPY";
+// input int                Signal_ATR_Timeframe          =PERIOD_M45;
+// input int                Signal_ATR_Period             =3;
+// input ENUM_MA_METHOD     Signal_ATR_MaMethod           =MODE_SMMA;
+// input bool               Signal_ATR_EnableATRDirection =true;
+// input bool               Signal_ATR_EnableATRIncrease  =true;
 //--- inputs for ma indicator
 input int                Signal_MA_PeriodMA            =12;          // Moving Average(12,0,...) Period of averaging
 input int                Signal_MA_Shift               =0;           // Moving Average(12,0,...) Time shift
@@ -122,30 +123,30 @@ int OnInit() {
     }
     signal.AddFilter(filterST);
 //--- Set filter parameters
-    filterST.IndicatorSymbol(Signal_ST_Symbol);
-    filterST.IndicatorTimeframe(Signal_ST_Timeframe);
+    filterST.SignalSymbol(Signal_ST_Symbol);
+    filterST.SignalTimeframe(Signal_ST_Timeframe);
     filterST.PeriodMA(Signal_ST_Period);
     filterST.Multiplier(Signal_ST_Multiplier);
     filterST.MaMethod(Signal_ST_MaMethod);
     filterST.Applied(Signal_ST_AppliedPrice);
 
 //--- Createing filter StochRSI
-    SignalStochRSI *filterStochRsi=new SignalStochRSI;
-    if(filterStochRsi==NULL) {
-        //--- failed
-        printf(__FUNCTION__+": error creating Stochastic RSI filter");
-        ExtExpert.Deinit();
-        return(INIT_FAILED);
-    }
-    signal.AddFilter(filterStochRsi);
+    // SignalStochRSI *filterStochRsi=new SignalStochRSI;
+    // if(filterStochRsi==NULL) {
+    //     //--- failed
+    //     printf(__FUNCTION__+": error creating Stochastic RSI filter");
+    //     ExtExpert.Deinit();
+    //     return(INIT_FAILED);
+    // }
+    // signal.AddFilter(filterStochRsi);
 //--- Set filter parameters
-    filterStochRsi.IndicatorSymbol(Signal_StochRsi_Symbol);
-    filterStochRsi.IndicatorTimeframe(Signal_StochRsi_Timeframe);
-    filterStochRsi.RSIPeriod(Signal_StochRsi_RsiPeriod);
-    filterStochRsi.StochLength(Signal_StochRsi_StochLength);
-    filterStochRsi.StochK(Signal_StochRsi_K);
-    filterStochRsi.StochD(Signal_StochRsi_D);
-    filterStochRsi.KDOperator(Signal_StochRsi_KDOperator);
+    // filterStochRsi.IndicatorSymbol(Signal_StochRsi_Symbol);
+    // filterStochRsi.IndicatorTimeframe(Signal_StochRsi_Timeframe);
+    // filterStochRsi.RSIPeriod(Signal_StochRsi_RsiPeriod);
+    // filterStochRsi.StochLength(Signal_StochRsi_StochLength);
+    // filterStochRsi.StochK(Signal_StochRsi_K);
+    // filterStochRsi.StochD(Signal_StochRsi_D);
+    // filterStochRsi.KDOperator(Signal_StochRsi_KDOperator);
 
 //--- Creating filter CSignalMA
     CSignalMA *filter0=new CSignalMA;

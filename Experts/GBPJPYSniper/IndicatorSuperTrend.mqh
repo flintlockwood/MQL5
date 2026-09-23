@@ -31,13 +31,21 @@ class CiSuperTrend: public CIndicator {
         void            Applied(ENUM_APPLIED_PRICE value) { m_applied = value; }
         
         //--- method of creation
+        bool            Create(const string symbol,const ENUM_TIMEFRAMES period,
+                            const ENUM_INDICATOR type,const int num_params,const MqlParam &params[]);
         bool            Create(const string symbol,const int period,
                             const int atr_period,const double atr_mutiplier,
                             const ENUM_MA_METHOD ma_method,const ENUM_APPLIED_PRICE applied);
         
         //--- methods of access to indicator data
-        double          Main(const int index) const;
-        bool            Refresh();
+        double          GetData(const int buffer_num,const int index);
+        int             GetData(const int start_pos,const int count,const int buffer_num,double &buffer[]);
+        int             GetData(const datetime start_time,const int count,const int buffer_num,double &buffer[]);
+        int             GetData(const datetime start_time,const datetime stop_time,const int buffer_num,double &buffer[]);
+        double          Main(const int index);
+        virtual void    Refresh(const int flags=OBJ_ALL_PERIODS);
+        bool            Refresh(const int handle,const int num);
+        bool            RefreshCurrent(const int handle,const int num);
 
     protected:
         //--- methods of tuning
@@ -67,6 +75,12 @@ CiSuperTrend::~CiSuperTrend(void) {
 //+------------------------------------------------------------------+
 //| Create indicator                                                 |
 //+------------------------------------------------------------------+
+bool CiSuperTrend::Create(const string symbol,const ENUM_TIMEFRAMES period,
+                            const ENUM_INDICATOR type,const int num_params,const MqlParam &params[]) {
+//--- we do not need to create indicator here
+    return(true);
+}
+
 bool CiSuperTrend::Create(const string symbol,const int period,
                         const int atr_period,const double atr_mutiplier,
                         const ENUM_MA_METHOD ma_method,const ENUM_APPLIED_PRICE applied) {
@@ -114,7 +128,7 @@ bool CiSuperTrend::Initialize(const string symbol,const int period,
 //+------------------------------------------------------------------+
 //| Access to buffer                                                 |
 //+------------------------------------------------------------------+
-double CiSuperTrend::Main(const int index) const {
+double CiSuperTrend::Main(const int index) {
     CIndicatorBuffer *buffer=At(0);
     //--- check
     if(buffer==NULL)
@@ -123,11 +137,8 @@ double CiSuperTrend::Main(const int index) const {
     return(buffer.At(index));
 }
 
-//+------------------------------------------------------------------+
-//| API access method "Copying an element of indicator buffer        |
-//| by specifying number of buffer and position of element"          |        
-//+------------------------------------------------------------------+
-double CIndicator::GetData(const int buffer_num,const int index) const {
+double CiSuperTrend::GetData(const int buffer_num,const int index) {
+    bool success = Refresh(NULL, buffer_num);
     CIndicatorBuffer *buffer=At(buffer_num);
     //--- check
     if(buffer==NULL) {
@@ -142,10 +153,10 @@ double CIndicator::GetData(const int buffer_num,const int index) const {
 //| API access method "Copying the buffer of indicator by specifying |
 //| a start position and number of elements"                         |
 //+------------------------------------------------------------------+
-int CIndicator::GetData(const int start_pos,const int count,const int buffer_num,double &buffer[]) const {
+int CiSuperTrend::GetData(const int start_pos,const int count,const int buffer_num,double &buffer[]) {
     //--- check
-    CIndicatorBuffer *buffer=At(buffer_num);
-    if(buffer==NULL) {
+    CIndicatorBuffer *ind_buffer=At(buffer_num);
+    if(ind_buffer==NULL) {
         Print(__FUNCTION__,": invalid buffer");
         return(-1);
     }
@@ -154,7 +165,7 @@ int CIndicator::GetData(const int start_pos,const int count,const int buffer_num
         return(-1);
     }
     for (int i=start_pos; i<count; i++) {
-        ArrayAppend(buffer, buffer.At(i));
+        ArrayAppend(buffer, ind_buffer.At(i));
     }
     //---
     return(ArraySize(buffer));
@@ -164,11 +175,10 @@ int CIndicator::GetData(const int start_pos,const int count,const int buffer_num
 //| API access method "Copying the buffer of indicator by specifying |
 //| start time and number of elements"                               |
 //+------------------------------------------------------------------+
-int CIndicator::GetData(const datetime start_time,const int count,const int buffer_num,double &buffer[]) const
-  {
-//--- check
-    CIndicatorBuffer *buffer=At(buffer_num);
-    if(buffer==NULL) {
+int CiSuperTrend::GetData(const datetime start_time,const int count,const int buffer_num,double &buffer[]) {
+    //--- check
+    CIndicatorBuffer *ind_buffer=At(buffer_num);
+    if(ind_buffer==NULL) {
         Print(__FUNCTION__,": invalid buffer");
         return(-1);
     }
@@ -184,12 +194,8 @@ int CIndicator::GetData(const datetime start_time,const int count,const int buff
 //| API access method "Copying the buffer of indicator by specifying |
 //| start and final time                                             |
 //+------------------------------------------------------------------+
-int CIndicator::GetData(const datetime start_time,const datetime stop_time,const int buffer_num,double &buffer[]) const {
+int CiSuperTrend::GetData(const datetime start_time,const datetime stop_time,const int buffer_num,double &buffer[]) {
     //--- check
-   if(buffer==NULL) {
-        Print(__FUNCTION__,": invalid buffer");
-        return(-1);
-    }
     if(buffer_num>=m_buffers_total) {
         SetUserError(ERR_USER_INVALID_BUFF_NUM);
         return(-1);
@@ -201,7 +207,7 @@ int CIndicator::GetData(const datetime start_time,const datetime stop_time,const
 //+------------------------------------------------------------------+
 //| Refreshing data of indicator                                     |
 //+------------------------------------------------------------------+
-void CIndicator::Refresh(const int flags) {
+void CiSuperTrend::Refresh(const int flags=OBJ_ALL_PERIODS) {
     int               i;
     CIndicatorBuffer *buff;
     //--- refreshing buffers
@@ -225,14 +231,14 @@ void CIndicator::Refresh(const int flags) {
 //+------------------------------------------------------------------+
 //| Refreshing of data in buffer                                     |
 //+------------------------------------------------------------------+
-bool CIndicatorBuffer::Refresh(const int handle,const int num) {
+bool CiSuperTrend::Refresh(const int handle,const int num) {
     //--- check
     if(handle==INVALID_HANDLE) {
         SetUserError(ERR_USER_INVALID_HANDLE);
         return(false);
     }
     //---
-    m_data_total=CopyBuffer(handle,num,-m_offset,m_size,m_data);
+    //m_data_total=CopyBuffer(handle,num,-m_offset,m_size,m_data);
     //---
     return(m_data_total>0);
 }
@@ -240,7 +246,7 @@ bool CIndicatorBuffer::Refresh(const int handle,const int num) {
 //+------------------------------------------------------------------+
 //| Refreshing of the data in buffer                                 |
 //+------------------------------------------------------------------+
-bool CIndicatorBuffer::RefreshCurrent(const int handle,const int num) {
+bool CiSuperTrend::RefreshCurrent(const int handle,const int num) {
     double array[1];
     //--- check
     if(handle==INVALID_HANDLE) {
@@ -248,10 +254,10 @@ bool CIndicatorBuffer::RefreshCurrent(const int handle,const int num) {
         return(false);
     }
     //---
-    if(CopyBuffer(handle,num,-m_offset,1,array)>0 && m_data_total>0) {
-        m_data[0]=array[0];
-        return(true);
-    }
+    //if(CopyBuffer(handle,num,-m_offset,1,array)>0 && m_data_total>0) {
+    //    m_data[0]=array[0];
+    //    return(true);
+    //}
     //--- error
     return(false);
 }
