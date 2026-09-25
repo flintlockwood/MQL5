@@ -20,7 +20,6 @@ class CiStochRSI: public CIndicator {
         int               m_stoch_k;
         int               m_stoch_d;
         ENUM_APPLIED_PRICE m_applied;
-        string            m_kd_operator;
 
     public:
         CiStochRSI(void);
@@ -34,22 +33,17 @@ class CiStochRSI: public CIndicator {
         void            StochK(int value) {m_stoch_k = value; }
         void            StochD(int value) {m_stoch_d = value; }
         void            Applied(ENUM_APPLIED_PRICE value) { m_applied = value; }
-        void            KDOperator(string value) { m_kd_operator = value; }
         
         //--- method of creation
         bool            Create(const string symbol,const ENUM_TIMEFRAMES period,
                             const ENUM_INDICATOR type,const int num_params,const MqlParam &params[]);
         bool            Create(const string symbol,const int period,
-                            const int atr_period,const double atr_mutiplier,
-                            const ENUM_MA_METHOD ma_method,const ENUM_APPLIED_PRICE applied);
+                            const int rsi_period,const int stoch_length,
+                            const int k,const int d, const ENUM_APPLIED_PRICE applied);
         
         //--- methods of access to indicator data
-        double          GetData(const int buffer_num,const int index);
-        int             GetData(const int start_pos,const int count,const int buffer_num,double &buffer[]);
-        int             GetData(const datetime start_time,const int count,const int buffer_num,double &buffer[]);
-        int             GetData(const datetime start_time,const datetime stop_time,const int buffer_num,double &buffer[]);
-        double          UpperBand(const int index);
-        double          LowerBand(const int index);
+        double          FastK(const int index);
+        double          SlowD(const int index);
         double          Trend(const int index);
         virtual void    Refresh(const int flags=OBJ_ALL_PERIODS);
         bool            Refresh(const int handle,const int num);
@@ -61,10 +55,11 @@ class CiStochRSI: public CIndicator {
 //+------------------------------------------------------------------+
 CiStochRSI::CiStochRSI(void) : m_ind_symbol("GBPJPY"),
                    m_ind_timeframe(PERIOD_M30),
-                   m_atr_period(10),
-                   m_atr_multiplier(3.1),
-                   m_ma_method(MODE_SMMA),
-                   m_applied(PRICE_OPEN) {
+                   m_rsi_period(22),
+                   m_stoch_length(2),
+                   m_stoch_k(19),
+                   m_stoch_d(2),
+                   m_applied(PRICE_HIGH) {
 }
 
 //+------------------------------------------------------------------+
@@ -79,39 +74,36 @@ CiStochRSI::~CiStochRSI(void) {
 bool CiStochRSI::Create(const string symbol,const ENUM_TIMEFRAMES period,
                             const ENUM_INDICATOR type,const int num_params,const MqlParam &params[]) {
     return(Create(params[1].string_value, (int)params[2].integer_value, 
-                    (int)params[3].integer_value, params[4].double_value,
-                    (ENUM_MA_METHOD)params[5].integer_value, (ENUM_APPLIED_PRICE)params[6].integer_value));
+                    params[3].integer_value, params[4].int_value,
+                    params[5].integer_value, params[6].integer_value, (ENUM_APPLIED_PRICE)params[7].integer_value));
 }
 
 bool CiStochRSI::Create(const string symbol,const int period,
-                        const int atr_period,const double atr_mutiplier,
-                        const ENUM_MA_METHOD ma_method,const ENUM_APPLIED_PRICE applied) {
+                        const int rsi_period,const int stoch_length,
+                        const int k,const int d, const ENUM_APPLIED_PRICE applied) {
 //--- we do not need to create indicator here
-    if(Reserve(3)) {
+    if(Reserve(2)) {
         //--- string of status of drawing
         m_name  ="ST";
         m_status="("+symbol+","+PeriodDescription()+","+
-               IntegerToString(atr_period)+","+DoubleToString(atr_mutiplier)+","+
-               MethodDescription(ma_method)+","+PriceDescription(applied)+")";
+               IntegerToString(rsi_period)+","+IntegerToString(stoch_length)+","+
+               IntegerToString(k)+","+IntegerToString(d)+")";
         //--- save settings
         m_ind_symbol = symbol;
         m_ind_timeframe = period;
-        m_atr_period=atr_period;
-        m_atr_multiplier=atr_mutiplier;
-        m_ma_method=ma_method;
+        m_rsi_period = rsi_period;
+        m_stoch_length = stoch_length;
+        m_stoch_k = k;
+        m_stoch_d = d;
         m_applied  =applied;
         //--- create buffers
-        CIndicatorBuffer *upper_band_buffer = new CIndicatorBuffer();
-        upper_band_buffer.Name("Upper Band");
-        Add(upper_band_buffer);
+        CIndicatorBuffer *k_buffer = new CIndicatorBuffer();
+        k_buffer.Name("K");
+        Add(k_buffer);
 
-        CIndicatorBuffer *lower_band_buffer = new CIndicatorBuffer();
-        lower_band_buffer.Name("Lower Band");
-        Add(lower_band_buffer);
-
-        CIndicatorBuffer *trend_buffer = new CIndicatorBuffer();
-        trend_buffer.Name("Trend");
-        Add(trend_buffer);
+        CIndicatorBuffer *d_buffer = new CIndicatorBuffer();
+        d_buffer.Name("D");
+        Add(d_buffer);
         //--- ok
         return(true);
     }
@@ -121,7 +113,7 @@ bool CiStochRSI::Create(const string symbol,const int period,
 //+------------------------------------------------------------------+
 //| Access to upper band buffer                                      |
 //+------------------------------------------------------------------+
-double CiStochRSI::UpperBand(const int index) {
+double CiStochRSI::FastK(const int index) {
     CIndicatorBuffer *buffer=At(0);
     //--- check
     if(buffer==NULL)
@@ -133,92 +125,13 @@ double CiStochRSI::UpperBand(const int index) {
 //+------------------------------------------------------------------+
 //| Access to lower band buffer                                      |
 //+------------------------------------------------------------------+
-double CiStochRSI::LowerBand(const int index) {
+double CiStochRSI::SlowD(const int index) {
     CIndicatorBuffer *buffer=At(1);
     //--- check
     if(buffer==NULL)
         return(EMPTY_VALUE);
     //---
     return(buffer.At(index));
-}
-
-//+------------------------------------------------------------------+
-//| Access to lower trend buffer                                     |
-//+------------------------------------------------------------------+
-double CiStochRSI::Trend(const int index) {
-    CIndicatorBuffer *buffer=At(2);
-    //--- check
-    if(buffer==NULL)
-        return(EMPTY_VALUE);
-    //---
-    return(buffer.At(index));
-}
-
-double CiStochRSI::GetData(const int buffer_num,const int index) {
-    bool success = Refresh(NULL, buffer_num);
-    CIndicatorBuffer *buffer=At(buffer_num);
-    //--- check
-    if(buffer==NULL) {
-        Print(__FUNCTION__,": invalid buffer");
-        return(EMPTY_VALUE);
-    }
-    //---
-    return(buffer.At(index));
-}
-
-//+------------------------------------------------------------------+
-//| API access method "Copying the buffer of indicator by specifying |
-//| a start position and number of elements"                         |
-//+------------------------------------------------------------------+
-int CiStochRSI::GetData(const int start_pos,const int count,const int buffer_num,double &buffer[]) {
-    //--- check
-    CIndicatorBuffer *ind_buffer=At(buffer_num);
-    if(ind_buffer==NULL) {
-        Print(__FUNCTION__,": invalid buffer");
-        return(-1);
-    }
-    if(buffer_num>=m_buffers_total) {
-        SetUserError(ERR_USER_INVALID_BUFF_NUM);
-        return(-1);
-    }
-    for (int i=start_pos; i<count; i++) {
-        ArrayAppend(buffer, ind_buffer.At(i));
-    }
-    //---
-    return(ArraySize(buffer));
-}
-
-//+------------------------------------------------------------------+
-//| API access method "Copying the buffer of indicator by specifying |
-//| start time and number of elements"                               |
-//+------------------------------------------------------------------+
-int CiStochRSI::GetData(const datetime start_time,const int count,const int buffer_num,double &buffer[]) {
-    //--- check
-    CIndicatorBuffer *ind_buffer=At(buffer_num);
-    if(ind_buffer==NULL) {
-        Print(__FUNCTION__,": invalid buffer");
-        return(-1);
-    }
-    if(buffer_num>=m_buffers_total) {
-        SetUserError(ERR_USER_INVALID_BUFF_NUM);
-        return(-1);
-    }
-    //---
-    return(CopyBuffer(m_handle,buffer_num,start_time,count,buffer));
-}
-
-//+------------------------------------------------------------------+
-//| API access method "Copying the buffer of indicator by specifying |
-//| start and final time                                             |
-//+------------------------------------------------------------------+
-int CiStochRSI::GetData(const datetime start_time,const datetime stop_time,const int buffer_num,double &buffer[]) {
-    //--- check
-    if(buffer_num>=m_buffers_total) {
-        SetUserError(ERR_USER_INVALID_BUFF_NUM);
-        return(-1);
-    }
-    //---
-    return(CopyBuffer(m_handle,buffer_num,start_time,stop_time,buffer));
 }
 
 //+------------------------------------------------------------------+

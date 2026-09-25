@@ -14,17 +14,6 @@ enum ENUM_TIMEFRAMES_CUSTOM {
     PERIOD_M45 = 145
 };
 
-// initialize array with value 
-void InitializeArray(double &array[], int size, double value = EMPTY_VALUE) {
-    ArrayResize(array, size);
-    ArrayInitialize(array, value);
-}
-
-void InitializeArray(bool &array[], int size, bool value = false) {
-    ArrayResize(array, size);
-    ArrayInitialize(array, value);
-}
-
 int BarsCustom(string symbol, int timeframe) {
     if (timeframe < 100) {
         return Bars(symbol, (ENUM_TIMEFRAMES)timeframe);
@@ -43,6 +32,48 @@ int BarsCustom(string symbol, int timeframe) {
     }
 }
 
+int GetPeriodSeconds(int timeframe) {
+    if (timeframe < 100) {
+        return PeriodSeconds((ENUM_TIMEFRAMES)timeframe);
+    }
+    else {
+        switch (timeframe) {
+            case PERIOD_M45:
+                return 45 * 60;
+            default:
+                return 0;
+        }
+    }
+}
+
+//+------------------------------------------------------------------+
+//| Array Functions                                                  |
+//+------------------------------------------------------------------+
+void InitializeArray(double &array[], int size, double value = EMPTY_VALUE) {
+    ArrayResize(array, size);
+    ArrayInitialize(array, value);
+}
+
+void InitializeArray(bool &array[], int size, bool value = false) {
+    ArrayResize(array, size);
+    ArrayInitialize(array, value);
+}
+
+void ArrayAppend(MqlRates &rates[], MqlRates &value) {
+    int n = ArraySize(rates);
+    ArrayResize(rates, n+1);
+    rates[n] = value;
+}
+
+void ArrayAppend(double &rates[], double value) {
+    int n = ArraySize(rates);
+    ArrayResize(rates, n+1);
+    rates[n] = value;
+}
+
+//+------------------------------------------------------------------+
+//| Timeseries Functions                                             |
+//+------------------------------------------------------------------+
 int CopyAppliedPrice(string symbol_name, int timeframe, ENUM_APPLIED_PRICE applied_price, int start_pos, int count, double &applied_price_array[]) {
     double open_array[];
     double high_array[];
@@ -95,6 +126,38 @@ int CopyAppliedPrice(string symbol_name, int timeframe, ENUM_APPLIED_PRICE appli
     }
 }
 
+int CopyOpenFromMqlRates(MqlRates &rates[], double &open_array[]) {
+    ArrayResize(open_array, ArraySize(rates));
+    for (int i=0; i<ArraySize(rates); i++) {
+        open_array[i] = rates[i].open;
+    }
+    return ArraySize(open_array);
+}
+
+int CopyHighFromMqlRates(MqlRates &rates[], double &high_array[]) {
+    ArrayResize(high_array, ArraySize(rates));
+    for (int i=0; i<ArraySize(rates); i++) {
+        high_array[i] = rates[i].high;
+    }
+    return ArraySize(high_array);
+}
+
+int CopyLowFromMqlRates(MqlRates &rates[], double &low_array[]) {
+    ArrayResize(low_array, ArraySize(rates));
+    for (int i=0; i<ArraySize(rates); i++) {
+        low_array[i] = rates[i].low;
+    }
+    return ArraySize(low_array);
+}
+
+int CopyCloseFromMqlRates(MqlRates &rates[], double &close_array[]) {
+    ArrayResize(close_array, ArraySize(rates));
+    for (int i=0; i<ArraySize(rates); i++) {
+        close_array[i] = rates[i].close;
+    }
+    return ArraySize(close_array);
+}
+
 int CopyTR(string symbol_name, int timeframe, int start_pos, int count, double &tr_array[]) {
     if (timeframe < 100) {
         double low_array[];
@@ -124,26 +187,6 @@ int CopyTR(string symbol_name, int timeframe, int start_pos, int count, double &
         }
 
         return ArraySize(rates);
-    }
-}
-
-void MAOnBuffer(const int rates_total,const int prev_calculated,const int begin,const int period,ENUM_MA_METHOD ma_method, double& price[],double& buffer[]) {
-    switch (ma_method)
-    {
-        case MODE_SMA:
-            SimpleMAOnBuffer(rates_total, prev_calculated, begin, period, price, buffer);
-            break;
-        case MODE_EMA:
-            ExponentialMAOnBuffer(rates_total, prev_calculated, begin, period, price, buffer);
-            break;
-        case MODE_LWMA:
-            LinearWeightedMAOnBuffer(rates_total, prev_calculated, begin, period, price, buffer);
-            break;
-        case MODE_SMMA:
-            SmoothedMAOnBuffer(rates_total, prev_calculated, begin, period, price, buffer);
-            break;
-        default:
-            break;
     }
 }
 
@@ -180,64 +223,6 @@ void CopyRatesCustom(string symbol, int timeframe, int start_pos, MqlRates &rate
     }
 }
 
-int CopyOpenFromMqlRates(MqlRates &rates[], double &open_array[]) {
-    ArrayResize(open_array, ArraySize(rates));
-    for (int i=0; i<ArraySize(rates); i++) {
-        open_array[i] = rates[i].open;
-    }
-    return ArraySize(open_array);
-}
-
-int CopyHighFromMqlRates(MqlRates &rates[], double &high_array[]) {
-    ArrayResize(high_array, ArraySize(rates));
-    for (int i=0; i<ArraySize(rates); i++) {
-        high_array[i] = rates[i].high;
-    }
-    return ArraySize(high_array);
-}
-
-int CopyLowFromMqlRates(MqlRates &rates[], double &low_array[]) {
-    ArrayResize(low_array, ArraySize(rates));
-    for (int i=0; i<ArraySize(rates); i++) {
-        low_array[i] = rates[i].low;
-    }
-    return ArraySize(low_array);
-}
-
-int CopyCloseFromMqlRates(MqlRates &rates[], double &close_array[]) {
-    ArrayResize(close_array, ArraySize(rates));
-    for (int i=0; i<ArraySize(rates); i++) {
-        close_array[i] = rates[i].close;
-    }
-    return ArraySize(close_array);
-}
-
-int GetPeriodSeconds(int timeframe) {
-    if (timeframe < 100) {
-        return PeriodSeconds((ENUM_TIMEFRAMES)timeframe);
-    }
-    else {
-        switch (timeframe) {
-            case PERIOD_M45:
-                return 45 * 60;
-            default:
-                return 0;
-        }
-    }
-}
-
-void ArrayAppend(MqlRates &rates[], MqlRates &value) {
-    int n = ArraySize(rates);
-    ArrayResize(rates, n+1);
-    rates[n] = value;
-}
-
-void ArrayAppend(double &rates[], double value) {
-    int n = ArraySize(rates);
-    ArrayResize(rates, n+1);
-    rates[n] = value;
-}
-
 double RatesMinimum(MqlRates &rates[]) {
     double min = 999999999;
     for (int i=0; i<ArraySize(rates); i++) {
@@ -272,4 +257,42 @@ long RatesRealVolumeSum(MqlRates &rates[]) {
         sum += rates[i].real_volume;
     }
     return sum;
+}
+
+//+------------------------------------------------------------------+
+//| Indicator on Buffer Functions                                    |
+//+------------------------------------------------------------------+
+void MAOnBuffer(const int rates_total,const int prev_calculated,const int begin,const int period,ENUM_MA_METHOD ma_method, double& price[],double& buffer[]) {
+    switch (ma_method)
+    {
+        case MODE_SMA:
+            SimpleMAOnBuffer(rates_total, prev_calculated, begin, period, price, buffer);
+            break;
+        case MODE_EMA:
+            ExponentialMAOnBuffer(rates_total, prev_calculated, begin, period, price, buffer);
+            break;
+        case MODE_LWMA:
+            LinearWeightedMAOnBuffer(rates_total, prev_calculated, begin, period, price, buffer);
+            break;
+        case MODE_SMMA:
+            SmoothedMAOnBuffer(rates_total, prev_calculated, begin, period, price, buffer);
+            break;
+        default:
+            break;
+    }
+}
+
+void RSIOnBuffer(const int period, double& price[], double& buffer[]) {
+    double gain[];
+    double loss[];
+    double again[];
+    double aloss[];
+    InitializeArray(gain, ArraySize(price), 0);
+    InitializeArray(loss, ArraySize(price), 0);
+
+    for (int i=1; i<ArraySize(price); i++) {
+        gain[i] = MathMax(price[i] - price[i-1], 0);
+        loss[i] = MathMax(price[i-1] - price[i], 0);
+    }
+
 }
