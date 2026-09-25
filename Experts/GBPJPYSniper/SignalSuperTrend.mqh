@@ -13,7 +13,7 @@
 
 class SignalSuperTrend: public CExpertSignal {
     protected:
-        CiSuperTrend      m_st_handle;
+        CiSuperTrend      m_st_indicator;
         
         //--- adjusted signal & indicator parameters
         string            m_sig_symbol;
@@ -22,11 +22,6 @@ class SignalSuperTrend: public CExpertSignal {
         double            m_st_multiplier;
         ENUM_MA_METHOD    m_st_ma_method;
         ENUM_APPLIED_PRICE m_st_applied_price;
-
-        //--- "weights" of market models (0-100)
-        int               m_pattern_0;
-        int               m_pattern_1;
-        int               m_pattern_2;
 
     public:
         SignalSuperTrend(void);
@@ -51,11 +46,6 @@ class SignalSuperTrend: public CExpertSignal {
     protected:
         //--- method of initialization of the indicator
         bool              InitSuperTrend(CIndicators *indicators);
-        //--- methods of getting data
-        double            Trend(int ind)                       { return(m_st_handle.GetData(0, ind));  }
-        double            Signal1(int ind)                     { return(m_st_handle.GetData(1, ind));  }
-        double            Signal2(int ind)                     { return(m_st_handle.GetData(2, ind));  }
-        double            Signal3(int ind)                     { return(m_st_handle.GetData(3, ind));  }
 };
 
 //+------------------------------------------------------------------+
@@ -117,25 +107,16 @@ bool SignalSuperTrend::InitSuperTrend(CIndicators *indicators) {
     //--- check pointer
     if(indicators==NULL)
         return(false);
+    
     //--- initialize object
-    MqlParam ind_params[];
-    ArrayResize(ind_params, 5);
-    ind_params[0].type = TYPE_STRING;
-    ind_params[0].string_value = "IndicatorSuperTrend";
-    ind_params[1].type = TYPE_INT;
-    ind_params[1].integer_value = m_st_period;
-    ind_params[2].type = TYPE_DOUBLE;
-    ind_params[2].double_value = m_st_multiplier;
-    ind_params[3].type = TYPE_INT;
-    ind_params[3].integer_value = m_st_ma_method;
-    ind_params[4].type = TYPE_INT;
-    ind_params[4].integer_value = m_st_applied_price;
-    if(!m_st_handle.Create(m_sig_symbol,(ENUM_TIMEFRAMES)m_sig_timeframe,IND_CUSTOM,5,ind_params)) {
+    if(!m_st_indicator.Create(m_sig_symbol, (ENUM_TIMEFRAMES)m_sig_timeframe,
+                        m_st_period, m_st_multiplier,
+                        m_st_ma_method, m_st_applied_price)) {
         printf(__FUNCTION__+": error initializing object");
         return(false);
     }
     //--- add object to collection
-    if(!indicators.Add(GetPointer(m_st_handle))) {
+    if(!indicators.Add(GetPointer(m_st_indicator))) {
         printf(__FUNCTION__+": error adding object");
         return(false);
     }
@@ -149,14 +130,10 @@ bool SignalSuperTrend::InitSuperTrend(CIndicators *indicators) {
 int SignalSuperTrend::LongCondition(void) {
     int result=0;
     int idx   =StartIndex();
-    if(Signal2(idx) == 1) {
-        result = m_pattern_1;
-    }
-    else {
-        result = 0;
-    }
+    bool cond = m_st_indicator.Trend(idx) == 1 && Close(idx) > Close(idx-1);
+
     //--- return the result
-    return(result);
+    return(cond == 1 ? 100 : 0);
 }
 
 //+------------------------------------------------------------------+
@@ -165,13 +142,8 @@ int SignalSuperTrend::LongCondition(void) {
 int SignalSuperTrend::ShortCondition(void) {
     int result=0;
     int idx   =StartIndex();
-    if(Signal2(idx) == 0) {
-        result = m_pattern_1;
-    }
-    else {
-        result = 0;
-    }
+    bool cond = m_st_indicator.Trend(idx) == -1 && Close(idx) > Close(idx-1);
     //--- return the result
-    return(result);
+    return(cond == -1 ? 100 : 0);
 }
 //+------------------------------------------------------------------+

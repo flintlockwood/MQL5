@@ -14,9 +14,6 @@
 //--- available signals
 #include "SignalSuperTrend.mqh"
 #include "SignalStochRSI.mqh"
-#include <Expert/Signal/SignalMA.mqh>
-#include <Expert/Signal/SignalMACD.mqh>
-#include <Expert/Signal/SignalRSI.mqh>
 //--- available trailing
 #include <Expert/Trailing/TrailingFixedPips.mqh>
 //--- available money management
@@ -29,8 +26,8 @@ input string             Expert_Title                  ="sniper";    // Document
 ulong                    Expert_MagicNumber            =-939731512;  //
 bool                     Expert_EveryTick              =false;       //
 //--- inputs for main signal
-input int                Signal_ThresholdOpen          =10;          // Signal threshold value to open [0...100]
-input int                Signal_ThresholdClose         =10;          // Signal threshold value to close [0...100]
+input int                Signal_ThresholdOpen          =100;         // Signal threshold value to open [0...100]
+input int                Signal_ThresholdClose         =100;         // Signal threshold value to close [0...100]
 input double             Signal_PriceLevel             =0.0;         // Price level to execute a deal
 input double             Signal_StopLevel              =50.0;        // Stop Loss level (in points)
 input double             Signal_TakeLevel              =50.0;        // Take Profit level (in points)
@@ -59,21 +56,21 @@ input ENUM_APPLIED_PRICE Signal_ST_AppliedPrice        =PRICE_OPEN;
 // input bool               Signal_ATR_EnableATRDirection =true;
 // input bool               Signal_ATR_EnableATRIncrease  =true;
 //--- inputs for ma indicator
-input int                Signal_MA_PeriodMA            =12;          // Moving Average(12,0,...) Period of averaging
-input int                Signal_MA_Shift               =0;           // Moving Average(12,0,...) Time shift
-input ENUM_MA_METHOD     Signal_MA_Method              =MODE_SMA;    // Moving Average(12,0,...) Method of averaging
-input ENUM_APPLIED_PRICE Signal_MA_Applied             =PRICE_CLOSE; // Moving Average(12,0,...) Prices series
-input double             Signal_MA_Weight              =1.0;         // Moving Average(12,0,...) Weight [0...1.0]
+// input int                Signal_MA_PeriodMA            =12;          // Moving Average(12,0,...) Period of averaging
+// input int                Signal_MA_Shift               =0;           // Moving Average(12,0,...) Time shift
+// input ENUM_MA_METHOD     Signal_MA_Method              =MODE_SMA;    // Moving Average(12,0,...) Method of averaging
+// input ENUM_APPLIED_PRICE Signal_MA_Applied             =PRICE_CLOSE; // Moving Average(12,0,...) Prices series
+// input double             Signal_MA_Weight              =1.0;         // Moving Average(12,0,...) Weight [0...1.0]
 //--- inputs for macd indicator
-input int                Signal_MACD_PeriodFast        =12;          // MACD(12,24,9,PRICE_CLOSE) Period of fast EMA
-input int                Signal_MACD_PeriodSlow        =24;          // MACD(12,24,9,PRICE_CLOSE) Period of slow EMA
-input int                Signal_MACD_PeriodSignal      =9;           // MACD(12,24,9,PRICE_CLOSE) Period of averaging of difference
-input ENUM_APPLIED_PRICE Signal_MACD_Applied           =PRICE_CLOSE; // MACD(12,24,9,PRICE_CLOSE) Prices series
-input double             Signal_MACD_Weight            =1.0;         // MACD(12,24,9,PRICE_CLOSE) Weight [0...1.0]
+// input int                Signal_MACD_PeriodFast        =12;          // MACD(12,24,9,PRICE_CLOSE) Period of fast EMA
+// input int                Signal_MACD_PeriodSlow        =24;          // MACD(12,24,9,PRICE_CLOSE) Period of slow EMA
+// input int                Signal_MACD_PeriodSignal      =9;           // MACD(12,24,9,PRICE_CLOSE) Period of averaging of difference
+// input ENUM_APPLIED_PRICE Signal_MACD_Applied           =PRICE_CLOSE; // MACD(12,24,9,PRICE_CLOSE) Prices series
+// input double             Signal_MACD_Weight            =1.0;         // MACD(12,24,9,PRICE_CLOSE) Weight [0...1.0]
 //--- input for rsi indicator
-input int                Signal_RSI_PeriodRSI          =8;           // Relative Strength Index(8,...) Period of calculation
-input ENUM_APPLIED_PRICE Signal_RSI_Applied            =PRICE_CLOSE; // Relative Strength Index(8,...) Prices series
-input double             Signal_RSI_Weight             =1.0;         // Relative Strength Index(8,...) Weight [0...1.0]
+// input int                Signal_RSI_PeriodRSI          =8;           // Relative Strength Index(8,...) Period of calculation
+// input ENUM_APPLIED_PRICE Signal_RSI_Applied            =PRICE_CLOSE; // Relative Strength Index(8,...) Prices series
+// input double             Signal_RSI_Weight             =1.0;         // Relative Strength Index(8,...) Weight [0...1.0]
 
 //--- inputs for trailing
 input int                Trailing_FixedPips_StopLevel  =30;          // Stop Loss trailing level (in points)
@@ -149,50 +146,50 @@ int OnInit() {
     // filterStochRsi.KDOperator(Signal_StochRsi_KDOperator);
 
 //--- Creating filter CSignalMA
-    CSignalMA *filter0=new CSignalMA;
-    if(filter0==NULL) {
-        //--- failed
-        printf(__FUNCTION__+": error creating filter0");
-        ExtExpert.Deinit();
-        return(INIT_FAILED);
-    }
-    signal.AddFilter(filter0);
+   //  CSignalMA *filter0=new CSignalMA;
+   //  if(filter0==NULL) {
+   //      //--- failed
+   //      printf(__FUNCTION__+": error creating filter0");
+   //      ExtExpert.Deinit();
+   //      return(INIT_FAILED);
+   //  }
+   //  signal.AddFilter(filter0);
 //--- Set filter parameters
-    filter0.PeriodMA(Signal_MA_PeriodMA);
-    filter0.Shift(Signal_MA_Shift);
-    filter0.Method(Signal_MA_Method);
-    filter0.Applied(Signal_MA_Applied);
-    filter0.Weight(Signal_MA_Weight);
+   //  filter0.PeriodMA(Signal_MA_PeriodMA);
+   //  filter0.Shift(Signal_MA_Shift);
+   //  filter0.Method(Signal_MA_Method);
+   //  filter0.Applied(Signal_MA_Applied);
+   //  filter0.Weight(Signal_MA_Weight);
 
 //--- Creating filter CSignalMACD
-    CSignalMACD *filter1=new CSignalMACD;
-    if(filter1==NULL) {
-        //--- failed
-        printf(__FUNCTION__+": error creating filter1");
-        ExtExpert.Deinit();
-        return(INIT_FAILED);
-    }
-    signal.AddFilter(filter1);
+   //  CSignalMACD *filter1=new CSignalMACD;
+   //  if(filter1==NULL) {
+   //      //--- failed
+   //      printf(__FUNCTION__+": error creating filter1");
+   //      ExtExpert.Deinit();
+   //      return(INIT_FAILED);
+   //  }
+   //  signal.AddFilter(filter1);
 //--- Set filter parameters
-    filter1.PeriodFast(Signal_MACD_PeriodFast);
-    filter1.PeriodSlow(Signal_MACD_PeriodSlow);
-    filter1.PeriodSignal(Signal_MACD_PeriodSignal);
-    filter1.Applied(Signal_MACD_Applied);
-    filter1.Weight(Signal_MACD_Weight);
+   //  filter1.PeriodFast(Signal_MACD_PeriodFast);
+   //  filter1.PeriodSlow(Signal_MACD_PeriodSlow);
+   //  filter1.PeriodSignal(Signal_MACD_PeriodSignal);
+   //  filter1.Applied(Signal_MACD_Applied);
+   //  filter1.Weight(Signal_MACD_Weight);
 
 //--- Creating filter CSignalRSI
-    CSignalRSI *filter2=new CSignalRSI;
-    if(filter2==NULL) {
-        //--- failed
-        printf(__FUNCTION__+": error creating filter2");
-        ExtExpert.Deinit();
-        return(INIT_FAILED);
-    }
-    signal.AddFilter(filter2);
+   //  CSignalRSI *filter2=new CSignalRSI;
+   //  if(filter2==NULL) {
+   //      //--- failed
+   //      printf(__FUNCTION__+": error creating filter2");
+   //      ExtExpert.Deinit();
+   //      return(INIT_FAILED);
+   //  }
+   //  signal.AddFilter(filter2);
 //--- Set filter parameters
-    filter2.PeriodRSI(Signal_RSI_PeriodRSI);
-    filter2.Applied(Signal_RSI_Applied);
-    filter2.Weight(Signal_RSI_Weight);
+   //  filter2.PeriodRSI(Signal_RSI_PeriodRSI);
+   //  filter2.Applied(Signal_RSI_Applied);
+   //  filter2.Weight(Signal_RSI_Weight);
 
 //--- Creation of trailing object
     CTrailingFixedPips *trailing=new CTrailingFixedPips;
