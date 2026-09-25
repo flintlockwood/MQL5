@@ -8,10 +8,11 @@
 #property version   "1.00"
 
 #include <Expert/ExpertSignal.mqh>
+#include "IndicatorStochRSI.mqh"
 
 class SignalStochRSI: public CExpertSignal {
     protected:
-        CiCustom          m_st_handle;
+        CiStochRSI        m_ind_stoch;
         
         //--- adjusted indicator parameters
         string            m_ind_symbol;
@@ -54,8 +55,8 @@ class SignalStochRSI: public CExpertSignal {
         //--- method of initialization of the indicator
         bool              InitStochRSI(CIndicators *indicators);
         //--- methods of getting data
-        double            StochKData(int ind)                     { return(m_st_handle.GetData(0, ind));  }
-        double            StochDData(int ind)                     { return(m_st_handle.GetData(1, ind));  }
+        double            StochKData(int ind)                     { return(m_ind_stoch.FastK(ind));  }
+        double            StochDData(int ind)                     { return(m_ind_stoch.SlowD(ind));  }
 };
 
 //+------------------------------------------------------------------+
@@ -130,28 +131,14 @@ bool SignalStochRSI::InitStochRSI(CIndicators *indicators) {
     if(indicators==NULL)
         return(false);
     //--- initialize object
-    MqlParam ind_params[];
-    ArrayResize(ind_params, 5);
-    ind_params[0].type = TYPE_STRING;
-    ind_params[0].string_value = "IndicatorStochRSI.ex5";
-    ind_params[1].type = TYPE_INT;
-    ind_params[1].integer_value = m_ind_rsi_period;
-    ind_params[2].type = TYPE_INT;
-    ind_params[2].integer_value = m_ind_stoch_length;
-    ind_params[3].type = TYPE_INT;
-    ind_params[3].integer_value = m_ind_k;
-    ind_params[4].type = TYPE_INT;
-    ind_params[4].integer_value = m_ind_d;
-    ind_params[5].type = TYPE_INT;
-    ind_params[5].integer_value = m_applied_price;
-    ind_params[6].type = TYPE_STRING;
-    ind_params[6].string_value = m_kd_operator;
-    if(!m_st_handle.Create(m_ind_symbol,m_ind_timeframe,IND_CUSTOM,7,ind_params)) {
+    if(!m_ind_stoch.Create(m_ind_symbol,m_ind_timeframe,
+                        m_ind_rsi_period, m_ind_stoch_length,
+                        m_ind_k, m_ind_d, m_applied_price)) {
         printf(__FUNCTION__+": error initializing object");
         return(false);
     }
     //--- add object to collection
-    if(!indicators.Add(GetPointer(m_st_handle))) {
+    if(!indicators.Add(GetPointer(m_ind_stoch))) {
         printf(__FUNCTION__+": error adding object");
         return(false);
     }

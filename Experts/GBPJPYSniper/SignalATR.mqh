@@ -9,7 +9,7 @@
 
 #include <Expert/ExpertSignal.mqh>
 #include <MovingAverages.mqh>
-#include "../../Indicators/Helper.mqh"
+#include "Helper.mqh"
 
 class SignalATR: public CExpertSignal {
     protected:
@@ -113,6 +113,7 @@ bool SignalATR::InitSuperTrend(CIndicators *indicators) {
 int SignalATR::LongCondition(void) {
     int result=0;
     int idx   =StartIndex();
+    
     double tr_array[];
     double atr_array[];
     int bars = Bars(m_sig_symbol, m_sig_timeframe);
@@ -133,6 +134,7 @@ int SignalATR::LongCondition(void) {
 int SignalATR::ShortCondition(void) {
     int result=0;
     int idx   =StartIndex();
+    
     double tr_array[];
     double atr_array[];
     int bars = Bars(m_sig_symbol, m_sig_timeframe);

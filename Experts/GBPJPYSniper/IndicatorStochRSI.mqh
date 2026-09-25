@@ -138,70 +138,26 @@ double CiStochRSI::SlowD(const int index) {
 //| Refreshing data of indicator                                     |
 //+------------------------------------------------------------------+
 void CiStochRSI::Refresh(const int flags=OBJ_ALL_PERIODS) {
-    double tr[];
-    double atr[];
     double applied_prices[];
-    MqlRates rates[];
-    double close[];
     CopyAppliedPrice(m_ind_symbol, m_ind_timeframe, m_applied, 0, BarsCustom(m_ind_symbol, m_ind_timeframe), applied_prices);
-    CopyTR(m_ind_symbol, m_ind_timeframe, 0, BarsCustom(m_ind_symbol, m_ind_timeframe), tr);
-    CopyRatesCustom(m_ind_symbol, m_ind_timeframe, 0, rates);
-    CopyCloseFromMqlRates(rates, close);
 
-    ArrayResize(atr, ArraySize(tr));
-    switch (m_ma_method)
-    {
-        case MODE_SMA:
-            SimpleMAOnBuffer(ArraySize(tr), 0, 0, m_atr_period, tr, atr);
-            break;
-        case MODE_EMA:
-            ExponentialMAOnBuffer(ArraySize(tr), 0, 0, m_atr_period, tr, atr);
-            break;
-        case MODE_LWMA:
-            LinearWeightedMAOnBuffer(ArraySize(tr), 0, 0, m_atr_period, tr, atr);
-            break;
-        case MODE_SMMA:
-            SmoothedMAOnBuffer(ArraySize(tr), 0, 0, m_atr_period, tr, atr);
-            break;
-        default:
-            break;
-    }
+    double rsi[];
+    RSIOnBuffer(m_rsi_period, applied_prices, rsi);
+
+    double stoch[];
+    StochasticOnBuffer(m_stoch_length, rsi, rsi, rsi, stoch);
+
+    double k[];
+    SimpleMAOnBuffer(ArraySize(stoch), 0, 0, m_stoch_k, stoch, k);
+
+    double d[];
+    SimpleMAOnBuffer(ArraySize(stoch), 0, 0, m_stoch_d, k, d);
+
+    CIndicatorBuffer *k_buffer = At(0);
+    k_buffer.AssignArray(k);
     
-    double upper_band[];
-    double lower_band[];
-    double trend[];
-    InitializeArray(upper_band, ArraySize(atr), EMPTY_VALUE);
-    InitializeArray(lower_band, ArraySize(atr), EMPTY_VALUE);
-    InitializeArray(trend, ArraySize(atr), EMPTY_VALUE);
-    trend[0] = 1;
-    for (int i=0; i<ArraySize(atr); i++) {
-        upper_band[i] = applied_prices[i] + m_atr_multiplier * atr[i];
-        lower_band[i] = applied_prices[i] - m_atr_multiplier * atr[i];
-        if (i>0) {
-            if (upper_band[i-1] == EMPTY_VALUE) {
-                continue;
-            }
-            if (close[i-1] < lower_band[i-1]) {
-                lower_band[i] = MathMin(lower_band[i], lower_band[i-1]);
-            }
-            if (lower_band[i-1] == EMPTY_VALUE){
-                continue;
-            }
-            if (close[i-1] > upper_band[i-1]) {
-                upper_band[i] = MathMax(upper_band[i], upper_band[i-1]);
-            }
-            trend[i] = trend[i-1] == -1 && close[i] > upper_band[i-1] ? 1 : trend[i-1] == -1 && close[i] > lower_band[i-1] ? -1 : trend[i-1];
-        }
-    }
-
-    CIndicatorBuffer *upper_band_buffer = At(0);
-    upper_band_buffer.AssignArray(upper_band);
-    
-    CIndicatorBuffer *lower_band_buffer = At(1);
-    lower_band_buffer.AssignArray(lower_band);
-
-    CIndicatorBuffer *trend_buffer = At(2);
-    trend_buffer.AssignArray(trend);
+    CIndicatorBuffer *d_buffer = At(1);
+    d_buffer.AssignArray(d);
 }
 
 //+------------------------------------------------------------------+

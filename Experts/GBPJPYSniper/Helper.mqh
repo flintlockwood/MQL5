@@ -294,5 +294,26 @@ void RSIOnBuffer(const int period, double& price[], double& buffer[]) {
         gain[i] = MathMax(price[i] - price[i-1], 0);
         loss[i] = MathMax(price[i-1] - price[i], 0);
     }
+    double again[];
+    double aloss[];
+    SmoothedMAOnBuffer(ArraySize(gain), 0, 0, period, gain, again);
+    SmoothedMAOnBuffer(ArraySize(loss), 0, 0, period, loss, aloss);
+    
+    InitializeArray(buffer, ArraySize(price), EMPTY_VALUE);
+    for(int i=0; i<ArraySize(again); i++) {
+        if (again[i] == 0) {
+            continue;
+        }
+        double rs = again[i] / again[i];
+        buffer[i] = 100 - 100 / (1 + rs);
+    }
+}
 
+void StochasticOnBuffer(const int period, double &price[], double &high[], double &low[], double &buffer[]) {
+    InitializeArray(buffer, ArraySize(price), EMPTY_VALUE);
+    for (int i=period; i<ArraySize(price); i++) {
+        double min = low[ArrayMinimum(low, i-period, period)];
+        double max = high[ArrayMaximum(high, i-period, period)];
+        buffer[i] = 100 * (price[i] - min) / (max - min);
+    }
 }
