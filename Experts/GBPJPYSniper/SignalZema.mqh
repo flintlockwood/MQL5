@@ -1,5 +1,5 @@
 //+------------------------------------------------------------------+
-//|                                             SignalATR.mq5 |
+//|                                             SignalZema.mq5 |
 //|                                                  Mufraeli Rahman |
 //|                                             https://www.mql5.com |
 //+------------------------------------------------------------------+
@@ -10,36 +10,29 @@
 #include <Expert/ExpertSignal.mqh>
 #include <MovingAverages.mqh>
 #include "Helper.mqh"
+#include "IndicatorZema.mqh"
 
-class SignalATR: public CExpertSignal {
+class SignalZema: public CExpertSignal {
     protected:
+        CiZema            m_zema_indicator;
+
         //--- adjusted parameters
         string            m_sig_symbol;
         int               m_sig_timeframe;
-        int               m_atr_period;
-        ENUM_MA_METHOD    m_smoothing_method;
-        bool              m_enable_atr_direction;
-        bool              m_enable_atr_increase_by;
-        double            m_atr_down_by_long;
-        double            m_atr_up_by_long;
-        double            m_atr_down_by_short;
-        double            m_atr_up_by_short;
+        int               m_zema_period_long;
+        int               m_zema_period_short;
+        bool              m_enable_zema_momentum;
 
     public:
-        SignalATR(void);
-        ~SignalATR(void);
+        SignalZema(void);
+        ~SignalZema(void);
 
         //--- methods of setting adjustable indicator parameters
         void              IndicatorSymbol(string value)        { m_sig_symbol=value;             }
         void              IndicatorTimeframe(int value)        { m_sig_timeframe=value;          }
-        void              ATRPeriod(int value)                 { m_atr_period=value;             }
-        void              SmootingMethod(ENUM_MA_METHOD value) { m_smoothing_method=value;       }
-        void              EnableATRDirectionSignal(bool value) { m_enable_atr_direction=value;   }
-        void              EnableATRIncreaseBySignal(bool value){ m_enable_atr_increase_by=value; }
-        void              ATRDownByLong(double value)          { m_atr_down_by_long=value;       }
-        void              ATRUpByLong(double value)            { m_atr_up_by_long=value;         }
-        void              ATRDownByShort(double value)         { m_atr_down_by_short=value;      }
-        void              ATRUpByShort(double value)           { m_atr_up_by_short=value;        }
+        void              ZemaPeriodLong(int value)            { m_zema_period_long=value;       }
+        void              ZemaPeriodShort(int value)           { m_zema_period_long=value;       }
+        void              EnableZemaMomentum(bool value)       { m_enable_zema_momentum=value;   }
         
         //--- method of verification of settings
         virtual bool      ValidationSettings(void);
@@ -51,15 +44,14 @@ class SignalATR: public CExpertSignal {
 
     protected:
         //--- method of initialization of the indicator
-        bool              InitATR(CIndicators *indicators);
+        bool              InitZema(CIndicators *indicators);
         //--- methods of getting data
 };
 
 //+------------------------------------------------------------------+
 //| Constructor                                                      |
 //+------------------------------------------------------------------+
-SignalATR::SignalATR(void) : m_atr_period(3),
-                             m_smoothing_method(MODE_SMMA) {
+SignalZema::SignalZema(void) : m_zema_period_long(73) {
     //--- initialization of protected data
     m_used_series=USE_SERIES_OPEN+USE_SERIES_HIGH+USE_SERIES_LOW+USE_SERIES_CLOSE;
 }
@@ -67,18 +59,18 @@ SignalATR::SignalATR(void) : m_atr_period(3),
 //+------------------------------------------------------------------+
 //| Destructor                                                       |
 //+------------------------------------------------------------------+
-SignalATR::~SignalATR(void){
+SignalZema::~SignalZema(void){
 }
 
 //+------------------------------------------------------------------+
 //| Validation settings protected data.                              |
 //+------------------------------------------------------------------+
-bool SignalATR::ValidationSettings(void) {
+bool SignalZema::ValidationSettings(void) {
     //--- validation settings of additional filters
     if(!CExpertSignal::ValidationSettings())
         return(false);
     //--- initial data checks
-    if(m_atr_period<=0) {
+    if(m_zema_period_long<=0) {
         printf(__FUNCTION__+": period ATR must be greater than 0");
         return(false);
     }
@@ -89,7 +81,7 @@ bool SignalATR::ValidationSettings(void) {
 //+------------------------------------------------------------------+
 //| Create indicators.                                               |
 //+------------------------------------------------------------------+
-bool SignalATR::InitIndicators(CIndicators *indicators) {
+bool SignalZema::InitIndicators(CIndicators *indicators) {
     //--- check pointer
     if(indicators==NULL)
         return(false);
@@ -97,7 +89,7 @@ bool SignalATR::InitIndicators(CIndicators *indicators) {
     if(!CExpertSignal::InitIndicators(indicators))
         return(false);
     //--- create and initialize MA indicator
-    if(!InitATR(indicators))
+    if(!InitZema(indicators))
         return(false);
     //--- ok
     return(true);
@@ -106,7 +98,7 @@ bool SignalATR::InitIndicators(CIndicators *indicators) {
 //+------------------------------------------------------------------+
 //| Initialize Super Trend indicators.                                        |
 //+------------------------------------------------------------------+
-bool SignalATR::InitATR(CIndicators *indicators) {
+bool SignalZema::InitZema(CIndicators *indicators) {
     //--- check pointer
     if(indicators==NULL)
         return(false);
@@ -118,46 +110,26 @@ bool SignalATR::InitATR(CIndicators *indicators) {
 //+------------------------------------------------------------------+
 //| "Voting" that price will grow.                                   |
 //+------------------------------------------------------------------+
-int SignalATR::LongCondition(void) {
+int SignalZema::LongCondition(void) {
     int result=0;
     int idx   =StartIndex();
     
-    double tr_array[];
-    double atr_array[];
-    int bars = BarsCustom(m_sig_symbol, m_sig_timeframe);
-    CopyTR(m_sig_symbol, m_sig_timeframe, 0, bars, tr_array);
-    InitializeArray(atr_array, ArraySize(tr_array), EMPTY_VALUE);
-    MAOnBuffer(ArraySize(tr_array), 0, 0, m_atr_period, m_smoothing_method, tr_array, atr_array);
-    ArraySetAsSeries(atr_array, true);
-    if ((!m_enable_atr_direction || atr_array[idx] > atr_array[idx+1]) 
-        && (!m_enable_atr_increase_by || (atr_array[idx] > m_atr_down_by_long && atr_array[idx] < m_atr_up_by_long))) {
-        return 100;
-    }
+    bool cond = Close(idx) > m_zema_indicator.ZemaLong(idx);
 
     //--- return the result
-    return(result);
+    return(cond ? 100 : 0);
 }
 
 //+------------------------------------------------------------------+
 //| "Voting" that price will fall.                                   |
 //+------------------------------------------------------------------+
-int SignalATR::ShortCondition(void) {
+int SignalZema::ShortCondition(void) {
     int result=0;
     int idx   =StartIndex();
     
-    double tr_array[];
-    double atr_array[];
-    int bars = BarsCustom(m_sig_symbol, m_sig_timeframe);
-    CopyTR(m_sig_symbol, m_sig_timeframe, 0, bars, tr_array);
-    InitializeArray(atr_array, ArraySize(tr_array), EMPTY_VALUE);
-    MAOnBuffer(ArraySize(tr_array), 0, 0, m_atr_period, m_smoothing_method, tr_array, atr_array);
-    ArraySetAsSeries(atr_array, true);
-    if ((!m_enable_atr_direction || atr_array[idx] < atr_array[idx+1]) 
-        && (!m_enable_atr_increase_by || (atr_array[idx] > m_atr_down_by_short && atr_array[idx] < m_atr_up_by_short))) {
-        return 100;
-    }
-    
+    bool cond = Close(idx) < m_zema_indicator.ZemaShort(idx);
+
     //--- return the result
-    return(result);
+    return(cond ? 100 : 0);
 }
 //+------------------------------------------------------------------+

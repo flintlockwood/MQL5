@@ -190,10 +190,10 @@ int CopyTR(string symbol_name, int timeframe, int start_pos, int count, double &
     }
 }
 
-void CopyRatesCustom(string symbol, int timeframe, int start_pos, MqlRates &rates[]){
+int CopyRatesCustom(string symbol, int timeframe, int start_pos, MqlRates &rates[]){
     if (timeframe < 100) {
         int bars = Bars(symbol, (ENUM_TIMEFRAMES)timeframe);
-        CopyRates(symbol, (ENUM_TIMEFRAMES)timeframe, start_pos, bars, rates);
+        return CopyRates(symbol, (ENUM_TIMEFRAMES)timeframe, start_pos, bars, rates);
     }
     else {
         int bars = Bars(symbol, PERIOD_M1);
@@ -201,25 +201,68 @@ void CopyRatesCustom(string symbol, int timeframe, int start_pos, MqlRates &rate
         CopyRates(symbol, PERIOD_M1, 0, bars, rates_m1);
         int ps = GetPeriodSeconds(timeframe);
         int pm = ps / 60;
+        datetime openTime = 0;
+        double open = 0.0;
+        double high = 0.0;
+        double low = 999999999.0;
+        double close = 0.0;
+        long tickVolume = 0;
+        long realVolume = 0;
+
         MqlRates temp[];
         int j = 0;
+        ArrayResize(rates, ArraySize(rates_m1) / pm + 2);
         for (int i=0; i<bars; i++) {
-            if (rates_m1[i].time % ps == 0) {
+            if (rates_m1[i].time % ps == 0 && openTime != 0) {
                 MqlRates newRate;
-                newRate.time = rates_m1[i].time;
-                newRate.open = temp[0].open;
-                newRate.high = RatesMaximum(temp);
-                newRate.low = RatesMinimum(temp);
-                newRate.close = temp[ArraySize(temp)-1].close;
-                newRate.real_volume = RatesRealVolumeSum(temp);
-                newRate.tick_volume = RatesTickVolumeSum(temp);
-                ArrayAppend(rates, newRate);
-                ArrayFree(temp);
+                newRate.time = openTime;
+                newRate.open = open;
+                newRate.high = high;
+                newRate.low = low;
+                newRate.close = close;
+                newRate.real_volume = realVolume;
+                newRate.tick_volume = tickVolume;
+                rates[j] = newRate;
+                // reset
+                openTime = 0;
+                open = 0.0;
+                high = 0.0;
+                low = 999999999.0;
+                close = 0.0;
+                tickVolume = 0;
+                realVolume = 0;
+                j++;
             }
             else {
-                ArrayAppend(temp, rates_m1[i]);
+                if (rates_m1[i].time % ps == 60) {
+                    openTime = rates_m1[i].time - 60;
+                    open = rates_m1[i].open;
+                }
+                if (rates_m1[i].high > high) {
+                    high = rates_m1[i].high;
+                }
+                if (rates_m1[i].low < low) {
+                    low = rates_m1[i].low;
+                }
+                close = rates_m1[i].close;
+                realVolume += rates_m1[i].real_volume;
+                tickVolume += rates_m1[i].tick_volume;
             }
         }
+        if (openTime != 0) {
+            MqlRates newRate;
+            newRate.time = openTime;
+            newRate.open = open;
+            newRate.high = high;
+            newRate.low = low;
+            newRate.close = close;
+            newRate.real_volume = realVolume;
+            newRate.tick_volume = tickVolume;
+            rates[j] = newRate;
+            j++;
+        }
+        ArrayResize(rates, j);
+        return ArraySize(rates);
     }
 }
 
@@ -289,13 +332,13 @@ void RSIOnBuffer(const int period, double& price[], double& buffer[]) {
     double aloss[];
     InitializeArray(gain, ArraySize(price), 0);
     InitializeArray(loss, ArraySize(price), 0);
+    InitializeArray(again, ArraySize(price), 0);
+    InitializeArray(aloss, ArraySize(price), 0);
 
     for (int i=1; i<ArraySize(price); i++) {
         gain[i] = MathMax(price[i] - price[i-1], 0);
         loss[i] = MathMax(price[i-1] - price[i], 0);
     }
-    double again[];
-    double aloss[];
     SmoothedMAOnBuffer(ArraySize(gain), 0, 0, period, gain, again);
     SmoothedMAOnBuffer(ArraySize(loss), 0, 0, period, loss, aloss);
     
@@ -304,7 +347,7 @@ void RSIOnBuffer(const int period, double& price[], double& buffer[]) {
         if (again[i] == 0) {
             continue;
         }
-        double rs = again[i] / again[i];
+        double rs = again[i] / aloss[i];
         buffer[i] = 100 - 100 / (1 + rs);
     }
 }
@@ -314,6 +357,12 @@ void StochasticOnBuffer(const int period, double &price[], double &high[], doubl
     for (int i=period; i<ArraySize(price); i++) {
         double min = low[ArrayMinimum(low, i-period, period)];
         double max = high[ArrayMaximum(high, i-period, period)];
+        if (min == EMPTY_VALUE || max == EMPTY_VALUE) {
+            continue;
+        }
+        if (max - min == 0) {
+            continue;
+        }
         buffer[i] = 100 * (price[i] - min) / (max - min);
     }
 }

@@ -15,6 +15,7 @@
 #include "SignalSuperTrend.mqh"
 #include "SignalStochRSI.mqh"
 #include "SignalATR.mqh"
+#include "SignalZema.mqh"
 //--- available trailing
 #include <Expert/Trailing/TrailingFixedPips.mqh>
 //--- available money management
@@ -34,6 +35,7 @@ input double             Signal_StopLevel              =50.0;        // Stop Los
 input double             Signal_TakeLevel              =50.0;        // Take Profit level (in points)
 input int                Signal_Expiration             =4;           // Expiration of pending orders (in bars)
 //--- inputs for super trend indicator
+input double             Signal_ST_Weight              =0.3;
 input string             Signal_ST_Symbol              ="GBPJPY";
 input ENUM_TIMEFRAMES    Signal_ST_Timeframe           =PERIOD_M30;
 input int                Signal_ST_Period              =10;
@@ -41,6 +43,7 @@ input double             Signal_ST_Multiplier          =3.1;
 input ENUM_MA_METHOD     Signal_ST_MaMethod            =MODE_SMMA;
 input ENUM_APPLIED_PRICE Signal_ST_AppliedPrice        =PRICE_OPEN;
 //--- inputs for Stochastic RSI indicator
+input double             Signal_StochRsi_Weight        =0.3;
 input string             Signal_StochRsi_Symbol        ="GBPJPY";
 input ENUM_TIMEFRAMES    Signal_StochRsi_Timeframe     =PERIOD_M30;
 input int                Signal_StochRsi_RsiPeriod     =22;
@@ -50,12 +53,19 @@ input int                Signal_StochRsi_D             =2;
 input ENUM_APPLIED_PRICE Signal_StochRsi_AppliedPrice  =PRICE_HIGH;
 input string             Signal_StochRsi_KDOperator    =">";
 //--- inputs for atr indicator
+input double             Signal_ATR_Weight             =0.3;
 input string             Signal_ATR_Symbol             ="GBPJPY";
 input int                Signal_ATR_Timeframe          =PERIOD_M45;
 input int                Signal_ATR_Period             =3;
 input ENUM_MA_METHOD     Signal_ATR_MaMethod           =MODE_SMMA;
 input bool               Signal_ATR_EnableATRDirection =true;
 input bool               Signal_ATR_EnableATRIncrease  =true;
+//--- inputs for zema indicator
+input double             Signal_Zema_Weight             =0.3;
+input string             Signal_Zema_Symbol             ="GBPJPY";
+input int                Signal_Zema_Timeframe          =PERIOD_M45;
+input int                Signal_Zema_Period_Long        =73;
+input int                Signal_Zema_Period_Short       =52;
 
 //--- inputs for trailing
 input int                Trailing_FixedPips_StopLevel  =30;          // Stop Loss trailing level (in points)
@@ -146,6 +156,21 @@ int OnInit() {
     filterATR.SmootingMethod(Signal_ATR_MaMethod);
     filterATR.EnableATRDirectionSignal(Signal_ATR_EnableATRDirection);
     filterATR.EnableATRIncreaseBySignal(Signal_ATR_EnableATRIncrease);
+
+//--- Createing filter Zema Signal
+    SignalZema *filterZema=new SignalZema;
+    if(filterZema==NULL) {
+        //--- failed
+        printf(__FUNCTION__+": error creating Zema Signal filter");
+        ExtExpert.Deinit();
+        return(INIT_FAILED);
+    }
+    signal.AddFilter(filterZema);
+//--- Set filter parameters
+    filterZema.IndicatorSymbol(Signal_Zema_Symbol);
+    filterZema.IndicatorTimeframe(Signal_Zema_Timeframe);
+    filterZema.ZemaPeriodLong(Signal_Zema_Period_Long);
+    filterZema.ZemaPeriodShort(Signal_Zema_Period_Short);
 
 //--- Creation of trailing object
     CTrailingFixedPips *trailing=new CTrailingFixedPips;
