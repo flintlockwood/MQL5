@@ -306,6 +306,7 @@ long RatesRealVolumeSum(MqlRates &rates[]) {
 //| Indicator on Buffer Functions                                    |
 //+------------------------------------------------------------------+
 void MAOnBuffer(const int rates_total,const int prev_calculated,const int begin,const int period,ENUM_MA_METHOD ma_method, double& price[],double& buffer[]) {
+    InitializeArray(buffer, ArraySize(price), EMPTY_VALUE);
     switch (ma_method)
     {
         case MODE_SMA:
