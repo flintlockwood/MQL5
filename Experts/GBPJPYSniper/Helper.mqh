@@ -10,21 +10,21 @@
 #include <MovingAverages.mqh>
 
 enum ENUM_TIMEFRAMES_CUSTOM {    
-    PERIOD_M19 = 119,
-    PERIOD_M45 = 145
+    PERIOD_M19 = 50019,
+    PERIOD_M45 = 50045
 };
 
 int BarsCustom(string symbol, int timeframe) {
-    if (timeframe < 100) {
+    if (timeframe < 50000) {
         return Bars(symbol, (ENUM_TIMEFRAMES)timeframe);
     }
     else {
         datetime times[];
         CopyTime(symbol, PERIOD_M1, 0, Bars(symbol, PERIOD_M1), times);
         int cnt = 0;
-        int pm = GetPeriodSeconds(timeframe) / 60;
+        int ps = GetPeriodSeconds(timeframe);
         for (int i=0; i<ArraySize(times); i++) {
-            if (times[i] % pm == 0) {
+            if (times[i] % ps == 0) {
                 cnt++;
             }
         }
@@ -33,17 +33,24 @@ int BarsCustom(string symbol, int timeframe) {
 }
 
 int GetPeriodSeconds(int timeframe) {
-    if (timeframe < 100) {
+    if (timeframe < 50000) {
         return PeriodSeconds((ENUM_TIMEFRAMES)timeframe);
     }
     else {
         switch (timeframe) {
+            case PERIOD_M19:
+                return 19 * 60;
             case PERIOD_M45:
                 return 45 * 60;
             default:
                 return 0;
         }
     }
+}
+
+double GetPoint(string symbol) {
+    double point = SymbolInfoDouble(symbol, SYMBOL_POINT);
+    return point;
 }
 
 //+------------------------------------------------------------------+
@@ -74,12 +81,47 @@ void ArrayAppend(double &rates[], double value) {
 //+------------------------------------------------------------------+
 //| Timeseries Functions                                             |
 //+------------------------------------------------------------------+
+double GetAppliedPrice(string symbol, int timeframe, ENUM_APPLIED_PRICE source, int index) {
+    double open = EMPTY_VALUE;
+    double high = EMPTY_VALUE;
+    double low = EMPTY_VALUE;
+    double close = EMPTY_VALUE;
+    if (timeframe < 50000) {
+        open = iOpen(symbol, (ENUM_TIMEFRAMES)timeframe, index);
+        high = iHigh(symbol, (ENUM_TIMEFRAMES)timeframe, index);
+        low = iLow(symbol, (ENUM_TIMEFRAMES)timeframe, index);
+        close = iClose(symbol, (ENUM_TIMEFRAMES)timeframe, index);
+    }
+    else {
+        // not implemented 
+    }
+    switch (source)
+    {
+        case ENUM_APPLIED_PRICE::PRICE_CLOSE:
+            return close;
+        case ENUM_APPLIED_PRICE::PRICE_HIGH:
+            return high;
+        case ENUM_APPLIED_PRICE::PRICE_LOW:
+            return low;
+        case ENUM_APPLIED_PRICE::PRICE_MEDIAN:
+            return (high + low) / 2;
+        case ENUM_APPLIED_PRICE::PRICE_OPEN:
+            return open;
+        case ENUM_APPLIED_PRICE::PRICE_TYPICAL:
+            return (high + low + close) / 3;
+        case ENUM_APPLIED_PRICE::PRICE_WEIGHTED:
+            return (high + low + close + open) / 4;
+        default:
+            return 0;
+    }
+}
+
 int CopyAppliedPrice(string symbol_name, int timeframe, ENUM_APPLIED_PRICE applied_price, int start_pos, int count, double &applied_price_array[]) {
     double open_array[];
     double high_array[];
     double low_array[];
     double close_array[];
-    if (timeframe < 100) {
+    if (timeframe < 50000) {
         CopyOpen(symbol_name, (ENUM_TIMEFRAMES)timeframe, start_pos, count, open_array);
         CopyHigh(symbol_name, (ENUM_TIMEFRAMES)timeframe, start_pos, count, high_array);
         CopyLow(symbol_name, (ENUM_TIMEFRAMES)timeframe, start_pos, count, low_array);
@@ -159,7 +201,7 @@ int CopyCloseFromMqlRates(MqlRates &rates[], double &close_array[]) {
 }
 
 int CopyTR(string symbol_name, int timeframe, int start_pos, int count, double &tr_array[]) {
-    if (timeframe < 100) {
+    if (timeframe < 50000) {
         double low_array[];
         double high_array[];
         double close_array[];
@@ -191,7 +233,7 @@ int CopyTR(string symbol_name, int timeframe, int start_pos, int count, double &
 }
 
 int CopyRatesCustom(string symbol, int timeframe, int start_pos, MqlRates &rates[]){
-    if (timeframe < 100) {
+    if (timeframe < 50000) {
         int bars = Bars(symbol, (ENUM_TIMEFRAMES)timeframe);
         return CopyRates(symbol, (ENUM_TIMEFRAMES)timeframe, start_pos, bars, rates);
     }
@@ -365,5 +407,43 @@ void StochasticOnBuffer(const int period, double &price[], double &high[], doubl
             continue;
         }
         buffer[i] = 100 * (price[i] - min) / (max - min);
+    }
+}
+
+double LinReg(const int period, const int offset, double &price[], const int index) {
+    if(period <= 0)
+        return EMPTY_VALUE;
+
+    double sumX  = 0.0;
+    double sumY  = 0.0;
+    double sumXY = 0.0;
+    double sumXX = 0.0;
+
+    for(int i = 0; i < period; i++) {
+        double x = i;
+        double y = price[index - i];
+
+        sumX  += x;
+        sumY  += y;
+        sumXY += x * y;
+        sumXX += x * x;
+    }
+
+    double denominator = period * sumXX - sumX * sumX;
+    if(denominator == 0.0)
+        return EMPTY_VALUE;
+
+    double slope = (period * sumXY - sumX * sumY) / denominator;
+    double intercept = (sumY - slope * sumX) / period;
+    double x = (period - 1) - offset;
+
+    return intercept + slope * x;
+}
+
+void LinRegOnBuffer(const int period, const int offset, double &price[], double &buffer[]) {
+    InitializeArray(buffer, ArraySize(price), EMPTY_VALUE);
+    for (int i=period-1; i<ArraySize(price); i++) {
+        double linreg = LinReg(period, offset, price, i);
+        buffer[i] = linreg;
     }
 }

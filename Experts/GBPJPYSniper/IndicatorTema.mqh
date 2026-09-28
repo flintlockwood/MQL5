@@ -11,85 +11,80 @@
 #include <MovingAverages.mqh>
 #include "Helper.mqh"
 
-class CiLinearRegression: public CIndicator {
+class CiTema: public CIndicator {
     protected:
         string            m_ind_symbol;
         int               m_ind_timeframe;
-        int               m_lr_period;
-        int               m_lr_offset;
+        int               m_tema_period;
         ENUM_APPLIED_PRICE m_applied;
 
     public:
-        CiLinearRegression(void);
-        ~CiLinearRegression(void);
+        CiTema(void);
+        ~CiTema(void);
 
         //--- methods to set to protected data
         void            IndSymbol(string value) { m_ind_symbol = value; }
         void            IndTimeframe(int value) { m_ind_timeframe = value; }
-        void            LrPeriod(int value) { m_lr_period = value;  }
-        void            LrOffset(int value) { m_lr_offset = value; }
+        void            TemaPeriod(int value) { m_tema_period = value;  }
         void            Applied(ENUM_APPLIED_PRICE value) { m_applied = value; }
         
         //--- method of creation
         bool            Create(const string symbol,const ENUM_TIMEFRAMES period,
                             const ENUM_INDICATOR type,const int num_params,const MqlParam &params[]);
         bool            Create(const string symbol,const int period,
-                            const int lr_period,const int lr_ofset,
+                            const int tema_period,
                             const ENUM_APPLIED_PRICE applied);
         
         //--- methods of access to indicator data
         double          GetData(const int buffer_num,const int index);
         int             GetData(const int start_pos,const int count,const int buffer_num,double &buffer[]);
-        double          LinReg(const int index);
+        double          Tema(const int index);
         virtual void    Refresh(const int flags=OBJ_ALL_PERIODS);
 };
 
 //+------------------------------------------------------------------+
 //| Constructor                                                      |
 //+------------------------------------------------------------------+
-CiLinearRegression::CiLinearRegression(void) : m_ind_symbol("GBPJPY"),
+CiTema::CiTema(void) : m_ind_symbol("GBPJPY"),
                    m_ind_timeframe(PERIOD_M30),
-                   m_lr_period(18),
-                   m_lr_offset(5),
+                   m_tema_period(72),
                    m_applied(PRICE_OPEN) {
 }
 
 //+------------------------------------------------------------------+
 //| Destructor                                                       |
 //+------------------------------------------------------------------+
-CiLinearRegression::~CiLinearRegression(void) {
+CiTema::~CiTema(void) {
 }
 
 //+------------------------------------------------------------------+
 //| Create indicator                                                 |
 //+------------------------------------------------------------------+
-bool CiLinearRegression::Create(const string symbol,const ENUM_TIMEFRAMES period,
+bool CiTema::Create(const string symbol,const ENUM_TIMEFRAMES period,
                             const ENUM_INDICATOR type,const int num_params,const MqlParam &params[]) {
     return(Create(params[1].string_value, (int)params[2].integer_value, 
-                    (int)params[3].integer_value, (int)params[4].integer_value,
-                    (ENUM_APPLIED_PRICE)params[5].integer_value));
+                    (int)params[3].integer_value,
+                    (ENUM_APPLIED_PRICE)params[4].integer_value));
 }
 
-bool CiLinearRegression::Create(const string symbol,const int period,
-                        const int lr_period,const int lr_offset,
-                        const ENUM_APPLIED_PRICE applied) {
+bool CiTema::Create(const string symbol,const int period,
+                        const int tema_period, const ENUM_APPLIED_PRICE applied) {
 //--- we do not need to create indicator here
     if(Reserve(3)) {
         //--- string of status of drawing
         m_name  ="ST";
         m_status="("+symbol+","+PeriodDescription()+","+
-               IntegerToString(lr_period)+","+IntegerToString(lr_offset)+","+
+               IntegerToString(tema_period)+","+
                ","+PriceDescription(applied)+")";
         //--- save settings
         m_ind_symbol = symbol;
         m_ind_timeframe = period;
-        m_lr_period=lr_period;
-        m_lr_offset=lr_offset;
+        m_tema_period=tema_period;
         m_applied  =applied;
         //--- create buffers
-        CIndicatorBuffer *lr_buffer = new CIndicatorBuffer();
-        lr_buffer.Name("Linear Regression");
-        Add(lr_buffer);
+        CIndicatorBuffer *tema_buffer = new CIndicatorBuffer();
+        tema_buffer.Name("Tema");
+        Add(tema_buffer);
         //--- ok
         return(true);
     }
@@ -99,7 +94,7 @@ bool CiLinearRegression::Create(const string symbol,const int period,
 //+------------------------------------------------------------------+
 //| Access to linear regression buffer                               |
 //+------------------------------------------------------------------+
-double CiLinearRegression::LinReg(const int index) {
+double CiTema::Tema(const int index) {
     CIndicatorBuffer *buffer=At(0);
     //--- check
     if(buffer==NULL)
@@ -108,7 +103,7 @@ double CiLinearRegression::LinReg(const int index) {
     return(buffer.At(index));
 }
 
-double CiLinearRegression::GetData(const int buffer_num,const int index) {
+double CiTema::GetData(const int buffer_num,const int index) {
     CIndicatorBuffer *buffer=At(buffer_num);
     //--- check
     if(buffer==NULL) {
@@ -123,7 +118,7 @@ double CiLinearRegression::GetData(const int buffer_num,const int index) {
 //| API access method "Copying the buffer of indicator by specifying |
 //| a start position and number of elements"                         |
 //+------------------------------------------------------------------+
-int CiLinearRegression::GetData(const int start_pos,const int count,const int buffer_num,double &buffer[]) {
+int CiTema::GetData(const int start_pos,const int count,const int buffer_num,double &buffer[]) {
     //--- check
     CIndicatorBuffer *ind_buffer=At(buffer_num);
     if(ind_buffer==NULL) {
@@ -144,12 +139,28 @@ int CiLinearRegression::GetData(const int start_pos,const int count,const int bu
 //+------------------------------------------------------------------+
 //| Refreshing data of indicator                                     |
 //+------------------------------------------------------------------+
-void CiLinearRegression::Refresh(const int flags=OBJ_ALL_PERIODS) {
+void CiTema::Refresh(const int flags=OBJ_ALL_PERIODS) {
     double applied_prices[];
-    double linreg[];
+    double ema1[];
+    double ema2[];
+    double ema3[];
+    double tema[];
     CopyAppliedPrice(m_ind_symbol, m_ind_timeframe, m_applied, 0, BarsCustom(m_ind_symbol, m_ind_timeframe), applied_prices);
-    LinRegOnBuffer(m_lr_period, m_lr_offset, applied_prices, linreg);
+    InitializeArray(ema1, ArraySize(applied_prices), EMPTY_VALUE);
+    InitializeArray(ema2, ArraySize(applied_prices), EMPTY_VALUE);
+    InitializeArray(ema3, ArraySize(applied_prices), EMPTY_VALUE);
+    InitializeArray(tema, ArraySize(applied_prices), EMPTY_VALUE);
+    ExponentialMAOnBuffer(ArraySize(applied_prices), 0, 0, m_tema_period, applied_prices, ema1);
+    ExponentialMAOnBuffer(ArraySize(applied_prices), 0, 0, m_tema_period, ema1, ema2);
+    ExponentialMAOnBuffer(ArraySize(applied_prices), 0, 0, m_tema_period, ema2, ema3);
+
+    for (int i=0; i<ArraySize(applied_prices); i++) {
+        if (ema1[i] == EMPTY_VALUE || ema2[i] == EMPTY_VALUE || ema3[i] == EMPTY_VALUE) {
+            continue;
+        }
+        tema[i] = 3 * ema1[i] - 3 * ema2[i] + ema3[i];
+    }
 
     CIndicatorBuffer *linreg_buffer = At(0);
-    linreg_buffer.AssignArray(linreg);
+    linreg_buffer.AssignArray(tema);
 }

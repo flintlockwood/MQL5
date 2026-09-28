@@ -17,6 +17,8 @@
 #include "SignalATR.mqh"
 #include "SignalZema.mqh"
 #include "SignalMovingAverage.mqh"
+#include "SignalLinearRegression.mqh"
+#include "SignalTema.mqh"
 //--- available trailing
 #include <Expert/Trailing/TrailingFixedPips.mqh>
 //--- available money management
@@ -59,7 +61,7 @@ input string             Signal_StochRsi_KDOperator    =">";
 //--- inputs for atr indicator
 input double             Signal_ATR_Weight             =0.4;
 input string             Signal_ATR_Symbol             ="GBPJPY";
-input int                Signal_ATR_Timeframe          =PERIOD_M45;
+input int                Signal_ATR_Timeframe          =PERIOD_M4;
 input int                Signal_ATR_Period             =3;
 input ENUM_MA_METHOD     Signal_ATR_MaMethod           =MODE_SMMA;
 input bool               Signal_ATR_EnableATRDirection =true;
@@ -72,13 +74,40 @@ input int                Signal_Zema_Timeframe          =PERIOD_M45;
 input int                Signal_Zema_Period_Long        =73;
 input int                Signal_Zema_Period_Short       =52;
 
-//--- inputs for ma indicator
+//--- inputs for ma close indicator
 input double             Signal_Ma_Weight               =0.4;
 input string             Signal_Ma_Symbol               ="GBPJPY";
 input int                Signal_Ma_Timeframe            =PERIOD_M20;
 input ENUM_APPLIED_PRICE Signal_Ma_Source               =PRICE_LOW;
 input int                Signal_Ma_Period               =60;
 input ENUM_MA_METHOD     Signal_Ma_Method               =MODE_SMMA;
+input ENUM_APPLIED_PRICE Signal_Ma_Target               =PRICE_CLOSE;
+
+//--- inputs for ema open indicator
+input double             Signal_EmaOpen_Weight          =0.4;
+input string             Signal_EmaOpen_Symbol          ="GBPJPY";
+input int                Signal_EmaOpen_Timeframe       =PERIOD_H2;
+input ENUM_APPLIED_PRICE Signal_EmaOpen_Source          =PRICE_CLOSE;
+input int                Signal_EmaOpen_Period          =10;
+input ENUM_MA_METHOD     Signal_EmaOpen_Method          =MODE_EMA;
+input ENUM_APPLIED_PRICE Signal_EmaOpen_Target          =PRICE_OPEN;
+
+//--- inputs for linear regresssion indicator
+input double             Signal_Lr_Weight               =0.4;
+input string             Signal_Lr_Symbol               ="GBPJPY";
+input int                Signal_Lr_Timeframe            =PERIOD_CURRENT;
+input ENUM_APPLIED_PRICE Signal_Lr_Source               =PRICE_LOW;
+input int                Signal_Lr_Period               =18;
+input int                Signal_Lr_Offset               =5;
+input int                Signal_Lr_Pip_Long             =76;
+input int                Signal_Lr_Pip_Short            =113;
+
+//--- inputs for tema indicator
+input double             Signal_Tema_Weight             =0.4;
+input string             Signal_Tema_Symbol             ="GBPJPY";
+input int                Signal_Tema_Timeframe          =PERIOD_CURRENT;
+input ENUM_APPLIED_PRICE Signal_Tema_Source             =PRICE_CLOSE;
+input int                Signal_Tema_Period             =72;
 
 //--- inputs for trailing
 input int                Trailing_FixedPips_StopLevel  =30;          // Stop Loss trailing level (in points)
@@ -202,6 +231,57 @@ int OnInit() {
     filterMa.MaPeriod(Signal_Ma_Period);
     filterMa.MaSource(Signal_Ma_Source);
     filterMa.MaMethod(Signal_Ma_Method);
+    filterMa.MaTarget(Signal_Ma_Target);
+
+//--- Createing filter Ema Open Signal
+    SignalMovingAverage *filterEmaOpen=new SignalMovingAverage;
+    if(filterEmaOpen==NULL) {
+        //--- failed
+        printf(__FUNCTION__+": error creating MA Signal filter");
+        ExtExpert.Deinit();
+        return(INIT_FAILED);
+    }
+    signal.AddFilter(filterEmaOpen);
+//--- Set filter parameters
+    filterEmaOpen.IndicatorSymbol(Signal_EmaOpen_Symbol);
+    filterEmaOpen.IndicatorTimeframe(Signal_EmaOpen_Timeframe);
+    filterEmaOpen.MaPeriod(Signal_EmaOpen_Period);
+    filterEmaOpen.MaSource(Signal_EmaOpen_Source);
+    filterEmaOpen.MaMethod(Signal_EmaOpen_Method);
+    filterEmaOpen.MaTarget(Signal_EmaOpen_Target);
+
+//--- Createing filter Linear Regresssion Signal
+    SignalLinearRegresssion *filterLr=new SignalLinearRegresssion;
+    if(filterLr==NULL) {
+        //--- failed
+        printf(__FUNCTION__+": error creating MA Signal filter");
+        ExtExpert.Deinit();
+        return(INIT_FAILED);
+    }
+    signal.AddFilter(filterLr);
+//--- Set filter parameters
+    filterLr.IndicatorSymbol(Signal_Lr_Symbol);
+    filterLr.IndicatorTimeframe(Signal_Lr_Timeframe);
+    filterLr.LrSource(Signal_Lr_Source);
+    filterLr.LrPeriod(Signal_Lr_Period);
+    filterLr.LrOffset(Signal_Lr_Offset);
+    filterLr.LrPipLong(Signal_Lr_Pip_Long);
+    filterLr.LrPipShort(Signal_Lr_Pip_Short);
+
+//--- Createing filter Tema Signal
+    SignalTema *filterTema=new SignalTema;
+    if(filterTema==NULL) {
+        //--- failed
+        printf(__FUNCTION__+": error creating MA Signal filter");
+        ExtExpert.Deinit();
+        return(INIT_FAILED);
+    }
+    signal.AddFilter(filterTema);
+//--- Set filter parameters
+    filterTema.IndicatorSymbol(Signal_Tema_Symbol);
+    filterTema.IndicatorTimeframe(Signal_Tema_Timeframe);
+    filterTema.TemaSource(Signal_Tema_Source);
+    filterTema.TemaPeriod(Signal_Tema_Period);
 
 //--- Creation of trailing object
     CTrailingFixedPips *trailing=new CTrailingFixedPips;

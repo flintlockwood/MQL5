@@ -1,5 +1,5 @@
 //+------------------------------------------------------------------+
-//|                                             SignalMovingAverage.mq5 |
+//|                                             SignalTema.mq5 |
 //|                                                  Mufraeli Rahman |
 //|                                             https://www.mql5.com |
 //+------------------------------------------------------------------+
@@ -10,28 +10,27 @@
 #include <Expert/ExpertSignal.mqh>
 #include <MovingAverages.mqh>
 #include "Helper.mqh"
+#include "IndicatorTema.mqh"
 
-class SignalMovingAverage: public CExpertSignal {
+class SignalTema: public CExpertSignal {
     protected:
+        CiTema            m_tema_indicator;
+
         //--- adjusted parameters
         string            m_sig_symbol;
         int               m_sig_timeframe;
-        ENUM_APPLIED_PRICE m_ma_source;
-        int               m_ma_period;
-        ENUM_MA_METHOD    m_ma_method;
-        ENUM_APPLIED_PRICE m_ma_target;
+        ENUM_APPLIED_PRICE m_tema_source;
+        int               m_tema_period;
 
     public:
-        SignalMovingAverage(void);
-        ~SignalMovingAverage(void);
+        SignalTema(void);
+        ~SignalTema(void);
 
         //--- methods of setting adjustable indicator parameters
         void              IndicatorSymbol(string value)        { m_sig_symbol=value;    }
         void              IndicatorTimeframe(int value)        { m_sig_timeframe=value; }
-        void              MaSource(ENUM_APPLIED_PRICE value)   { m_ma_source=value;     }
-        void              MaPeriod(int value)                  { m_ma_period=value;     }
-        void              MaMethod(ENUM_MA_METHOD value)       { m_ma_method=value;     }
-        void              MaTarget(ENUM_APPLIED_PRICE value)   { m_ma_target=value;     }
+        void              TemaSource(ENUM_APPLIED_PRICE value) { m_tema_source=value;   }
+        void              TemaPeriod(int value)                { m_tema_period=value;   }
         
         //--- method of verification of settings
         virtual bool      ValidationSettings(void);
@@ -45,9 +44,8 @@ class SignalMovingAverage: public CExpertSignal {
 //+------------------------------------------------------------------+
 //| Constructor                                                      |
 //+------------------------------------------------------------------+
-SignalMovingAverage::SignalMovingAverage(void) : m_ma_source(PRICE_LOW),
-                             m_ma_period(60),
-                             m_ma_method(MODE_SMMA) {
+SignalTema::SignalTema(void) : m_tema_source(PRICE_CLOSE),
+                             m_tema_period(18) {
     //--- initialization of protected data
     m_used_series=USE_SERIES_OPEN+USE_SERIES_HIGH+USE_SERIES_LOW+USE_SERIES_CLOSE;
 }
@@ -55,18 +53,18 @@ SignalMovingAverage::SignalMovingAverage(void) : m_ma_source(PRICE_LOW),
 //+------------------------------------------------------------------+
 //| Destructor                                                       |
 //+------------------------------------------------------------------+
-SignalMovingAverage::~SignalMovingAverage(void){
+SignalTema::~SignalTema(void){
 }
 
 //+------------------------------------------------------------------+
 //| Validation settings protected data.                              |
 //+------------------------------------------------------------------+
-bool SignalMovingAverage::ValidationSettings(void) {
+bool SignalTema::ValidationSettings(void) {
     //--- validation settings of additional filters
     if(!CExpertSignal::ValidationSettings())
         return(false);
     //--- initial data checks
-    if(m_ma_period<=0) {
+    if(m_tema_period<=0) {
         printf(__FUNCTION__+": period MA must be greater than 0");
         return(false);
     }
@@ -77,14 +75,25 @@ bool SignalMovingAverage::ValidationSettings(void) {
 //+------------------------------------------------------------------+
 //| Create indicators.                                               |
 //+------------------------------------------------------------------+
-bool SignalMovingAverage::InitIndicators(CIndicators *indicators) {
+bool SignalTema::InitIndicators(CIndicators *indicators) {
     //--- check pointer
     if(indicators==NULL)
         return(false);
     //--- initialization of indicators and timeseries of additional filters
     if(!CExpertSignal::InitIndicators(indicators))
         return(false);
-
+    
+    //--- create and initialize MA indicator
+    if(!m_tema_indicator.Create(m_sig_symbol, (ENUM_TIMEFRAMES)m_sig_timeframe,
+                        m_tema_period, m_tema_source)) {
+        printf(__FUNCTION__+": error initializing object");
+        return(false);
+    }
+    //--- add object to collection
+    if(!indicators.Add(GetPointer(m_tema_indicator))) {
+        printf(__FUNCTION__+": error adding object");
+        return(false);
+    }
     //--- ok
     return(true);
 }
@@ -92,19 +101,11 @@ bool SignalMovingAverage::InitIndicators(CIndicators *indicators) {
 //+------------------------------------------------------------------+
 //| "Voting" that price will grow.                                   |
 //+------------------------------------------------------------------+
-int SignalMovingAverage::LongCondition(void) {
+int SignalTema::LongCondition(void) {
     int result=0;
     int idx   =StartIndex();
-    
-    int bars = BarsCustom(m_sig_symbol, m_sig_timeframe);
-    double source[];
-    CopyAppliedPrice(m_sig_symbol, m_sig_timeframe, m_ma_source, 0, bars, source);
-    double ma[];
-    MAOnBuffer(ArraySize(source), 0, 0, m_ma_period, m_ma_method, source, ma);
-    
-    ArraySetAsSeries(ma, true);
-    double target_price = GetAppliedPrice(m_sig_symbol, m_sig_timeframe, m_ma_target, idx);
-    bool cond = target_price > ma[idx];
+
+    bool cond = Close(idx) > m_tema_indicator.Tema(idx);
 
     //--- return the result
     return(cond ? 100 : 0);
@@ -113,20 +114,12 @@ int SignalMovingAverage::LongCondition(void) {
 //+------------------------------------------------------------------+
 //| "Voting" that price will fall.                                   |
 //+------------------------------------------------------------------+
-int SignalMovingAverage::ShortCondition(void) {
+int SignalTema::ShortCondition(void) {
     int result=0;
     int idx   =StartIndex();
     
-    int bars = BarsCustom(m_sig_symbol, m_sig_timeframe);
-    double source[];
-    CopyAppliedPrice(m_sig_symbol, m_sig_timeframe, m_ma_source, 0, bars, source);
-    double ma[];
-    MAOnBuffer(ArraySize(source), 0, 0, m_ma_period, m_ma_method, source, ma);
+    bool cond = Close(idx) < m_tema_indicator.Tema(idx);
     
-    ArraySetAsSeries(ma, true);
-    double target_price = GetAppliedPrice(m_sig_symbol, m_sig_timeframe, m_ma_target, idx);
-    bool cond = target_price < ma[idx];
-
     //--- return the result
     return(cond ? 100 : 0);
 }

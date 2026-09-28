@@ -10,15 +10,20 @@
 #include <Expert/ExpertSignal.mqh>
 #include <MovingAverages.mqh>
 #include "Helper.mqh"
+#include "IndicatorLinearRegression.mqh"
 
 class SignalLinearRegresssion: public CExpertSignal {
     protected:
+        CiLinearRegression m_lr_indicator;
+
         //--- adjusted parameters
         string            m_sig_symbol;
         int               m_sig_timeframe;
         ENUM_APPLIED_PRICE m_lr_source;
         int               m_lr_period;
         int               m_lr_offset;
+        double            m_lr_pip_long;
+        double            m_lr_pip_short;
 
     public:
         SignalLinearRegresssion(void);
@@ -30,6 +35,8 @@ class SignalLinearRegresssion: public CExpertSignal {
         void              LrSource(ENUM_APPLIED_PRICE value)   { m_lr_source=value;     }
         void              LrPeriod(int value)                  { m_lr_period=value;     }
         void              LrOffset(int value)                  { m_lr_offset=value;     }
+        void              LrPipLong(double value)              { m_lr_pip_long=value;   }
+        void              LrPipShort(double value)             { m_lr_pip_short=value;  }
         
         //--- method of verification of settings
         virtual bool      ValidationSettings(void);
@@ -87,9 +94,18 @@ bool SignalLinearRegresssion::InitIndicators(CIndicators *indicators) {
     //--- initialization of indicators and timeseries of additional filters
     if(!CExpertSignal::InitIndicators(indicators))
         return(false);
+    
     //--- create and initialize MA indicator
-    if(!InitLR(indicators))
+    if(!m_lr_indicator.Create(m_sig_symbol, (ENUM_TIMEFRAMES)m_sig_timeframe,
+                        m_lr_period, m_lr_offset, m_lr_source)) {
+        printf(__FUNCTION__+": error initializing object");
         return(false);
+    }
+    //--- add object to collection
+    if(!indicators.Add(GetPointer(m_lr_indicator))) {
+        printf(__FUNCTION__+": error adding object");
+        return(false);
+    }
     //--- ok
     return(true);
 }
@@ -113,7 +129,7 @@ int SignalLinearRegresssion::LongCondition(void) {
     int result=0;
     int idx   =StartIndex();
 
-    bool cond = true;
+    bool cond = Open(idx) < m_lr_indicator.LinReg(idx) + m_lr_pip_long * GetPoint(m_sig_symbol) * 10;
 
     //--- return the result
     return(cond ? 100 : 0);
@@ -126,7 +142,7 @@ int SignalLinearRegresssion::ShortCondition(void) {
     int result=0;
     int idx   =StartIndex();
     
-    bool cond = true;
+    bool cond = Close(idx) > m_lr_indicator.LinReg(idx) - m_lr_pip_short * GetPoint(m_sig_symbol) * 10;
     
     //--- return the result
     return(cond ? 100 : 0);

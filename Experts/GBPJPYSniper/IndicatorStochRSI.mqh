@@ -74,8 +74,8 @@ CiStochRSI::~CiStochRSI(void) {
 bool CiStochRSI::Create(const string symbol,const ENUM_TIMEFRAMES period,
                             const ENUM_INDICATOR type,const int num_params,const MqlParam &params[]) {
     return(Create(params[1].string_value, (int)params[2].integer_value, 
-                    params[3].integer_value, params[4].integer_value,
-                    params[5].integer_value, params[6].integer_value, (ENUM_APPLIED_PRICE)params[7].integer_value));
+                    (int)params[3].integer_value, (int)params[4].integer_value,
+                    (int)params[5].integer_value, (int)params[6].integer_value, (ENUM_APPLIED_PRICE)params[7].integer_value));
 }
 
 bool CiStochRSI::Create(const string symbol,const int period,
