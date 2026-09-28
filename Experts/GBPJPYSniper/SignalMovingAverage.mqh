@@ -119,7 +119,7 @@ int SignalMovingAverage::LongCondition(void) {
     double ma[];
     MAOnBuffer(ArraySize(source), 0, 0, m_ma_period, m_ma_method, source, ma);
     
-    ArraySetAsSeries(ma);
+    ArraySetAsSeries(ma, true);
     bool cond = Close(idx) > ma[idx];
 
     //--- return the result
@@ -139,7 +139,7 @@ int SignalMovingAverage::ShortCondition(void) {
     double ma[];
     MAOnBuffer(ArraySize(source), 0, 0, m_ma_period, m_ma_method, source, ma);
     
-    ArraySetAsSeries(ma);
+    ArraySetAsSeries(ma, true);
     bool cond = Close(idx) < ma[idx];
 
     //--- return the result

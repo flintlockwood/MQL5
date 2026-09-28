@@ -32,7 +32,7 @@ class CiZema: public CIndicator {
         bool            Create(const string symbol,const ENUM_TIMEFRAMES period,
                             const ENUM_INDICATOR type,const int num_params,const MqlParam &params[]);
         bool            Create(const string symbol,const int period,
-                            const int zema_period);
+                            const int zema_period_long, const int zema_period_short);
         
         //--- methods of access to indicator data
         double          GetData(const int buffer_num,const int index);
@@ -63,7 +63,7 @@ CiZema::~CiZema(void) {
 bool CiZema::Create(const string symbol,const ENUM_TIMEFRAMES period,
                             const ENUM_INDICATOR type,const int num_params,const MqlParam &params[]) {
     return(Create(params[1].string_value, (int)params[2].integer_value, 
-                    params[3].integer_value));
+                    params[3].integer_value, params[4].integer_value));
 }
 
 bool CiZema::Create(const string symbol,const int period,
@@ -73,7 +73,7 @@ bool CiZema::Create(const string symbol,const int period,
         //--- string of status of drawing
         m_name  ="ST";
         m_status="("+symbol+","+PeriodDescription()+","+
-               IntegerToString(zema_period_long)+","+IntegerToString(zema_period_short)")";
+               IntegerToString(zema_period_long)+","+IntegerToString(zema_period_short)+")";
         //--- save settings
         m_ind_symbol = symbol;
         m_ind_timeframe = period;
