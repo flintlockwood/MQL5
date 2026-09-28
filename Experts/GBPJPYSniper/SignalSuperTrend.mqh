@@ -42,10 +42,6 @@ class SignalSuperTrend: public CExpertSignal {
         //--- methods of checking if the market models are formed
         virtual int       LongCondition(void);
         virtual int       ShortCondition(void);
-
-    protected:
-        //--- method of initialization of the indicator
-        bool              InitSuperTrend(CIndicators *indicators);
 };
 
 //+------------------------------------------------------------------+
@@ -93,22 +89,8 @@ bool SignalSuperTrend::InitIndicators(CIndicators *indicators) {
     //--- initialization of indicators and timeseries of additional filters
     if(!CExpertSignal::InitIndicators(indicators))
         return(false);
-    //--- create and initialize MA indicator
-    if(!InitSuperTrend(indicators))
-        return(false);
-    //--- ok
-    return(true);
-}
-
-//+------------------------------------------------------------------+
-//| Initialize Super Trend indicators.                                        |
-//+------------------------------------------------------------------+
-bool SignalSuperTrend::InitSuperTrend(CIndicators *indicators) {
-    //--- check pointer
-    if(indicators==NULL)
-        return(false);
     
-    //--- initialize object
+    //--- create and initialize MA indicator
     if(!m_st_indicator.Create(m_sig_symbol, (ENUM_TIMEFRAMES)m_sig_timeframe,
                         m_st_period, m_st_multiplier,
                         m_st_ma_method, m_st_applied_price)) {

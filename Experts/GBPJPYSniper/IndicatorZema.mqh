@@ -35,11 +35,11 @@ class CiZema: public CIndicator {
                             const int zema_period);
         
         //--- methods of access to indicator data
+        double          GetData(const int buffer_num,const int index);
+        int             GetData(const int start_pos,const int count,const int buffer_num,double &buffer[]);
         double          ZemaLong(const int index);
         double          ZemaShort(const int index);
         virtual void    Refresh(const int flags=OBJ_ALL_PERIODS);
-        bool            Refresh(const int handle,const int num);
-        bool            RefreshCurrent(const int handle,const int num);
 };
 
 //+------------------------------------------------------------------+
@@ -47,7 +47,8 @@ class CiZema: public CIndicator {
 //+------------------------------------------------------------------+
 CiZema::CiZema(void) : m_ind_symbol("GBPJPY"),
                    m_ind_timeframe(PERIOD_M30),
-                   m_zema_period_long(73) {
+                   m_zema_period_long(73),
+                   m_zema_period_short(73) {
 }
 
 //+------------------------------------------------------------------+
@@ -66,17 +67,18 @@ bool CiZema::Create(const string symbol,const ENUM_TIMEFRAMES period,
 }
 
 bool CiZema::Create(const string symbol,const int period,
-                        const int zema_period) {
+                        const int zema_period_long, const int zema_period_short) {
 //--- we do not need to create indicator here
     if(Reserve(2)) {
         //--- string of status of drawing
         m_name  ="ST";
         m_status="("+symbol+","+PeriodDescription()+","+
-               IntegerToString(zema_period)+")";
+               IntegerToString(zema_period_long)+","+IntegerToString(zema_period_short)")";
         //--- save settings
         m_ind_symbol = symbol;
         m_ind_timeframe = period;
-        m_zema_period_long = zema_period;
+        m_zema_period_long = zema_period_long;
+        m_zema_period_long = zema_period_short;
 
         //--- create buffers
         CIndicatorBuffer *zema_buffer_long = new CIndicatorBuffer();
@@ -117,6 +119,39 @@ double CiZema::ZemaShort(const int index) {
     return(buffer.At(index));
 }
 
+double CiZema::GetData(const int buffer_num,const int index) {
+    CIndicatorBuffer *buffer=At(buffer_num);
+    //--- check
+    if(buffer==NULL) {
+        Print(__FUNCTION__,": invalid buffer");
+        return(EMPTY_VALUE);
+    }
+    //---
+    return(buffer.At(index));
+}
+
+//+------------------------------------------------------------------+
+//| API access method "Copying the buffer of indicator by specifying |
+//| a start position and number of elements"                         |
+//+------------------------------------------------------------------+
+int CiZema::GetData(const int start_pos,const int count,const int buffer_num,double &buffer[]) {
+    //--- check
+    CIndicatorBuffer *ind_buffer=At(buffer_num);
+    if(ind_buffer==NULL) {
+        Print(__FUNCTION__,": invalid buffer");
+        return(-1);
+    }
+    if(buffer_num>=m_buffers_total) {
+        SetUserError(ERR_USER_INVALID_BUFF_NUM);
+        return(-1);
+    }
+    for (int i=start_pos; i<count; i++) {
+        ArrayAppend(buffer, ind_buffer.At(i));
+    }
+    //---
+    return(ArraySize(buffer));
+}
+
 //+------------------------------------------------------------------+
 //| Refreshing data of indicator                                     |
 //+------------------------------------------------------------------+
@@ -155,38 +190,4 @@ void CiZema::Refresh(const int flags=OBJ_ALL_PERIODS) {
 
     CIndicatorBuffer *zema_buffer_short = At(1);
     zema_buffer_short.AssignArray(zema_short);
-}
-
-//+------------------------------------------------------------------+
-//| Refreshing of data in buffer                                     |
-//+------------------------------------------------------------------+
-bool CiZema::Refresh(const int handle,const int num) {
-    //--- check
-    if(handle==INVALID_HANDLE) {
-        SetUserError(ERR_USER_INVALID_HANDLE);
-        return(false);
-    }
-    //---
-    //m_data_total=CopyBuffer(handle,num,-m_offset,m_size,m_data);
-    //---
-    return(m_data_total>0);
-}
-
-//+------------------------------------------------------------------+
-//| Refreshing of the data in buffer                                 |
-//+------------------------------------------------------------------+
-bool CiZema::RefreshCurrent(const int handle,const int num) {
-    double array[1];
-    //--- check
-    if(handle==INVALID_HANDLE) {
-        SetUserError(ERR_USER_INVALID_HANDLE);
-        return(false);
-    }
-    //---
-    //if(CopyBuffer(handle,num,-m_offset,1,array)>0 && m_data_total>0) {
-    //    m_data[0]=array[0];
-    //    return(true);
-    //}
-    //--- error
-    return(false);
 }

@@ -50,13 +50,6 @@ class SignalStochRSI: public CExpertSignal {
         //--- methods of checking if the market models are formed
         virtual int       LongCondition(void);
         virtual int       ShortCondition(void);
-
-    protected:
-        //--- method of initialization of the indicator
-        bool              InitStochRSI(CIndicators *indicators);
-        //--- methods of getting data
-        double            StochKData(int ind)                     { return(m_ind_stoch.FastK(ind));  }
-        double            StochDData(int ind)                     { return(m_ind_stoch.SlowD(ind));  }
 };
 
 //+------------------------------------------------------------------+
@@ -116,27 +109,15 @@ bool SignalStochRSI::InitIndicators(CIndicators *indicators) {
     //--- initialization of indicators and timeseries of additional filters
     if(!CExpertSignal::InitIndicators(indicators))
         return(false);
-    //--- create and initialize MA indicator
-    if(!InitStochRSI(indicators))
-        return(false);
-    //--- ok
-    return(true);
-}
 
-//+------------------------------------------------------------------+
-//| Initialize Super Trend indicators.                                        |
-//+------------------------------------------------------------------+
-bool SignalStochRSI::InitStochRSI(CIndicators *indicators) {
-    //--- check pointer
-    if(indicators==NULL)
-        return(false);
-    //--- initialize object
+    //--- create and initialize MA indicator
     if(!m_ind_stoch.Create(m_ind_symbol,m_ind_timeframe,
                         m_ind_rsi_period, m_ind_stoch_length,
                         m_ind_k, m_ind_d, m_applied_price)) {
         printf(__FUNCTION__+": error initializing object");
         return(false);
     }
+
     //--- add object to collection
     if(!indicators.Add(GetPointer(m_ind_stoch))) {
         printf(__FUNCTION__+": error adding object");
@@ -153,7 +134,7 @@ int SignalStochRSI::LongCondition(void) {
     int result=0;
     int idx   =StartIndex();
     if (m_kd_operator == ">") {
-        if (StochKData(idx) < 80 && StochKData(idx) > 50 && StochKData(idx) > StochDData(idx))
+        if (m_ind_stoch.FastK(idx) < 80 && m_ind_stoch.FastK(idx) > 50 && m_ind_stoch.FastK(idx) > m_ind_stoch.SlowD(idx))
             result = m_pattern_0;
     }
     else {
@@ -170,7 +151,7 @@ int SignalStochRSI::ShortCondition(void) {
     int result=0;
     int idx   =StartIndex();
     if (m_kd_operator == ">") {
-        if (StochDData(idx) < 50 && StochDData(idx) > 20 && StochDData(idx) > StochKData(idx))
+        if (m_ind_stoch.SlowD(idx) < 50 && m_ind_stoch.SlowD(idx) > 20 && m_ind_stoch.SlowD(idx) > m_ind_stoch.FastK(idx))
             result = m_pattern_0;
     }
     else {

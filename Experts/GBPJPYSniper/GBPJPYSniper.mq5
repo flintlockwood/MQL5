@@ -16,6 +16,7 @@
 #include "SignalStochRSI.mqh"
 #include "SignalATR.mqh"
 #include "SignalZema.mqh"
+#include "SignalMovingAverage.mqh"
 //--- available trailing
 #include <Expert/Trailing/TrailingFixedPips.mqh>
 //--- available money management
@@ -34,6 +35,7 @@ input double             Signal_PriceLevel             =0.0;         // Price le
 input double             Signal_StopLevel              =50.0;        // Stop Loss level (in points)
 input double             Signal_TakeLevel              =50.0;        // Take Profit level (in points)
 input int                Signal_Expiration             =4;           // Expiration of pending orders (in bars)
+
 //--- inputs for super trend indicator
 input double             Signal_ST_Weight              =0.3;
 input string             Signal_ST_Symbol              ="GBPJPY";
@@ -42,8 +44,9 @@ input int                Signal_ST_Period              =10;
 input double             Signal_ST_Multiplier          =3.1;
 input ENUM_MA_METHOD     Signal_ST_MaMethod            =MODE_SMMA;
 input ENUM_APPLIED_PRICE Signal_ST_AppliedPrice        =PRICE_OPEN;
+
 //--- inputs for Stochastic RSI indicator
-input double             Signal_StochRsi_Weight        =0.3;
+input double             Signal_StochRsi_Weight        =0.4;
 input string             Signal_StochRsi_Symbol        ="GBPJPY";
 input ENUM_TIMEFRAMES    Signal_StochRsi_Timeframe     =PERIOD_M30;
 input int                Signal_StochRsi_RsiPeriod     =22;
@@ -52,20 +55,30 @@ input int                Signal_StochRsi_K             =19;
 input int                Signal_StochRsi_D             =2;
 input ENUM_APPLIED_PRICE Signal_StochRsi_AppliedPrice  =PRICE_HIGH;
 input string             Signal_StochRsi_KDOperator    =">";
+
 //--- inputs for atr indicator
-input double             Signal_ATR_Weight             =0.3;
+input double             Signal_ATR_Weight             =0.4;
 input string             Signal_ATR_Symbol             ="GBPJPY";
 input int                Signal_ATR_Timeframe          =PERIOD_M45;
 input int                Signal_ATR_Period             =3;
 input ENUM_MA_METHOD     Signal_ATR_MaMethod           =MODE_SMMA;
 input bool               Signal_ATR_EnableATRDirection =true;
 input bool               Signal_ATR_EnableATRIncrease  =true;
+
 //--- inputs for zema indicator
-input double             Signal_Zema_Weight             =0.3;
+input double             Signal_Zema_Weight             =0.4;
 input string             Signal_Zema_Symbol             ="GBPJPY";
 input int                Signal_Zema_Timeframe          =PERIOD_M45;
 input int                Signal_Zema_Period_Long        =73;
 input int                Signal_Zema_Period_Short       =52;
+
+//--- inputs for ma indicator
+input double             Signal_Ma_Weight               =0.4;
+input string             Signal_Ma_Symbol               ="GBPJPY";
+input int                Signal_Ma_Timeframe            =PERIOD_M20;
+input ENUM_APPLIED_PRICE Signal_Ma_Source               =PRICE_LOW;
+input int                Signal_Ma_Period               =60;
+input ENUM_MA_METHOD     Signal_Ma_Method               =MODE_SMMA;
 
 //--- inputs for trailing
 input int                Trailing_FixedPips_StopLevel  =30;          // Stop Loss trailing level (in points)
@@ -89,6 +102,7 @@ int OnInit() {
         ExtExpert.Deinit();
         return(INIT_FAILED);
     }
+
 //--- Creating signal
     CExpertSignal *signal=new CExpertSignal;
     if(signal==NULL) {
@@ -97,7 +111,7 @@ int OnInit() {
         ExtExpert.Deinit();
         return(INIT_FAILED);
     }
-//---
+//--- Set main signal parameters
     ExtExpert.InitSignal(signal);
     signal.ThresholdOpen(Signal_ThresholdOpen);
     signal.ThresholdClose(Signal_ThresholdClose);
@@ -105,6 +119,7 @@ int OnInit() {
     signal.StopLevel(Signal_StopLevel);
     signal.TakeLevel(Signal_TakeLevel);
     signal.Expiration(Signal_Expiration);
+
 //--- Createing filter SuperTrend
     SignalSuperTrend *filterST=new SignalSuperTrend;
     if(filterST==NULL) {
@@ -172,6 +187,22 @@ int OnInit() {
     filterZema.ZemaPeriodLong(Signal_Zema_Period_Long);
     filterZema.ZemaPeriodShort(Signal_Zema_Period_Short);
 
+//--- Createing filter Ma Signal
+    SignalMovingAverage *filterMa=new SignalMovingAverage;
+    if(filterMa==NULL) {
+        //--- failed
+        printf(__FUNCTION__+": error creating MA Signal filter");
+        ExtExpert.Deinit();
+        return(INIT_FAILED);
+    }
+    signal.AddFilter(filterMa);
+//--- Set filter parameters
+    filterMa.IndicatorSymbol(Signal_Ma_Symbol);
+    filterMa.IndicatorTimeframe(Signal_Ma_Timeframe);
+    filterMa.MaPeriod(Signal_Ma_Period);
+    filterMa.MaSource(Signal_Ma_Source);
+    filterMa.MaMethod(Signal_Ma_Method);
+
 //--- Creation of trailing object
     CTrailingFixedPips *trailing=new CTrailingFixedPips;
     if(trailing==NULL) {
@@ -208,12 +239,14 @@ int OnInit() {
     }
 //--- Set money parameters
     money.Percent(Money_FixRisk_Percent);
+
 //--- Check all trading objects parameters
     if(!ExtExpert.ValidationSettings()) {
         //--- failed
         ExtExpert.Deinit();
         return(INIT_FAILED);
     }
+
 //--- Tuning of all necessary indicators
     if(!ExtExpert.InitIndicators()) {
         //--- failed
@@ -221,27 +254,32 @@ int OnInit() {
         ExtExpert.Deinit();
         return(INIT_FAILED);
     }
+
 //--- ok
     return(INIT_SUCCEEDED);
 }
+
 //+------------------------------------------------------------------+
 //| Deinitialization function of the expert                          |
 //+------------------------------------------------------------------+
 void OnDeinit(const int reason) {
     ExtExpert.Deinit();
 }
+
 //+------------------------------------------------------------------+
 //| "Tick" event handler function                                    |
 //+------------------------------------------------------------------+
 void OnTick() {
     ExtExpert.OnTick();
 }
+
 //+------------------------------------------------------------------+
 //| "Trade" event handler function                                   |
 //+------------------------------------------------------------------+
 void OnTrade() {
     ExtExpert.OnTrade();
 }
+
 //+------------------------------------------------------------------+
 //| "Timer" event handler function                                   |
 //+------------------------------------------------------------------+

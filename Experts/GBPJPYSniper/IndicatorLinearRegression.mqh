@@ -11,7 +11,7 @@
 #include <MovingAverages.mqh>
 #include "Helper.mqh"
 
-class CiSuperTrend: public CIndicator {
+class CiLinearRegression: public CIndicator {
     protected:
         string            m_ind_symbol;
         int               m_ind_timeframe;
@@ -21,8 +21,8 @@ class CiSuperTrend: public CIndicator {
         ENUM_APPLIED_PRICE m_applied;
 
     public:
-        CiSuperTrend(void);
-        ~CiSuperTrend(void);
+        CiLinearRegression(void);
+        ~CiLinearRegression(void);
 
         //--- methods to set to protected data
         void            IndSymbol(string value) { m_ind_symbol = value; }
@@ -51,7 +51,7 @@ class CiSuperTrend: public CIndicator {
 //+------------------------------------------------------------------+
 //| Constructor                                                      |
 //+------------------------------------------------------------------+
-CiSuperTrend::CiSuperTrend(void) : m_ind_symbol("GBPJPY"),
+CiLinearRegression::CiLinearRegression(void) : m_ind_symbol("GBPJPY"),
                    m_ind_timeframe(PERIOD_M30),
                    m_atr_period(10),
                    m_atr_multiplier(3.1),
@@ -62,20 +62,20 @@ CiSuperTrend::CiSuperTrend(void) : m_ind_symbol("GBPJPY"),
 //+------------------------------------------------------------------+
 //| Destructor                                                       |
 //+------------------------------------------------------------------+
-CiSuperTrend::~CiSuperTrend(void) {
+CiLinearRegression::~CiLinearRegression(void) {
 }
 
 //+------------------------------------------------------------------+
 //| Create indicator                                                 |
 //+------------------------------------------------------------------+
-bool CiSuperTrend::Create(const string symbol,const ENUM_TIMEFRAMES period,
+bool CiLinearRegression::Create(const string symbol,const ENUM_TIMEFRAMES period,
                             const ENUM_INDICATOR type,const int num_params,const MqlParam &params[]) {
     return(Create(params[1].string_value, (int)params[2].integer_value, 
                     (int)params[3].integer_value, params[4].double_value,
                     (ENUM_MA_METHOD)params[5].integer_value, (ENUM_APPLIED_PRICE)params[6].integer_value));
 }
 
-bool CiSuperTrend::Create(const string symbol,const int period,
+bool CiLinearRegression::Create(const string symbol,const int period,
                         const int atr_period,const double atr_mutiplier,
                         const ENUM_MA_METHOD ma_method,const ENUM_APPLIED_PRICE applied) {
 //--- we do not need to create indicator here
@@ -113,7 +113,7 @@ bool CiSuperTrend::Create(const string symbol,const int period,
 //+------------------------------------------------------------------+
 //| Access to upper band buffer                                      |
 //+------------------------------------------------------------------+
-double CiSuperTrend::UpperBand(const int index) {
+double CiLinearRegression::UpperBand(const int index) {
     CIndicatorBuffer *buffer=At(0);
     //--- check
     if(buffer==NULL)
@@ -125,7 +125,7 @@ double CiSuperTrend::UpperBand(const int index) {
 //+------------------------------------------------------------------+
 //| Access to lower band buffer                                      |
 //+------------------------------------------------------------------+
-double CiSuperTrend::LowerBand(const int index) {
+double CiLinearRegression::LowerBand(const int index) {
     CIndicatorBuffer *buffer=At(1);
     //--- check
     if(buffer==NULL)
@@ -137,7 +137,7 @@ double CiSuperTrend::LowerBand(const int index) {
 //+------------------------------------------------------------------+
 //| Access to lower trend buffer                                     |
 //+------------------------------------------------------------------+
-double CiSuperTrend::Trend(const int index) {
+double CiLinearRegression::Trend(const int index) {
     CIndicatorBuffer *buffer=At(2);
     //--- check
     if(buffer==NULL)
@@ -146,7 +146,7 @@ double CiSuperTrend::Trend(const int index) {
     return(buffer.At(index));
 }
 
-double CiSuperTrend::GetData(const int buffer_num,const int index) {
+double CiLinearRegression::GetData(const int buffer_num,const int index) {
     CIndicatorBuffer *buffer=At(buffer_num);
     //--- check
     if(buffer==NULL) {
@@ -161,7 +161,7 @@ double CiSuperTrend::GetData(const int buffer_num,const int index) {
 //| API access method "Copying the buffer of indicator by specifying |
 //| a start position and number of elements"                         |
 //+------------------------------------------------------------------+
-int CiSuperTrend::GetData(const int start_pos,const int count,const int buffer_num,double &buffer[]) {
+int CiLinearRegression::GetData(const int start_pos,const int count,const int buffer_num,double &buffer[]) {
     //--- check
     CIndicatorBuffer *ind_buffer=At(buffer_num);
     if(ind_buffer==NULL) {
@@ -182,7 +182,7 @@ int CiSuperTrend::GetData(const int start_pos,const int count,const int buffer_n
 //+------------------------------------------------------------------+
 //| Refreshing data of indicator                                     |
 //+------------------------------------------------------------------+
-void CiSuperTrend::Refresh(const int flags=OBJ_ALL_PERIODS) {
+void CiLinearRegression::Refresh(const int flags=OBJ_ALL_PERIODS) {
     double tr[];
     double atr[];
     double applied_prices[];
