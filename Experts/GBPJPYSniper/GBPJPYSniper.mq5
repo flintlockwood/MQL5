@@ -92,6 +92,15 @@ input int                Signal_EmaOpen_Period          =10;
 input ENUM_MA_METHOD     Signal_EmaOpen_Method          =MODE_EMA;
 input ENUM_APPLIED_PRICE Signal_EmaOpen_Target          =PRICE_OPEN;
 
+//--- inputs for rma close indicator
+input double             Signal_RmaClose_Weight          =0.4;
+input string             Signal_RmaClose_Symbol          ="GBPJPY";
+input int                Signal_RmaClose_Timeframe       =PERIOD_M20;
+input ENUM_APPLIED_PRICE Signal_RmaClose_Source          =PRICE_LOW;
+input int                Signal_RmaClose_Period          =60;
+input ENUM_MA_METHOD     Signal_RmaClose_Method          =MODE_SMMA;
+input ENUM_APPLIED_PRICE Signal_RmaClose_Target          =PRICE_CLOSE;
+
 //--- inputs for linear regresssion indicator
 input double             Signal_Lr_Weight               =0.4;
 input string             Signal_Lr_Symbol               ="GBPJPY";
@@ -249,6 +258,23 @@ int OnInit() {
     filterEmaOpen.MaSource(Signal_EmaOpen_Source);
     filterEmaOpen.MaMethod(Signal_EmaOpen_Method);
     filterEmaOpen.MaTarget(Signal_EmaOpen_Target);
+
+//--- Createing filter RMA Close Signal
+    SignalMovingAverage *filterRmaClose=new SignalMovingAverage;
+    if(filterRmaClose==NULL) {
+        //--- failed
+        printf(__FUNCTION__+": error creating MA Signal filter");
+        ExtExpert.Deinit();
+        return(INIT_FAILED);
+    }
+    signal.AddFilter(filterRmaClose);
+//--- Set filter parameters
+    filterRmaClose.IndicatorSymbol(Signal_RmaClose_Symbol);
+    filterRmaClose.IndicatorTimeframe(Signal_RmaClose_Timeframe);
+    filterRmaClose.MaPeriod(Signal_RmaClose_Period);
+    filterRmaClose.MaSource(Signal_RmaClose_Source);
+    filterRmaClose.MaMethod(Signal_RmaClose_Method);
+    filterRmaClose.MaTarget(Signal_RmaClose_Target);
 
 //--- Createing filter Linear Regresssion Signal
     SignalLinearRegresssion *filterLr=new SignalLinearRegresssion;
