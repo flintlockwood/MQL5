@@ -22,6 +22,8 @@ class SignalZema: public CExpertSignal {
         int               m_zema_period_long;
         int               m_zema_period_short;
         bool              m_enable_zema_momentum;
+        string            m_zema_momentum_cond_long;
+        string            m_zema_momentum_cond_short;
 
     public:
         SignalZema(void);
@@ -33,6 +35,8 @@ class SignalZema: public CExpertSignal {
         void              ZemaPeriodLong(int value)            { m_zema_period_long=value;       }
         void              ZemaPeriodShort(int value)           { m_zema_period_long=value;       }
         void              EnableZemaMomentum(bool value)       { m_enable_zema_momentum=value;   }
+        void              ZemaMomentumCondLong(string value)   { m_zema_momentum_cond_long=value;}
+        void              ZemaMomentumCondShort(string value)  { m_zema_momentum_cond_short=value;}
         
         //--- method of verification of settings
         virtual bool      ValidationSettings(void);
@@ -107,8 +111,12 @@ int SignalZema::LongCondition(void) {
     
     bool cond = Close(idx) > m_zema_indicator.ZemaLong(idx);
 
+    double momentum[];
+    m_zema_indicator.GetData(0, 20, 2, momentum);
+    bool cond2 = !m_enable_zema_momentum || CheckSeriesCondition(m_zema_momentum_cond_long, momentum);
+
     //--- return the result
-    return(cond ? 100 : 0);
+    return(cond && cond2 ? 100 : 0);
 }
 
 //+------------------------------------------------------------------+
@@ -120,7 +128,11 @@ int SignalZema::ShortCondition(void) {
     
     bool cond = Close(idx) < m_zema_indicator.ZemaShort(idx);
 
+    double momentum[];
+    m_zema_indicator.GetData(0, 20, 3, momentum);
+    bool cond2 = !m_enable_zema_momentum || CheckSeriesCondition(m_zema_momentum_cond_short, momentum);
+
     //--- return the result
-    return(cond ? 100 : 0);
+    return(cond && cond2 ? 100 : 0);
 }
 //+------------------------------------------------------------------+

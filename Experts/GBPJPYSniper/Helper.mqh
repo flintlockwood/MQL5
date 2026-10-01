@@ -54,6 +54,24 @@ double GetPoint(string symbol) {
 }
 
 //+------------------------------------------------------------------+
+//| This function to check condition in array given index to check   |
+//| for example idx_to_check = 0|1|2 this function will check        |
+//| element in index 0, 1, and 2 to be 1 and the function will return|
+//| true. Otherwise it will return false.                            |
+//+------------------------------------------------------------------+
+bool CheckSeriesCondition(string idx_to_check, double &series[]) {
+    string indexes[];
+    StringSplit(idx_to_check, '|', indexes);
+    ArraySetAsSeries(series, true);
+    bool cond = true;
+    for (int i=0; i<ArraySize(indexes); i++) {
+        int idx = (int)StringToInteger(indexes[i]);
+        cond = cond && series[idx] == 1;
+    }
+    return cond;
+}
+
+//+------------------------------------------------------------------+
 //| Array Functions                                                  |
 //+------------------------------------------------------------------+
 void InitializeArray(double &array[], int size, double value = EMPTY_VALUE) {

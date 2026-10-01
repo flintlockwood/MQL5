@@ -39,6 +39,8 @@ class CiZema: public CIndicator {
         int             GetData(const int start_pos,const int count,const int buffer_num,double &buffer[]);
         double          ZemaLong(const int index);
         double          ZemaShort(const int index);
+        double          ZemaMomentumLong(const int index);
+        double          ZemaMomentumShort(const int index);
         virtual void    Refresh(const int flags=OBJ_ALL_PERIODS);
 };
 
@@ -119,6 +121,30 @@ double CiZema::ZemaShort(const int index) {
     return(buffer.At(index));
 }
 
+//+------------------------------------------------------------------+
+//| Access to Zema Momentum Long buffer                              |
+//+------------------------------------------------------------------+
+double CiZema::ZemaMomentumLong(const int index) {
+    CIndicatorBuffer *buffer=At(2);
+    //--- check
+    if(buffer==NULL)
+        return(EMPTY_VALUE);
+    //---
+    return(buffer.At(index));
+}
+
+//+------------------------------------------------------------------+
+//| Access to Zema Momentum Short buffer                             |
+//+------------------------------------------------------------------+
+double CiZema::ZemaMomentumShort(const int index) {
+    CIndicatorBuffer *buffer=At(3);
+    //--- check
+    if(buffer==NULL)
+        return(EMPTY_VALUE);
+    //---
+    return(buffer.At(index));
+}
+
 double CiZema::GetData(const int buffer_num,const int index) {
     CIndicatorBuffer *buffer=At(buffer_num);
     //--- check
@@ -166,10 +192,15 @@ void CiZema::Refresh(const int flags=OBJ_ALL_PERIODS) {
     ExponentialMAOnBuffer(ArraySize(ema1_long), 0, 0, m_zema_period_long, ema1_long, ema2_long);
 
     double zema_long[];
+    double zema_momentum_long[];
     InitializeArray(zema_long, ArraySize(close), EMPTY_VALUE);
+    InitializeArray(zema_momentum_long, ArraySize(close), EMPTY_VALUE);
     for (int i=0; i<ArraySize(close); i++) {
         double diff = ema1_long[i] - ema2_long[i];
         zema_long[i] = ema1_long[i] + diff;
+        if (zema_long[i-1] != EMPTY_VALUE) {
+            zema_momentum_long[i] = zema_long[i] > zema_long[i-1] ? 1 : 0;
+        }
     }
 
     double ema1_short[];
@@ -179,10 +210,15 @@ void CiZema::Refresh(const int flags=OBJ_ALL_PERIODS) {
     ExponentialMAOnBuffer(ArraySize(ema1_short), 0, 0, m_zema_period_short, ema1_short, ema2_short);
 
     double zema_short[];
+    double zema_momentum_short[];
     InitializeArray(zema_short, ArraySize(close), EMPTY_VALUE);
+    InitializeArray(zema_momentum_short, ArraySize(close), EMPTY_VALUE);
     for (int i=0; i<ArraySize(close); i++) {
         double diff = ema1_short[i] - ema2_short[i];
         zema_short[i] = ema1_short[i] + diff;
+        if (zema_long[i-1] != EMPTY_VALUE) {
+            zema_momentum_short[i] = zema_short[i] < zema_short[i-1] ? 1 : 0;
+        }
     }
 
     CIndicatorBuffer *zema_buffer_long = At(0);
@@ -190,4 +226,10 @@ void CiZema::Refresh(const int flags=OBJ_ALL_PERIODS) {
 
     CIndicatorBuffer *zema_buffer_short = At(1);
     zema_buffer_short.AssignArray(zema_short);
+
+    CIndicatorBuffer *zema_momentum_buffer_long = At(2);
+    zema_momentum_buffer_long.AssignArray(zema_momentum_long);
+
+    CIndicatorBuffer *zema_momentum_buffer_short = At(3);
+    zema_momentum_buffer_short.AssignArray(zema_momentum_short);
 }
