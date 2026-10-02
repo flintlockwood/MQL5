@@ -1,0 +1,123 @@
+Signal "Long" (2174)
+1. inDateRange (not used)
+2. no open position
+3. tpo (enable only one buy)
+4. calculated lot size > 0 --> money management
+5. long or long3
+   5.1 long
+       5.1.1 (choppy_lsmap==false or open< (lsma+(lsmapips*GetPipSize()))) --> open price < linear regression of close price + some pips --> done (Signal_Lr)
+       5.1.2 (choppy_tema==false or temab) --> triple ema --> done (Signal_Tema)
+       5.1.3 (choppy_buyprl==false or open>lcib) --> not used
+       5.1.4 (choppy_zl==false or trendz==1) --> not used 
+       5.1.5 (choppy_ao==false or aobuy) --> awesome oscilator --> not used
+       5.1.6 (choppy_lo2==false or startLongTrade) --> not used
+       5.1.7 (choppy_atrp==false or atrn==false) --> not used
+       5.1.8 (choppy_sslm==false or ssl_momentum_buy) --> not used
+       5.1.9 (choppy_ssl==false or sslb) --> not used
+       5.1.10 (choppy_emacloud3==false or upc3) --> not used
+       5.1.11 (choppy_emacloud2==false or upc2) --> not used
+       5.1.12 (choppy_emacloud1==false or upc) --> not used
+       5.1.13 (choppy_memo == false or memob) --> open > 2H ema --> done (Signal_EmaOpen)
+       5.1.14 (choppy_tm==false or tbuy) --> trend meter --> not used
+       5.1.15 (choppy_band==false or colorTrend==color.green) --> not used
+       5.1.16 (choppy_cso==false or(choppy_cso and close< open[csob]*(1+csop))) --> prevent large bull --> 
+       5.1.17 (choppy_cs==false or (choppy_cs and open<open[1]*(1+csp) ))
+       5.1.18 (choppy_color==false or close>open)
+       5.1.19 (choppy_lo==false or lcbuy) -> not used
+       5.1.20 (choppy_mema==false or memabuy) --> done
+       5.1.21 (choppy_avtr==false or avtrbuy)   
+       5.1.22 (choppy_zemam==false or z1_momentum_buy)
+       5.1.23 (choppy_zema==false or zemab) --> done  
+       5.1.24 (choppy_xatr==false or(choppy_xatr and xan==false)) -> not used
+       5.1.25 (choppy_cd==false or(choppy_cd and csd==false)) --> csd (1113 2193)
+       5.1.26 (choppy_pst==false or pstb) -> not used
+       5.1.27 (choppy_atr==false or atr18l) --> done
+       5.1.28 (choppy_atr0==false or atr18lo) --> done
+       5.1.29 (choppy_sk2==false or skbuy2) --> done
+       5.1.30 (choppy_st==false or stbuy12) --> done
+   5.2 long3
+6. barstate is confirmed
+7. enable long input
+long = choppy_buy2 = 
+    
+
+Signal Long Reversal
+
+
+long3=
+    (choppy_long3cp==false or (math.abs(open-close)<(choppy_long3cpi*GetPipSize())))
+and (choppy_st3==false or stbuy)
+and (choppy_zemam3==false or z1_momentum_buy) --> not used
+and (choppy_sslm3==false or ssl_momentum_buy)
+and (choppy_ao==false or aobuy) --> not used
+and (choppy_color3==false or close>open) --> not used
+and (choppy_atrp==false or atrn==false) --> not used
+and choppy_long3 
+and strategy.position_size==0 
+and tdir==1 
+and close >BBMC 
+and close>kernelEstimate 
+and close > ema_1502 
+and upc2 
+
+Signal Short
+choppy_sell =
+    (choppy_lsmaph==false or close> (lsma-(lsmapipsh*GetPipSize())))
+and (choppy_tema==false or temaso)
+and (choppy_tema==false or temas)
+and (choppy_zemas1==false or zemaso)
+and (choppy_csos==false or(choppy_csos and close> open[csobs]*(1-csops)))
+and (choppy_css==false or (choppy_css and open>open[1]*(1-csps) ))
+and (choppy_sellprl==false or open<lcis)
+and (choppy_zl==false or trendz==-1)
+and (choppy_ao==false or aosell)
+and (choppy_lo2==false or startShortTrade)
+and (choppy_sslm==false or ssl_momentum_sell)
+and (choppy_ssl==false or ssls)
+and (choppy_emacloud3==false or downc3) 
+and (choppy_emacloud2==false or downc2) 
+and (choppy_emacloud1==false or downc)
+and (choppy_toos==false or toos==false)
+and (choppy_selwb==false or sellwb==false)
+and (choppy_memo==false or memos)
+and (choppy_tm==false or tsell)
+and (choppy_band==false or colorTrend==color.red)
+and (choppy_color==false or close<open)
+and (choppy_lo==false or lcsell) 
+and (choppy_mema==false or memasell)
+and (choppy_avtr==false or avtrsell)
+and (choppy_zemam==false or z1_momentum_sell)
+and (choppy_zema==false or zemas) 
+and (choppy_xatr==false or(choppy_xatr and xans==false)) 
+and (choppy_cd==false or(choppy_cd and csds==false))
+and (choppy_pst==false or psts)
+and (choppy_atr==false or atr18ls) 
+and (choppy_atr0==false or atr18lso)
+and (choppy_sk2==false or sksell2)
+and (choppy_st==false or stsell12 )   
+
+Signal Short Reversal
+
+Signal Long2
+long2 
+    (choppy_sslm2==false or ssl_momentum_buy)  
+and barstate.isconfirmed 
+and (choppy_cs2==false or (choppy_cs2 and open<open[1]*(1+csp2) ))
+and (choppy_zemam2==false or z1_momentum_buy)
+and (choppy_color2==false or close>open)
+and (choppy_ao==false or aobuy )
+and (choppy_atrp==false or atrn==false)
+and choppy_longre 
+and le==1 
+and ottbuy 
+and upc 
+and abuy 
+and strategy.position_size==0 
+and (choppy_st2==false or stbuy) 
+and (choppy_csd2==false or csd==false )
+
+Signal Short2
+
+Signal Short3
+
+money management
