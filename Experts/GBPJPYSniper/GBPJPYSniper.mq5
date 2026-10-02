@@ -61,7 +61,7 @@ input string             Signal_StochRsi_KDOperator    =">";
 //--- inputs for atr indicator
 input double             Signal_ATR_Weight             =0.4;
 input string             Signal_ATR_Symbol             ="GBPJPY";
-input int                Signal_ATR_Timeframe          =PERIOD_M4;
+input int                Signal_ATR_Timeframe          =PERIOD_M45;
 input int                Signal_ATR_Period             =3;
 input ENUM_MA_METHOD     Signal_ATR_MaMethod           =MODE_SMMA;
 input bool               Signal_ATR_EnableATRDirection =true;
@@ -70,7 +70,7 @@ input bool               Signal_ATR_EnableATRIncrease  =true;
 //--- inputs for zema indicator
 input double             Signal_Zema_Weight             =0.4;
 input string             Signal_Zema_Symbol             ="GBPJPY";
-input int                Signal_Zema_Timeframe          =PERIOD_M45;
+input int                Signal_Zema_Timeframe          =PERIOD_CURRENT;
 input int                Signal_Zema_Period_Long        =73;
 input int                Signal_Zema_Period_Short       =52;
 
