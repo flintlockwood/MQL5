@@ -1,178 +1,272 @@
-Signal "Long" (2174)
-1. inDateRange (not used)
-2. no open position
-3. tpo (enable only one buy)
-4. calculated lot size > 0 --> money management
-5. long or long3 --> line: 2124
-   5.1 long = choppy_buy = choppy_buy2 or (choppy_stbuy and stbuyt) --> not used
-       5.1.1 (choppy_lsmap==false or open< (lsma+(lsmapips*GetPipSize()))) --> open price < linear regression of close price + some pips --> done (Signal_Lr)
-       5.1.2 (choppy_tema==false or temab) --> triple ema --> done (Signal_Tema)
-       5.1.3 (choppy_buyprl==false or open>lcib) --> not used
-       5.1.4 (choppy_zl==false or trendz==1) --> not used 
-       5.1.5 (choppy_ao==false or aobuy) --> awesome oscilator --> not used
-       5.1.6 (choppy_lo2==false or startLongTrade) --> not used
-       5.1.7 (choppy_atrp==false or atrn==false) --> not used
-       5.1.8 (choppy_sslm==false or ssl_momentum_buy) --> not used
-       5.1.9 (choppy_ssl==false or sslb) --> not used
-       5.1.10 (choppy_emacloud3==false or upc3) --> not used
-       5.1.11 (choppy_emacloud2==false or upc2) --> not used
-       5.1.12 (choppy_emacloud1==false or upc) --> not used
-       5.1.13 (choppy_memo == false or memob) --> open > 2H ema --> done (Signal_EmaOpen)
-       5.1.14 (choppy_tm==false or tbuy) --> trend meter --> not used
-       5.1.15 (choppy_band==false or colorTrend==color.green) --> not used
-       5.1.16 (choppy_cso==false or(choppy_cso and close< open[csob]*(1+csop))) --> prevent large bull --> in progress
-       5.1.17 (choppy_cs==false or (choppy_cs and open<open[1]*(1+csp) )) --> prevent large candle --> in progress
-       5.1.18 (choppy_color==false or close>open) --> green candle --> in progress
-       5.1.19 (choppy_lo==false or lcbuy) --> not used
-       5.1.20 (choppy_mema==false or memabuy) --> close > 20M RMA  --> done (Signal_MemaClose)
-       5.1.21 (choppy_avtr==false or avtrbuy) --> ATR --> in progress
-       5.1.22 (choppy_zemam==false or z1_momentum_buy) --> zero lag ema > previous zero lag ema --> in progress
-       5.1.23 (choppy_zema==false or zemab) --> done (Signal_Zema)
-       5.1.24 (choppy_xatr==false or(choppy_xatr and xan==false)) --> not used
-       5.1.25 (choppy_cd==false or(choppy_cd and csd==false)) --> csd (1113 2193)
-       5.1.26 (choppy_pst==false or pstb) --> not used
-       5.1.27 (choppy_atr==false or atr18l) --> done (Signal_ATR)
-       5.1.28 (choppy_atr0==false or atr18lo) --> done (Signal_ATR)
-       5.1.29 (choppy_sk2==false or skbuy2) --> done (Signal_StochRsi)
-       5.1.30 (choppy_st==false or stbuy12) --> done (Signal_ST)
-   5.2 long3
-       5.2.1 (choppy_long3cp==false or (math.abs(open-close)<(choppy_long3cpi*GetPipSize())))
-       5.2.2 (choppy_st3==false or stbuy)
-       5.2.3 (choppy_zemam3==false or z1_momentum_buy) --> not used
-       5.2.4 (choppy_sslm3==false or ssl_momentum_buy)
-       5.2.5 (choppy_ao==false or aobuy) --> not used
-       5.2.6 (choppy_color3==false or close>open) --> not used
-       5.2.7 (choppy_atrp==false or atrn==false) --> not used
-       5.2.8 choppy_long3 
-       5.2.9 strategy.position_size==0 
-       5.2.10 tdir==1 
-       5.2.11 close >BBMC 
-       5.2.12 close>kernelEstimate 
-       5.2.13 close > ema_1502 
-       5.2.14 upc2 
-6. barstate is confirmed
-7. enable long (input)
+Entry Signal
+1. "Long" (2174)
+    1.1. inDateRange (not used)
+    1.2. no open position
+    1.3. tpo (enable only one buy)
+    1.4. calculated lot size > 0 --> money management
+    1.5. long or long3 --> line: 2124
+        1.5.1 long = choppy_buy = choppy_buy2 or (choppy_stbuy and stbuyt) --> not used
+            1.5.1.1 (choppy_lsmap==false or open< (lsma+(lsmapips*GetPipSize()))) --> open price < linear regression of close price + some pips --> done (Signal_Lr)
+            1.5.1.2 (choppy_tema==false or temab) --> triple ema --> done (Signal_Tema)
+            1.5.1.3 (choppy_buyprl==false or open>lcib) --> not used
+            1.5.1.4 (choppy_zl==false or trendz==1) --> not used 
+            1.5.1.5 (choppy_ao==false or aobuy) --> awesome oscilator --> not used
+            1.5.1.6 (choppy_lo2==false or startLongTrade) --> not used
+            1.5.1.7 (choppy_atrp==false or atrn==false) --> not used
+            1.5.1.8 (choppy_sslm==false or ssl_momentum_buy) --> not used
+            1.5.1.9 (choppy_ssl==false or sslb) --> not used
+            1.5.1.10 (choppy_emacloud3==false or upc3) --> not used
+            1.5.1.11 (choppy_emacloud2==false or upc2) --> not used
+            1.5.1.12 (choppy_emacloud1==false or upc) --> not used
+            1.5.1.13 (choppy_memo == false or memob) --> open > 2H ema --> done (Signal_EmaOpen)
+            1.5.1.14 (choppy_tm==false or tbuy) --> trend meter --> not used
+            1.5.1.15 (choppy_band==false or colorTrend==color.green) --> not used
+            1.5.1.16 (choppy_cso==false or(choppy_cso and close< open[csob]*(1+csop))) --> prevent large bull --> in progress
+            1.5.1.17 (choppy_cs==false or (choppy_cs and open<open[1]*(1+csp) )) --> prevent large candle --> in progress
+            1.5.1.18 (choppy_color==false or close>open) --> green candle --> in progress
+            1.5.1.19 (choppy_lo==false or lcbuy) --> not used
+            1.5.1.20 (choppy_mema==false or memabuy) --> close > 20M RMA  --> done (Signal_MemaClose)
+            1.5.1.21 (choppy_avtr==false or avtrbuy) --> ATR --> in progress
+            1.5.1.22 (choppy_zemam==false or z1_momentum_buy) --> zero lag ema > previous zero lag ema --> in progress
+            1.5.1.23 (choppy_zema==false or zemab) --> done (Signal_Zema)
+            1.5.1.24 (choppy_xatr==false or(choppy_xatr and xan==false)) --> not used
+            1.5.1.25 (choppy_cd==false or(choppy_cd and csd==false)) --> csd (1113 2193)
+            1.5.1.26 (choppy_pst==false or pstb) --> not used
+            1.5.1.27 (choppy_atr==false or atr18l) --> done (Signal_ATR)
+            1.5.1.28 (choppy_atr0==false or atr18lo) --> done (Signal_ATR)
+            1.5.1.29 (choppy_sk2==false or skbuy2) --> done (Signal_StochRsi)
+            1.5.1.30 (choppy_st==false or stbuy12) --> done (Signal_ST)
+        1.5.2 long3
+            1.5.2.1 (choppy_long3cp==false or (math.abs(open-close)<(choppy_long3cpi*GetPipSize())))
+            1.5.2.2 (choppy_st3==false or stbuy)
+            1.5.2.3 (choppy_zemam3==false or z1_momentum_buy) --> not used
+            1.5.2.4 (choppy_sslm3==false or ssl_momentum_buy)
+            1.5.2.5 (choppy_ao==false or aobuy) --> not used
+            1.5.2.6 (choppy_color3==false or close>open) --> not used
+            1.5.2.7 (choppy_atrp==false or atrn==false) --> not used
+            1.5.2.8 choppy_long3 
+            1.5.2.9 strategy.position_size==0 
+            1.5.2.10 tdir==1 
+            1.5.2.11 close >BBMC 
+            1.5.2.12 close>kernelEstimate 
+            1.5.2.13 close > ema_1502 
+            1.5.2.14 upc2 
+    1.6. barstate is confirmed
+    1.7. enable long (input)
+2. "Long" (Short Reversal)
+    2.1. sell position exists
+    2.2. "Long" signal
+3. "Short"
+    3.1. inDateRange (not used)
+    3.2. no open position
+    3.3. tpos (enable only one sell)
+    3.4. calculated lot size > 0 --> money management
+    3.5. barstate.isconfirmed  
+    3.6. (strategy.position_size==0 or e34) --> no open position or enable long reversal
+    3.7. sn --> enable short
+    3.8. (ale==0 or alt==false or altn==1 or ta.barssince(strategy.position_size<0)>altc) --> not used (aways true) because alt is false
+    3.9. short = choppy_sell
+        3.9.1 (choppy_lsmaph==false or close> (lsma-(lsmapipsh*GetPipSize())))
+        3.9.2 (choppy_tema==false or temaso)
+        3.9.3 (choppy_tema==false or temas)
+        3.9.4 (choppy_zemas1==false or zemaso)
+        3.9.5 (choppy_csos==false or(choppy_csos and close> open[csobs]*(1-csops)))
+        3.9.6 (choppy_css==false or (choppy_css and open>open[1]*(1-csps) ))
+        3.9.7 (choppy_sellprl==false or open<lcis)
+        3.9.8 (choppy_zl==false or trendz==-1)
+        3.9.9 (choppy_ao==false or aosell)
+        3.9.10 (choppy_lo2==false or startShortTrade)
+        3.9.11 (choppy_sslm==false or ssl_momentum_sell)
+        3.9.12 (choppy_ssl==false or ssls)
+        3.9.13 (choppy_emacloud3==false or downc3) 
+        3.9.14 (choppy_emacloud2==false or downc2) 
+        3.9.15 (choppy_emacloud1==false or downc)
+        3.9.16 (choppy_toos==false or toos==false)
+        3.9.17 (choppy_selwb==false or sellwb==false)
+        3.9.18 (choppy_memo==false or memos)
+        3.9.19 (choppy_tm==false or tsell)
+        3.9.20 (choppy_band==false or colorTrend==color.red)
+        3.9.21 (choppy_color==false or close<open)
+        3.9.22 (choppy_lo==false or lcsell) 
+        3.9.23 (choppy_mema==false or memasell)
+        3.9.24 (choppy_avtr==false or avtrsell)
+        3.9.25 (choppy_zemam==false or z1_momentum_sell)
+        3.9.26 (choppy_zema==false or zemas) 
+        3.9.27 (choppy_xatr==false or(choppy_xatr and xans==false)) 
+        3.9.28 (choppy_cd==false or(choppy_cd and csds==false))
+        3.9.29 (choppy_pst==false or psts)
+        3.9.29 (choppy_atr==false or atr18ls) 
+        3.9.30 (choppy_atr0==false or atr18lso)
+        3.9.31 (choppy_sk2==false or sksell2)
+        3.9.31 (choppy_st==false or stsell12 )   
+4. "Short" (Long Reversal)
+    4.1. sell position exists
+    4.2. "Long" signal
+5. "Long2"
+    5.1. inDateRange
+    5.2. calculated lot size > 0
+    5.3. (choppy_sslm2==false or ssl_momentum_buy)  
+    5.4. barstate.isconfirmed 
+    5.5. (choppy_cs2==false or (choppy_cs2 and open<open[1]*(1+csp2) ))
+    5.6. (choppy_zemam2==false or z1_momentum_buy)
+    5.7. (choppy_color2==false or close>open)
+    5.8. (choppy_ao==false or aobuy )
+    5.9. (choppy_atrp==false or atrn==false)
+    5.10. choppy_longre 
+    5.11. le==1 
+    5.12. ottbuy 
+    5.13. upc 
+    5.14. abuy 
+    5.15. strategy.position_size==0 
+    5.16. (choppy_st2==false or stbuy) 
+    5.17. (choppy_csd2==false or csd==false )
+6. "Short2"
+    6.1. inDateRange
+    6.2. calculated lot size > 0
+    6.3. (choppy_temaso2==false or temaso)  
+    6.4. (choppy_zemas2==false or zemaso)
+    6.5. (choppy_css2==false or csps2e) 
+    6.6. choppy_short2 
+    6.7. barstate.isconfirmed 
+    6.8. (choppy_st2s==false or stsell)
+    6.9. (choppy_ao==false or aosell) 
+    6.10. (choppy_short2csd==false or csds==false) 
+    6.11. se==1 
+    6.12. downc2 
+    6.13. close< ema_1502 
+    6.14. strategy.position_size==0 
+    6.15. lcsell 
+    6.16. close<kernelEstimate 
+    6.17. ta.crossunder(close,BBMC)
+7. "Short" (line 2642)
+    7.1. inDateRange
+    7.2. calculated lot size > 0
+    7.3. (choppy_pips4==false or(math.abs(open-close)<(pips4*GetPipSize())))
+    7.4. (choppy_csd4==false or csde3==false)
+    7.5. (choppy_lsma4==false or lsma_momentum_sell)
+    7.6. choppy_short4 
+    7.7. (choppy_rsell4==false or sksell4)
+    7.8. barstate.isconfirmed    
+    7.9. strategy.position_size==0 
+    7.10. short3e==1 
+    7.11. (ta.crossunder(close,lsma) or (open>lsma and close<lsma) )
+    7.12. (choppy_zemas4 ==false or zemaso)
+8. "Short3"
+    8.1. inDateRange
+    8.2. calculated lot size > 0
+    8.3. (choppy_zemas3==false or zemaso) 
+    8.4. choppy_short3 
+    8.5. barstate.isconfirmed 
+    8.6. psts 
+    8.7. (choppy_ao==false or aosell) 
+    8.8. ( csds==false)   
+    8.9. strategy.position_size==0 
+    8.10. plotColor==c_red 
+    8.11. trendz == -1 
 
+Exit Signal
+1. "Long" -> "Stage 2 Exit" Signal "Stage 2 Exit" (line 2101) --> exit stage 2 when long signal is happen again --> always false
+    1.1. position long exists
+    1.2. long
+    1.3. ft==1 --> stage 1 => ft=0, stage 2 ft=1
+    1.4. e53 --> enable exit stage 1 or 2, default is false
+    1.5. barstate.isconfirmed
+2. "Long2" -> "Stage 2 Exit"
+    2.1. Condition same as "Long" -> "Stage 2 Exit"
+3. "Long4" -> "Stage 2 Exit" --> ignore Signal entry Long4 doesn't exists 
+    3.1. condition same as "Long" -> "Stage 2 Exit"
+4. "Long" -> "Stage 1 Exit" (line 2106) --> exit stage 1 when long signal is happen again --> always false
+    4.1. position long exists
+    4.2. long
+    4.3. ft==0 --> stage 1 => ft=0, stage 2 ft=1, if signal long is true then change ft to 1 (stage 2)
+    4.4. e53 --> enable exit stage 1 or 2, default is false
+    4.5. barstate.isconfirmed
+5. "Long2" -> "Stage 1 Exit"
+    5.1 condition same as "Long" -> "Stage 1 Exit"
+6. "Long4" -> "Stage 1 Exit"
+    6.1 condition same as "Long" -> "Stage 1 Exit"
+7. "Long" -> "Long Exit" (line 2131) -->
+    7.1. ln3==1 
+        7.1.1 (long or long3) 
+        7.1.2 barstate.isconfirmed 
+        7.1.3 (strategy.position_size==0 or e35) --> e35 short buy exit, default true 
+        7.1.4 ln --> enable long
+        7.1.5 (ale==0 or alt==false or altn==0 or ta.barssince(strategy.position_size>0)>altc)
+    7.2. e89 
+    7.3. long 
+    7.4. barstate.isconfirmed
+8. "Short" -> "Buy Filter Exit"
+9. "Long" -> "Short Filter Exit"
+10. "Long" -> "SL PIP"
+11. "Short" -> "SL PIP"
+12. "Long" -> "Filter Bearish"
+13. "Long" -> "Buy TSL"
+14. "Long" -> "Buy TSL Partial"
+15. "Long" -> "Buy TSL Partial 2"
+16. "Long" -> "SL Partial 2"
+17. "Long" -> "ST exit"
+18. "Short" -> "ST exit"
+19. "Long" -> "Zlag exit"
+20. "Short" -> "Zlag exit"
+21. "Long" -> "ST exit" (line 2331)
+22. "Short" -> "ST exit" (line 2333)
+23. "Long" -> "CSD EMA exit"
+24. "Long2" -> "CSD EMA exit"
+25. "Short" -> "CSD EMA exit"
+26. "Short" -> "CSD EMA exit"
+27. "Short" -> "Sell EMA exit"
+28. "Long" -> "Long3 LC exit"
+29. "Long" -> "Long3 SSL exit"
+30. "Short" -> "CSD Oppo Exit Psar"
+31. "Short" -> "CSD Oppo Exit Psar"
+32. "Long" -> "CSD Oppo Exit Psar"
+33. "Long" -> "CSD Oppo exit and EMA below"
+34. "Long2" -> "CSD Oppo exit and entry below"
+35. "Long" -> "CSD Oppo exit and EMA below Long3"
+36. "Short" -> "Wick exit"
+37. "Long" -> "Psar EMA Exit"
+38. "Long" -> "Psar Exit"
+39. "Short" -> "Psar Exit"
+40. "Short" -> "Filter < Exit"
+41. "Short" -> "Filter < Exit P"
+42. "Long" -> "Psar Exit PAR"
+43. "Short" -> "Psar Exit PAR"
+44. "Long" -> "LC Exit"
+45. "Short" -> "LC Exit"
+46. "Long" -> "ATR Band Exit"
+47. "Short" -> "ATR Band Exit"
+48. "Long" -> "LSMA SSL Exit"
+49. "Long -> "LSMA CSD SSL Exit"
+50. "Long -> "Wick Exit"
+51. "Short" -> "Wick Exit"
+52. "Long2" -> "EMA Cloud Exit"
+53. "Short2" -> "EMA Cloud Exit"
+54. "Long" -> "Wick Exit"
+55. "Short" -> "Wich Exit"
+56. "Long2" -> "Buy TSL"
+57. "Long2" -> "Buy TSL Partial"
+58. "Long2" -> "TP X"
+59. "Long2" -> "CSD Oppo Exit"
+60. "Short2" -> "LC/SSL exit"
+61. "Short3" -> "Zlag exit"
 
-Signal Short Reversal
-1. sell position exists
-2. "Long" signal
-
-
-Signal "Short"
-1. inDateRange (not used)
-2. no open position
-3. tpos (enable only one sell)
-4. calculated lot size > 0 --> money management
-5. barstate.isconfirmed  
-6. (strategy.position_size==0 or e34) --> no open position or enable long reversal
-7. sn --> enable short
-8. (ale==0 or alt==false or altn==1 or ta.barssince(strategy.position_size<0)>altc) --> not used (aways true) because alt is false
-9. short = choppy_sell
-    9.1 (choppy_lsmaph==false or close> (lsma-(lsmapipsh*GetPipSize())))
-    9.2 (choppy_tema==false or temaso)
-    9.3 (choppy_tema==false or temas)
-    9.4 (choppy_zemas1==false or zemaso)
-    9.5 (choppy_csos==false or(choppy_csos and close> open[csobs]*(1-csops)))
-    9.6 (choppy_css==false or (choppy_css and open>open[1]*(1-csps) ))
-    9.7 (choppy_sellprl==false or open<lcis)
-    9.8 (choppy_zl==false or trendz==-1)
-    9.9 (choppy_ao==false or aosell)
-    9.10 (choppy_lo2==false or startShortTrade)
-    9.11 (choppy_sslm==false or ssl_momentum_sell)
-    9.12 (choppy_ssl==false or ssls)
-    9.13 (choppy_emacloud3==false or downc3) 
-    9.14 (choppy_emacloud2==false or downc2) 
-    9.15 (choppy_emacloud1==false or downc)
-    9.16 (choppy_toos==false or toos==false)
-    9.17 (choppy_selwb==false or sellwb==false)
-    9.18 (choppy_memo==false or memos)
-    9.19 (choppy_tm==false or tsell)
-    9.20 (choppy_band==false or colorTrend==color.red)
-    9.21 (choppy_color==false or close<open)
-    9.22 (choppy_lo==false or lcsell) 
-    9.23 (choppy_mema==false or memasell)
-    9.24 (choppy_avtr==false or avtrsell)
-    9.25 (choppy_zemam==false or z1_momentum_sell)
-    9.26 (choppy_zema==false or zemas) 
-    9.27 (choppy_xatr==false or(choppy_xatr and xans==false)) 
-    9.28 (choppy_cd==false or(choppy_cd and csds==false))
-    9.29 (choppy_pst==false or psts)
-    9.29 (choppy_atr==false or atr18ls) 
-    9.30 (choppy_atr0==false or atr18lso)
-    9.31 (choppy_sk2==false or sksell2)
-    9.31 (choppy_st==false or stsell12 )   
-
-Signal Long Reversal
-1. sell position exists
-2. "Long" signal
-
-Signal "Long2"
-1. inDateRange
-2. calculated lot size > 0
-3. (choppy_sslm2==false or ssl_momentum_buy)  
-4. barstate.isconfirmed 
-5. (choppy_cs2==false or (choppy_cs2 and open<open[1]*(1+csp2) ))
-6. (choppy_zemam2==false or z1_momentum_buy)
-7. (choppy_color2==false or close>open)
-8. (choppy_ao==false or aobuy )
-9. (choppy_atrp==false or atrn==false)
-10. choppy_longre 
-11. le==1 
-12. ottbuy 
-13. upc 
-14. abuy 
-15. strategy.position_size==0 
-16. (choppy_st2==false or stbuy) 
-17. (choppy_csd2==false or csd==false )
-
-Signal "Short2"
-1. inDateRange
-2. calculated lot size > 0
-3. (choppy_temaso2==false or temaso)  
-4. (choppy_zemas2==false or zemaso)
-5. (choppy_css2==false or csps2e) 
-6. choppy_short2 
-7. barstate.isconfirmed 
-8. (choppy_st2s==false or stsell)
-9. (choppy_ao==false or aosell) 
-10. (choppy_short2csd==false or csds==false) 
-11. se==1 
-12. downc2 
-13. close< ema_1502 
-14. strategy.position_size==0 
-15. lcsell 
-16. close<kernelEstimate 
-17. ta.crossunder(close,BBMC)
-
-
-Signal "Short" again
-1. inDateRange
-2. calculated lot size > 0
-3. (choppy_pips4==false or(math.abs(open-close)<(pips4*GetPipSize())))
-4. (choppy_csd4==false or csde3==false)
-5. (choppy_lsma4==false or lsma_momentum_sell)
-6. choppy_short4 
-7. (choppy_rsell4==false or sksell4)
-8. barstate.isconfirmed    
-9. strategy.position_size==0 
-10. short3e==1 
-11. (ta.crossunder(close,lsma) or (open>lsma and close<lsma) )
-12. (choppy_zemas4 ==false or zemaso)
-
-
-Signal "Short3"
-1. inDateRange
-2. calculated lot size > 0
-3. (choppy_zemas3==false or zemaso) 
-4. choppy_short3 
-5. barstate.isconfirmed 
-6. psts 
-7. (choppy_ao==false or aosell) 
-8. ( csds==false)   
-9. strategy.position_size==0 
-10. plotColor==c_red 
-11. trendz == -1 
-
+Trailing Signal
+1. "Long" -> "Long Close Partial or sl"
+2. "Long" -> "Long Close sl"
 
 money management
+
+how to produce signal for entry and exit?
+there is 8 entry signal and 61 exit signal
+each entry signal encapsulated in expert signal class
+master signal object will contains all 8 entry signal object
+if one of the signal is weighted more than 0 then entry position
+
+create SignalMain
+initialize SignalMain with all of Signal needed
+Implement LongCondition to calculate all sub signal long condition weight
+Implement ShortCondition to calculate all sub signal short condition weight
+Implement CheckCloseLong check long position exists and check close long condition
+Implement CheckCloseShort check short position exists and check close short conditon 
+Implement CheckReverseLong for reverse long signal 
+Implement CheckReverseShort for reverse short signal
