@@ -34,8 +34,6 @@ class SignalTema: public CExpertSignal {
         
         //--- method of verification of settings
         virtual bool      ValidationSettings(void);
-        //--- method of creating the indicator and timeseries
-        virtual bool      InitIndicators(CIndicators *indicators);
         //--- methods of checking if the market models are formed
         virtual int       LongCondition(void);
         virtual int       ShortCondition(void);
@@ -66,32 +64,6 @@ bool SignalTema::ValidationSettings(void) {
     //--- initial data checks
     if(m_tema_period<=0) {
         printf(__FUNCTION__+": period MA must be greater than 0");
-        return(false);
-    }
-    //--- ok
-    return(true);
-}
-
-//+------------------------------------------------------------------+
-//| Create indicators.                                               |
-//+------------------------------------------------------------------+
-bool SignalTema::InitIndicators(CIndicators *indicators) {
-    //--- check pointer
-    if(indicators==NULL)
-        return(false);
-    //--- initialization of indicators and timeseries of additional filters
-    if(!CExpertSignal::InitIndicators(indicators))
-        return(false);
-    
-    //--- create and initialize MA indicator
-    if(!m_tema_indicator.Create(m_sig_symbol, (ENUM_TIMEFRAMES)m_sig_timeframe,
-                        m_tema_period, m_tema_source)) {
-        printf(__FUNCTION__+": error initializing object");
-        return(false);
-    }
-    //--- add object to collection
-    if(!indicators.Add(GetPointer(m_tema_indicator))) {
-        printf(__FUNCTION__+": error adding object");
         return(false);
     }
     //--- ok

@@ -27,9 +27,9 @@
 //| Inputs                                                           |
 //+------------------------------------------------------------------+
 //--- inputs for expert
-input string             Expert_Title                  ="sniper";    // Document name
-ulong                    Expert_MagicNumber            =-939731512;  //
-bool                     Expert_EveryTick              =false;       //
+input string             Expert_Title                  ="GBPJPY Sniper";    
+ulong                    Expert_MagicNumber            =-939731512;  
+bool                     Expert_EveryTick              =false;       // Use last confirmed bar only
 //--- inputs for main signal
 input int                Signal_ThresholdOpen          =100;         // Signal threshold value to open [0...100]
 input int                Signal_ThresholdClose         =100;         // Signal threshold value to close [0...100]
