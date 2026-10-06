@@ -26,11 +26,11 @@ Entry Signal
             1.5.1.18 (choppy_color==false or close>open) --> green candle --> done
             1.5.1.19 (choppy_lo==false or lcbuy) --> not used
             1.5.1.20 (choppy_mema==false or memabuy) --> close > 20M RMA  --> done (Signal_MemaClose)
-            
-            1.5.1.21 (choppy_avtr==false or avtrbuy) --> ATR --> in progress
+            1.5.1.21 (choppy_avtr==false or avtrbuy) --> ATR --> done
             1.5.1.22 (choppy_zemam==false or z1_momentum_buy) --> zero lag ema > previous zero lag ema --> in progress
             1.5.1.23 (choppy_zema==false or zemab) --> done (Signal_Zema)
             1.5.1.24 (choppy_xatr==false or(choppy_xatr and xan==false)) --> not used
+            
             1.5.1.25 (choppy_cd==false or(choppy_cd and csd==false)) --> csd (1113 2193)
             1.5.1.26 (choppy_pst==false or pstb) --> not used
             1.5.1.27 (choppy_atr==false or atr18l) --> done (Signal_ATR)

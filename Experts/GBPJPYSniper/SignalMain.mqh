@@ -18,6 +18,7 @@
 #include "SignalLinearRegression.mqh"
 #include "SignalTema.mqh"
 #include "SignalCandlestickLimit.mqh"
+#include "SignalATRTrailing.mqh"
 
 class SignalMain: public CExpertSignal {
     protected:
@@ -74,6 +75,19 @@ class SignalMain: public CExpertSignal {
         ENUM_MA_METHOD     m_mema_method;
         ENUM_APPLIED_PRICE m_mema_target;
 
+        //--- parameters for ATR Trailing
+        SignalATRTrailing *m_sig_atrt;
+        int                m_atrt_period_long;
+        double             m_atrt_multiplier_long;
+        int                m_atrt_period_short;
+        double             m_atrt_multiplier_short;
+
+        //--- parameters for ZEMA
+        int                m_zema_timeframe;
+        int                m_zema_period_long;
+        int                m_zema_period_short;
+        bool               m_zema_enable_momentum;
+
         //--- parameters for ST (Super Trend)
         SignalSuperTrend  *m_sig_st;
         ENUM_TIMEFRAMES    m_st_timeframe;
@@ -97,11 +111,6 @@ class SignalMain: public CExpertSignal {
         ENUM_MA_METHOD     m_atr_method;
         bool               m_atr_enable_atr_direction;
         bool               m_atr_enable_atr_increase;
-
-        //--- parameters for ZEMA indicator
-        int                m_zema_timeframe;
-        int                m_zema_period_long;
-        int                m_zema_period_short;
 
         //--- parameters for ma close indicator
         int                m_ma_timeframe;
@@ -153,11 +162,32 @@ class SignalMain: public CExpertSignal {
         void               CsoOpenTarget(ENUM_APPLIED_PRICE value) { m_csoo_target=value;         }
 
         //--- MEMA (RMA Close)
-        void               MemaTimeframe(int value)             { m_mema_timeframe=value; }
-        void               MemaSource(ENUM_APPLIED_PRICE value) { m_mema_source=value;  }
-        void               MemaPeriod(int value)                { m_mema_period=value;  }
-        void               MemaMethod(ENUM_MA_METHOD value)     { m_mema_method=value;  }
-        void               MemaTarget(ENUM_APPLIED_PRICE value) { m_mema_target=value;  }
+        void               MemaTimeframe(int value)             { m_mema_timeframe=value;         }
+        void               MemaSource(ENUM_APPLIED_PRICE value) { m_mema_source=value;            }
+        void               MemaPeriod(int value)                { m_mema_period=value;            }
+        void               MemaMethod(ENUM_MA_METHOD value)     { m_mema_method=value;            }
+        void               MemaTarget(ENUM_APPLIED_PRICE value) { m_mema_target=value;            }
+
+        //--- ATR Trailing
+        void               ATRTPeriodLong(int value)            { m_atrt_period_long=value;       }
+        void               ATRTMultiplierLong(double value)     { m_atrt_multiplier_long=value;   }
+        void               ATRTPeriodShort(int value)           { m_atrt_period_short=value;      }
+        void               ATRTMultiplierShort(double value)    { m_atrt_multiplier_short=value;  }
+
+        //--- ZEMA
+        void               ZemaTimeframe(int value)             { m_zema_timeframe=value;         }
+        void               ZemaPeriodLong(int value)            { m_zema_period_long=value;       }
+        void               ZemaPeriodShort(int value)           { m_zema_period_short=value;      }
+        void               ZemaEnableMomentum(bool value)       { m_zema_enable_momentum=value;   }
+
+        // Consolidation
+
+        //--- ATR
+        void               AtrTimeframe(int value)              { m_atr_timeframe=value;          }
+        void               AtrPeriod(int value)                 { m_atr_period=value;             }
+        void               AtrMethod(ENUM_MA_METHOD value)      { m_atr_method=value;             }
+        void               AtrEnableAtrDirection(bool value)    { m_atr_enable_atr_direction=value; }
+        void               AtrEnableAtrIncrease(bool value)     { m_atr_enable_atr_increase=value; }
 
         //--- ST (Super Trend)
         void               StTimeframe(ENUM_TIMEFRAMES value)   { m_st_timeframe=value;           }
@@ -175,24 +205,12 @@ class SignalMain: public CExpertSignal {
         void               StochRsiSource(ENUM_APPLIED_PRICE value) { m_stochrsi_source=value;    }
         void               StochRsiOperator(string value)       { m_stochrsi_operator=value;      }
 
-        //--- ATR
-        void               AtrTimeframe(int value)              { m_atr_timeframe=value;     }
-        void               AtrPeriod(int value)                 { m_atr_period=value;        }
-        void               AtrMethod(ENUM_MA_METHOD value)      { m_atr_method=value;      }
-        void               AtrEnableAtrDirection(bool value)    { m_atr_enable_atr_direction=value; }
-        void               AtrEnableAtrIncrease(bool value)     { m_atr_enable_atr_increase=value; }
-
-        //--- ZEMA
-        void               ZemaTimeframe(int value)             { m_zema_timeframe=value;    }
-        void               ZemaPeriodLong(int value)            { m_zema_period_long=value;  }
-        void               ZemaPeriodShort(int value)           { m_zema_period_short=value; }
-
         //--- MA Close
-        void               MaTimeframe(int value)               { m_ma_timeframe=value;      }
-        void               MaSource(ENUM_APPLIED_PRICE value)   { m_ma_source=value;         }
-        void               MaPeriod(int value)                  { m_ma_period=value;         }
-        void               MaMethod(ENUM_MA_METHOD value)       { m_ma_method=value;         }
-        void               MaTarget(ENUM_APPLIED_PRICE value)   { m_ma_target=value;         }
+        void               MaTimeframe(int value)               { m_ma_timeframe=value;           }
+        void               MaSource(ENUM_APPLIED_PRICE value)   { m_ma_source=value;              }
+        void               MaPeriod(int value)                  { m_ma_period=value;              }
+        void               MaMethod(ENUM_MA_METHOD value)       { m_ma_method=value;              }
+        void               MaTarget(ENUM_APPLIED_PRICE value)   { m_ma_target=value;              }
 
         //--- method of verification of settings
         virtual bool       ValidationSettings(void);
@@ -233,18 +251,6 @@ SignalMain::SignalMain(void) {
     m_stochrsi_d             =2;
     m_stochrsi_source  =PRICE_HIGH;
     m_stochrsi_operator    =">";
-
-    //--- parameters for atr indicator
-    m_atr_timeframe          =PERIOD_M45;
-    m_atr_period             =3;
-    m_atr_method           =MODE_SMMA;
-    m_atr_enable_atr_direction =true;
-    m_atr_enable_atr_increase  =true;
-
-    //--- parameters for zema indicator
-    m_zema_timeframe          =PERIOD_CURRENT;
-    m_zema_period_long        =73;
-    m_zema_period_short       =52;
 
     //--- parameters for ma close indicator
     m_ma_timeframe            =PERIOD_M20;
@@ -394,7 +400,7 @@ int SignalMain::LongCondition(void) {
         + m_sig_csoc.LongCondition()
         + m_sig_csoo.LongCondition()
         + (Close(idx) > Open(idx) ? 100 : 0)
-        + m_sig_mema. ) / 5;
+        + m_sig_mema.LongCondition() ) / 7;
 }
 
 //+------------------------------------------------------------------+
@@ -404,18 +410,18 @@ int SignalMain::ShortCondition(void) {
     return (0);
 }
 
-bool CheckCloseLong(double &price) {
+bool SignalMain::CheckCloseLong(double &price) {
     return false;
 }
 
-bool CheckCloseShort(double &price) {
+bool SignalMain::CheckCloseShort(double &price) {
     return false;
 }
 
-bool CheckReverseLong(double &price, double &sl, double &tp, datetime &expiration) {
+bool SignalMain::CheckReverseLong(double &price, double &sl, double &tp, datetime &expiration) {
     return false;
 }
 
-bool CheckReverseShort(double &price, double &sl, double &tp, datetime &expiration) {
+bool SignalMain::CheckReverseShort(double &price, double &sl, double &tp, datetime &expiration) {
     return false;
 }

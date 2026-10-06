@@ -55,18 +55,18 @@ input ENUM_MA_METHOD     Signal_Memo_Method            =MODE_EMA;
 input ENUM_APPLIED_PRICE Signal_Memo_Target            =PRICE_OPEN;
 
 //--- inputs for CSO Close 
-input int                Signal_Idx_Long               =4;
-input double             Signal_Pct_Long               =0.464;
-input int                Signal_Idx_Short              =2;
-input double             Signal_Pct_Short              =0.777;
-input ENUM_APPLIED_PRICE Signal_Target                 =PRICE_CLOSE;
+input int                Signal_Csoc_Idx_Long               =4;
+input double             Signal_Csoc_Pct_Long               =0.464;
+input int                Signal_Csoc_Idx_Short              =2;
+input double             Signal_Csoc_Pct_Short              =0.777;
+input ENUM_APPLIED_PRICE Signal_Csoc_Target                 =PRICE_CLOSE;
 
 //--- inputs for CSO Open
-input int                Signal_Idx_Long               =1;
-input double             Signal_Pct_Long               =0.255;
-input int                Signal_Idx_Short              =1;
-input double             Signal_Pct_Short              =0.325;
-input ENUM_APPLIED_PRICE Signal_Target                 =PRICE_OPEN;
+input int                Signal_Csoo_Idx_Long               =1;
+input double             Signal_Csoo_Pct_Long               =0.255;
+input int                Signal_Csoo_Idx_Short              =1;
+input double             Signal_Csoo_Pct_Short              =0.325;
+input ENUM_APPLIED_PRICE Signal_Csoo_Target                 =PRICE_OPEN;
 
 //--- inputs for MEMA (rma close indicator)
 input int                Signal_Mema_Timeframe         =PERIOD_M20;
@@ -76,6 +76,23 @@ input ENUM_MA_METHOD     Signal_Mema_Method            =MODE_SMMA;
 input ENUM_APPLIED_PRICE Signal_Mema_Target            =PRICE_CLOSE;
 
 //-- inputs for ATR Trailing
+input int                Signal_Atrt_Period_Long       =10;
+input double             Signal_Atrt_Multiplier_Long   =3.6;
+input int                Signal_Atrt_Period_Short      =6;
+input double             Signal_Atrt_Multiplier_Short  =2.2;
+
+//--- inputs for zema indicator
+input int                Signal_Zema_Timeframe         =PERIOD_CURRENT;
+input int                Signal_Zema_Period_Long       =73;
+input int                Signal_Zema_Period_Short      =52;
+input bool               Signal_Zema_Enable_Momentum   =true;
+
+//--- inputs for atr indicator
+input int                Signal_ATR_Timeframe          =PERIOD_M45;
+input int                Signal_ATR_Period             =3;
+input ENUM_MA_METHOD     Signal_ATR_MaMethod           =MODE_SMMA;
+input bool               Signal_ATR_EnableATRDirection =true;
+input bool               Signal_ATR_EnableATRIncrease  =true;
 
 //--- inputs for super trend indicator
 input double             Signal_ST_Weight              =0.3;
@@ -96,22 +113,6 @@ input int                Signal_StochRsi_K             =19;
 input int                Signal_StochRsi_D             =2;
 input ENUM_APPLIED_PRICE Signal_StochRsi_AppliedPrice  =PRICE_HIGH;
 input string             Signal_StochRsi_KDOperator    =">";
-
-//--- inputs for atr indicator
-input double             Signal_ATR_Weight             =0.4;
-input string             Signal_ATR_Symbol             ="GBPJPY";
-input int                Signal_ATR_Timeframe          =PERIOD_M45;
-input int                Signal_ATR_Period             =3;
-input ENUM_MA_METHOD     Signal_ATR_MaMethod           =MODE_SMMA;
-input bool               Signal_ATR_EnableATRDirection =true;
-input bool               Signal_ATR_EnableATRIncrease  =true;
-
-//--- inputs for zema indicator
-input double             Signal_Zema_Weight             =0.4;
-input string             Signal_Zema_Symbol             ="GBPJPY";
-input int                Signal_Zema_Timeframe          =PERIOD_CURRENT;
-input int                Signal_Zema_Period_Long        =73;
-input int                Signal_Zema_Period_Short       =52;
 
 //--- inputs for ma close indicator
 input double             Signal_Ma_Weight               =0.4;
@@ -185,18 +186,37 @@ int OnInit() {
     signal.MemoTarget(Signal_Memo_Target);
 
 // Set CSO Close parameters
-    signal.CsoCloseIdxLong(int value);
-    signal.CsoClosePctLong(double value);
-    signal.CsoCloseIdxShort(int value);
-    signal.CsoClosePctShort(double value);
-    signal.CsoCloseTarget(ENUM_APPLIED_PRICE value);
+    signal.CsoCloseIdxLong(Signal_Csoc_Idx_Long);
+    signal.CsoClosePctLong(Signal_Csoc_Pct_Long);
+    signal.CsoCloseIdxShort(Signal_Csoc_Idx_Short);
+    signal.CsoClosePctShort(Signal_Csoc_Pct_Short);
+    signal.CsoCloseTarget(Signal_Csoc_Target);
 
 // Set CSO Open parameters
-    signal.CsoOpenIdxLong(int value);
-    signal.CsoOpenPctLong(double value);
-    signal.CsoOpenIdxShort(int value);
-    signal.CsoOpenPctShort(double value);
-    signal.CsoOpenTarget(ENUM_APPLIED_PRICE value);
+    signal.CsoOpenIdxLong(Signal_Csoo_Idx_Long);
+    signal.CsoOpenPctLong(Signal_Csoo_Pct_Short);
+    signal.CsoOpenIdxShort(Signal_Csoo_Idx_Short);
+    signal.CsoOpenPctShort(Signal_Csoo_Pct_Short);
+    signal.CsoOpenTarget(Signal_Csoo_Target);
+
+// Set ATR Trailing parameters
+    signal.ATRTPeriodLong(Signal_Atrt_Period_Long);
+    signal.ATRTMultiplierLong(Signal_Atrt_Multiplier_Long);
+    signal.ATRTPeriodShort(Signal_Atrt_Period_Short);
+    signal.ATRTMultiplierShort(Signal_Atrt_Multiplier_Short);
+
+// Set ZEMA parameters
+    signal.ZemaTimeframe(Signal_Zema_Timeframe);
+    signal.ZemaPeriodLong(Signal_Zema_Period_Long);
+    signal.ZemaPeriodShort(Signal_Zema_Period_Short);
+    signal.ZemaEnableMomentum(Signal_Zema_Enable_Momentum);
+    
+// Set ATR parameter
+    signal.AtrTimeframe(Signal_ATR_Timeframe);
+    signal.AtrPeriod(Signal_ATR_Period);
+    signal.AtrMethod(Signal_ATR_MaMethod);
+    signal.AtrEnableAtrDirection(Signal_ATR_EnableATRDirection);
+    signal.AtrEnableAtrIncrease(Signal_ATR_EnableATRIncrease);
 
 //--- Creation of trailing object
     CTrailingFixedPips *trailing=new CTrailingFixedPips;
