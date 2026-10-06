@@ -11,14 +11,7 @@
 //+------------------------------------------------------------------+
 #include <Expert/Expert.mqh>
 #include "Helper.mqh"
-//--- available signals
-#include "SignalSuperTrend.mqh"
-#include "SignalStochRSI.mqh"
-#include "SignalATR.mqh"
-#include "SignalZema.mqh"
-#include "SignalMovingAverage.mqh"
-#include "SignalLinearRegression.mqh"
-#include "SignalTema.mqh"
+#include "SignalMain.mqh"
 //--- available trailing
 #include <Expert/Trailing/TrailingFixedPips.mqh>
 //--- available money management
@@ -142,7 +135,7 @@ int OnInit() {
     }
 
 //--- Creating signal
-    CExpertSignal *signal=new CExpertSignal;
+    SignalMain *signal=new SignalMain;
     if(signal==NULL) {
         //--- failed
         printf(__FUNCTION__+": error creating signal");
@@ -157,157 +150,6 @@ int OnInit() {
     signal.StopLevel(Signal_StopLevel);
     signal.TakeLevel(Signal_TakeLevel);
     signal.Expiration(Signal_Expiration);
-
-//--- Createing filter SuperTrend
-    SignalSuperTrend *filterST=new SignalSuperTrend;
-    if(filterST==NULL) {
-        //--- failed
-        printf(__FUNCTION__+": error creating super trend filter");
-        ExtExpert.Deinit();
-        return(INIT_FAILED);
-    }
-    signal.AddFilter(filterST);
-//--- Set filter parameters
-    filterST.SignalSymbol(Signal_ST_Symbol);
-    filterST.SignalTimeframe(Signal_ST_Timeframe);
-    filterST.PeriodMA(Signal_ST_Period);
-    filterST.Multiplier(Signal_ST_Multiplier);
-    filterST.MaMethod(Signal_ST_MaMethod);
-    filterST.Applied(Signal_ST_AppliedPrice);
-
-//--- Createing filter StochRSI
-    SignalStochRSI *filterStochRsi=new SignalStochRSI;
-    if(filterStochRsi==NULL) {
-        //--- failed
-        printf(__FUNCTION__+": error creating Stochastic RSI filter");
-        ExtExpert.Deinit();
-        return(INIT_FAILED);
-    }
-    signal.AddFilter(filterStochRsi);
-//--- Set filter parameters
-    filterStochRsi.IndicatorSymbol(Signal_StochRsi_Symbol);
-    filterStochRsi.IndicatorTimeframe(Signal_StochRsi_Timeframe);
-    filterStochRsi.RSIPeriod(Signal_StochRsi_RsiPeriod);
-    filterStochRsi.StochLength(Signal_StochRsi_StochLength);
-    filterStochRsi.StochK(Signal_StochRsi_K);
-    filterStochRsi.StochD(Signal_StochRsi_D);
-    filterStochRsi.KDOperator(Signal_StochRsi_KDOperator);
-
-//--- Createing filter ATR Signal
-    SignalATR *filterATR=new SignalATR;
-    if(filterATR==NULL) {
-        //--- failed
-        printf(__FUNCTION__+": error creating Stochastic ATR Signal filter");
-        ExtExpert.Deinit();
-        return(INIT_FAILED);
-    }
-    signal.AddFilter(filterATR);
-//--- Set filter parameters
-    filterATR.IndicatorSymbol(Signal_ATR_Symbol);
-    filterATR.IndicatorTimeframe(Signal_ATR_Timeframe);
-    filterATR.ATRPeriod(Signal_ATR_Period);
-    filterATR.SmootingMethod(Signal_ATR_MaMethod);
-    filterATR.EnableATRDirectionSignal(Signal_ATR_EnableATRDirection);
-    filterATR.EnableATRIncreaseBySignal(Signal_ATR_EnableATRIncrease);
-
-//--- Createing filter Zema Signal
-    SignalZema *filterZema=new SignalZema;
-    if(filterZema==NULL) {
-        //--- failed
-        printf(__FUNCTION__+": error creating Zema Signal filter");
-        ExtExpert.Deinit();
-        return(INIT_FAILED);
-    }
-    signal.AddFilter(filterZema);
-//--- Set filter parameters
-    filterZema.IndicatorSymbol(Signal_Zema_Symbol);
-    filterZema.IndicatorTimeframe(Signal_Zema_Timeframe);
-    filterZema.ZemaPeriodLong(Signal_Zema_Period_Long);
-    filterZema.ZemaPeriodShort(Signal_Zema_Period_Short);
-
-//--- Createing filter Ma Signal
-    SignalMovingAverage *filterMa=new SignalMovingAverage;
-    if(filterMa==NULL) {
-        //--- failed
-        printf(__FUNCTION__+": error creating MA Signal filter");
-        ExtExpert.Deinit();
-        return(INIT_FAILED);
-    }
-    signal.AddFilter(filterMa);
-//--- Set filter parameters
-    filterMa.IndicatorSymbol(Signal_Ma_Symbol);
-    filterMa.IndicatorTimeframe(Signal_Ma_Timeframe);
-    filterMa.MaPeriod(Signal_Ma_Period);
-    filterMa.MaSource(Signal_Ma_Source);
-    filterMa.MaMethod(Signal_Ma_Method);
-    filterMa.MaTarget(Signal_Ma_Target);
-
-//--- Createing filter Ema Open Signal
-    SignalMovingAverage *filterEmaOpen=new SignalMovingAverage;
-    if(filterEmaOpen==NULL) {
-        //--- failed
-        printf(__FUNCTION__+": error creating MA Signal filter");
-        ExtExpert.Deinit();
-        return(INIT_FAILED);
-    }
-    signal.AddFilter(filterEmaOpen);
-//--- Set filter parameters
-    filterEmaOpen.IndicatorSymbol(Signal_EmaOpen_Symbol);
-    filterEmaOpen.IndicatorTimeframe(Signal_EmaOpen_Timeframe);
-    filterEmaOpen.MaPeriod(Signal_EmaOpen_Period);
-    filterEmaOpen.MaSource(Signal_EmaOpen_Source);
-    filterEmaOpen.MaMethod(Signal_EmaOpen_Method);
-    filterEmaOpen.MaTarget(Signal_EmaOpen_Target);
-
-//--- Createing filter Mema Close Signal
-    SignalMovingAverage *filterMemaClose=new SignalMovingAverage;
-    if(filterMemaClose==NULL) {
-        //--- failed
-        printf(__FUNCTION__+": error creating MA Signal filter");
-        ExtExpert.Deinit();
-        return(INIT_FAILED);
-    }
-    signal.AddFilter(filterMemaClose);
-//--- Set filter parameters
-    filterMemaClose.IndicatorSymbol(Signal_MemaClose_Symbol);
-    filterMemaClose.IndicatorTimeframe(Signal_MemaClose_Timeframe);
-    filterMemaClose.MaPeriod(Signal_MemaClose_Period);
-    filterMemaClose.MaSource(Signal_MemaClose_Source);
-    filterMemaClose.MaMethod(Signal_MemaClose_Method);
-    filterMemaClose.MaTarget(Signal_MemaClose_Target);
-
-//--- Createing filter Linear Regresssion Signal
-    SignalLinearRegresssion *filterLr=new SignalLinearRegresssion;
-    if(filterLr==NULL) {
-        //--- failed
-        printf(__FUNCTION__+": error creating MA Signal filter");
-        ExtExpert.Deinit();
-        return(INIT_FAILED);
-    }
-    signal.AddFilter(filterLr);
-//--- Set filter parameters
-    filterLr.IndicatorSymbol(Signal_Lr_Symbol);
-    filterLr.IndicatorTimeframe(Signal_Lr_Timeframe);
-    filterLr.LrSource(Signal_Lr_Source);
-    filterLr.LrPeriod(Signal_Lr_Period);
-    filterLr.LrOffset(Signal_Lr_Offset);
-    filterLr.LrPipLong(Signal_Lr_Pip_Long);
-    filterLr.LrPipShort(Signal_Lr_Pip_Short);
-
-//--- Createing filter Tema Signal
-    SignalTema *filterTema=new SignalTema;
-    if(filterTema==NULL) {
-        //--- failed
-        printf(__FUNCTION__+": error creating MA Signal filter");
-        ExtExpert.Deinit();
-        return(INIT_FAILED);
-    }
-    signal.AddFilter(filterTema);
-//--- Set filter parameters
-    filterTema.IndicatorSymbol(Signal_Tema_Symbol);
-    filterTema.IndicatorTimeframe(Signal_Tema_Timeframe);
-    filterTema.TemaSource(Signal_Tema_Source);
-    filterTema.TemaPeriod(Signal_Tema_Period);
 
 //--- Creation of trailing object
     CTrailingFixedPips *trailing=new CTrailingFixedPips;

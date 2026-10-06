@@ -17,11 +17,11 @@ Entry Signal
             1.5.1.9 (choppy_ssl==false or sslb) --> not used
             1.5.1.10 (choppy_emacloud3==false or upc3) --> not used
             1.5.1.11 (choppy_emacloud2==false or upc2) --> not used
-            1.5.1.12 (choppy_emacloud1==false or upc) --> not used
-            
+            1.5.1.12 (choppy_emacloud1==false or upc) --> not used            
             1.5.1.13 (choppy_memo == false or memob) --> open > 2H ema --> done (Signal_EmaOpen)
             1.5.1.14 (choppy_tm==false or tbuy) --> trend meter --> not used
             1.5.1.15 (choppy_band==false or colorTrend==color.green) --> not used
+            
             1.5.1.16 (choppy_cso==false or(choppy_cso and close< open[csob]*(1+csop))) --> prevent large bull --> in progress
             1.5.1.17 (choppy_cs==false or (choppy_cs and open<open[1]*(1+csp) )) --> prevent large candle --> in progress
             1.5.1.18 (choppy_color==false or close>open) --> green candle --> in progress

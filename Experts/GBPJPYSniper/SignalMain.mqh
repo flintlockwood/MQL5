@@ -21,75 +21,75 @@
 class SignalMain: public CExpertSignal {
     protected:
         //--- adjusted parameters
-        string           *m_sig_symbol                   ="GBPJPY";
-        int               m_sig_timeframe                =PERIOD_CURRENT;
+        string            m_sig_symbol;
+        int               m_sig_timeframe;
         CPositionInfo     m_position;
         
         //--- parameters for lsma (linear squares moving averages / linear regression)
         SignalLinearRegresssion *m_sig_lsma;
-        int                m_lsma_timeframe              =PERIOD_CURRENT;
-        ENUM_APPLIED_PRICE m_lsma_source                 =PRICE_CLOSE;
-        int                m_lsma_period                 =18;
-        int                m_lsma_offset                 =5;
-        int                m_lsma_pip_long               =76;
-        int                m_lsma_pip_short              =113;
+        int                m_lsma_timeframe;
+        ENUM_APPLIED_PRICE m_lsma_source;
+        int                m_lsma_period;
+        int                m_lsma_offset;
+        int                m_lsma_pip_long;
+        int                m_lsma_pip_short;
 
         //--- parameters for tema (triple ema)
         SignalTema        *m_sig_tema;
-        int                m_tema_timeframe              =PERIOD_CURRENT;
-        ENUM_APPLIED_PRICE m_tema_source                 =PRICE_CLOSE;
-        int                m_tema_period                 =72;
+        int                m_tema_timeframe;
+        ENUM_APPLIED_PRICE m_tema_source;
+        int                m_tema_period;
 
         //--- parameters for ema open
         SignalMovingAverage *m_sig_ema_open;
-        int                m_ema_open_timeframe          =PERIOD_H2;
-        ENUM_APPLIED_PRICE m_ema_open_source             =PRICE_CLOSE;
-        int                m_ema_open_period             =10;
-        ENUM_MA_METHOD     m_ema_open_method             =MODE_EMA;
-        ENUM_APPLIED_PRICE m_ema_open_target             =PRICE_OPEN;
+        int                m_ema_open_timeframe;
+        ENUM_APPLIED_PRICE m_ema_open_source;
+        int                m_ema_open_period;
+        ENUM_MA_METHOD     m_ema_open_method;
+        ENUM_APPLIED_PRICE m_ema_open_target;
 
         //--- parameters for super trend indicator
         SignalSuperTrend  *m_sig_st;
-        ENUM_TIMEFRAMES    m_st_timeframe                =PERIOD_M30;
-        int                m_st_period                   =10;
-        double             m_st_multiplier               =3.1;
-        ENUM_MA_METHOD     m_st_method                   =MODE_SMMA;
-        ENUM_APPLIED_PRICE m_st_source                  =PRICE_OPEN;
+        ENUM_TIMEFRAMES    m_st_timeframe;
+        int                m_st_period;
+        double             m_st_multiplier;
+        ENUM_MA_METHOD     m_st_method;
+        ENUM_APPLIED_PRICE m_st_source;
 
         //--- parameters for Stochastic RSI indicator
-        ENUM_TIMEFRAMES    Signal_StochRsi_Timeframe     =PERIOD_M30;
-        int                Signal_StochRsi_RsiPeriod     =22;
-        int                Signal_StochRsi_StochLength   =2;
-        int                Signal_StochRsi_K             =19;
-        int                Signal_StochRsi_D             =2;
-        ENUM_APPLIED_PRICE Signal_StochRsi_AppliedPrice  =PRICE_HIGH;
-        string             Signal_StochRsi_KDOperator    =">";
+        ENUM_TIMEFRAMES    Signal_StochRsi_Timeframe;
+        int                Signal_StochRsi_RsiPeriod;
+        int                Signal_StochRsi_StochLength;
+        int                Signal_StochRsi_K;
+        int                Signal_StochRsi_D;
+        ENUM_APPLIED_PRICE Signal_StochRsi_AppliedPrice;
+        string             Signal_StochRsi_KDOperator;
 
         //--- parameters for atr indicator
-        int                Signal_ATR_Timeframe          =PERIOD_M45;
-        int                Signal_ATR_Period             =3;
-        ENUM_MA_METHOD     Signal_ATR_MaMethod           =MODE_SMMA;
-        bool               Signal_ATR_EnableATRDirection =true;
-        bool               Signal_ATR_EnableATRIncrease  =true;
+        int                Signal_ATR_Timeframe;
+        int                Signal_ATR_Period;
+        ENUM_MA_METHOD     Signal_ATR_MaMethod;
+        bool               Signal_ATR_EnableATRDirection;
+        bool               Signal_ATR_EnableATRIncrease;
 
         //--- parameters for zema indicator
-        int                Signal_Zema_Timeframe          =PERIOD_CURRENT;
-        int                Signal_Zema_Period_Long        =73;
-        int                Signal_Zema_Period_Short       =52;
+        int                Signal_Zema_Timeframe;
+        int                Signal_Zema_Period_Long;
+        int                Signal_Zema_Period_Short;
 
         //--- parameters for ma close indicator
-        int                Signal_Ma_Timeframe            =PERIOD_M20;
-        ENUM_APPLIED_PRICE Signal_Ma_Source               =PRICE_LOW;
-        int                Signal_Ma_Period               =60;
-        ENUM_MA_METHOD     Signal_Ma_Method               =MODE_SMMA;
-        ENUM_APPLIED_PRICE Signal_Ma_Target               =PRICE_CLOSE;
+        int                Signal_Ma_Timeframe;
+        ENUM_APPLIED_PRICE Signal_Ma_Source;
+        int                Signal_Ma_Period;
+        ENUM_MA_METHOD     Signal_Ma_Method;
+        ENUM_APPLIED_PRICE Signal_Ma_Target;
 
         //--- parameters for rma close indicator
-        int                Signal_MemaClose_Timeframe     =PERIOD_M20;
-        ENUM_APPLIED_PRICE Signal_MemaClose_Source        =PRICE_LOW;
-        int                Signal_MemaClose_Period        =60;
-        ENUM_MA_METHOD     Signal_MemaClose_Method        =MODE_SMMA;
-        ENUM_APPLIED_PRICE Signal_MemaClose_Target        =PRICE_CLOSE;
+        int                Signal_MemaClose_Timeframe;
+        ENUM_APPLIED_PRICE Signal_MemaClose_Source;
+        int                Signal_MemaClose_Period;
+        ENUM_MA_METHOD     Signal_MemaClose_Method;
+        ENUM_APPLIED_PRICE Signal_MemaClose_Target;
 
     public:
         SignalMain(void);
@@ -122,6 +122,75 @@ class SignalMain: public CExpertSignal {
 SignalMain::SignalMain(void) {
     //--- initialization of protected data
     m_used_series=USE_SERIES_OPEN+USE_SERIES_HIGH+USE_SERIES_LOW+USE_SERIES_CLOSE;
+
+    m_sig_symbol                  ="GBPJPY";
+    m_sig_timeframe               =PERIOD_CURRENT;
+    
+    //--- parameters for lsma (linear squares moving averages / linear regression)
+    m_sig_lsma                    = new SignalLinearRegresssion();
+    m_lsma_timeframe              =PERIOD_CURRENT;
+    m_lsma_source                 =PRICE_CLOSE;
+    m_lsma_period                 =18;
+    m_lsma_offset                 =5;
+    m_lsma_pip_long               =76;
+    m_lsma_pip_short              =113;
+
+    //--- parameters for tema (triple ema)
+    m_sig_tema                    = new SignalTema();
+    m_tema_timeframe              =PERIOD_CURRENT;
+    m_tema_source                 =PRICE_CLOSE;
+    m_tema_period                 =72;
+
+    //--- parameters for ema open
+    m_sig_ema_open                = new SignalMovingAverage();
+    m_ema_open_timeframe          =PERIOD_H2;
+    m_ema_open_source             =PRICE_CLOSE;
+    m_ema_open_period             =10;
+    m_ema_open_method             =MODE_EMA;
+    m_ema_open_target             =PRICE_OPEN;
+
+    //--- parameters for super trend indicator
+    m_sig_st                      = new SignalSuperTrend();
+    m_st_timeframe                =PERIOD_M30;
+    m_st_period                   =10;
+    m_st_multiplier               =3.1;
+    m_st_method                   =MODE_SMMA;
+    m_st_source                   =PRICE_OPEN;
+
+    //--- parameters for Stochastic RSI indicator
+    Signal_StochRsi_Timeframe     =PERIOD_M30;
+    Signal_StochRsi_RsiPeriod     =22;
+    Signal_StochRsi_StochLength   =2;
+    Signal_StochRsi_K             =19;
+    Signal_StochRsi_D             =2;
+    Signal_StochRsi_AppliedPrice  =PRICE_HIGH;
+    Signal_StochRsi_KDOperator    =">";
+
+    //--- parameters for atr indicator
+    Signal_ATR_Timeframe          =PERIOD_M45;
+    Signal_ATR_Period             =3;
+    Signal_ATR_MaMethod           =MODE_SMMA;
+    Signal_ATR_EnableATRDirection =true;
+    Signal_ATR_EnableATRIncrease  =true;
+
+    //--- parameters for zema indicator
+    Signal_Zema_Timeframe          =PERIOD_CURRENT;
+    Signal_Zema_Period_Long        =73;
+    Signal_Zema_Period_Short       =52;
+
+    //--- parameters for ma close indicator
+    Signal_Ma_Timeframe            =PERIOD_M20;
+    Signal_Ma_Source               =PRICE_LOW;
+    Signal_Ma_Period               =60;
+    Signal_Ma_Method               =MODE_SMMA;
+    Signal_Ma_Target               =PRICE_CLOSE;
+
+    //--- parameters for rma close indicator
+    Signal_MemaClose_Timeframe     =PERIOD_M20;
+    Signal_MemaClose_Source        =PRICE_LOW;
+    Signal_MemaClose_Period        =60;
+    Signal_MemaClose_Method        =MODE_SMMA;
+    Signal_MemaClose_Target        =PRICE_CLOSE;
 }
 
 //+------------------------------------------------------------------+
@@ -256,27 +325,30 @@ int SignalMain::LongCondition(void) {
     if (m_position.Volume() > 0)
         return (0);
     
+    return (m_sig_lsma.LongCondition()
+        + m_sig_tema.LongCondition()
+        + m_sig_ema_open.LongCondition()) / 3;
 }
 
 //+------------------------------------------------------------------+
 //| "Voting" that price will fall.                                   |
 //+------------------------------------------------------------------+
 int SignalMain::ShortCondition(void) {
-
+    return (0);
 }
 
 bool CheckCloseLong(double &price) {
-
+    return false;
 }
 
 bool CheckCloseShort(double &price) {
-
+    return false;
 }
 
 bool CheckReverseLong(double &price, double &sl, double &tp, datetime &expiration) {
-
+    return false;
 }
 
 bool CheckReverseShort(double &price, double &sl, double &tp, datetime &expiration) {
-
+    return false;
 }
