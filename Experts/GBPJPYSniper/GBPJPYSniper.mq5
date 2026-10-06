@@ -23,13 +23,59 @@
 input string             Expert_Title                  ="GBPJPY Sniper";    
 ulong                    Expert_MagicNumber            =-939731512;  
 bool                     Expert_EveryTick              =false;       // Use last confirmed bar only
+
 //--- inputs for main signal
+input string             Signal_Symbol                 ="GBPJPY";
+input int                Signal_Timeframe              =PERIOD_CURRENT;
 input int                Signal_ThresholdOpen          =100;         // Signal threshold value to open [0...100]
 input int                Signal_ThresholdClose         =100;         // Signal threshold value to close [0...100]
 input double             Signal_PriceLevel             =0.0;         // Price level to execute a deal
 input double             Signal_StopLevel              =50.0;        // Stop Loss level (in points)
 input double             Signal_TakeLevel              =50.0;        // Take Profit level (in points)
 input int                Signal_Expiration             =4;           // Expiration of pending orders (in bars)
+
+//--- inputs for LSMA
+input int                Signal_Lsma_Timeframe         =PERIOD_CURRENT;
+input ENUM_APPLIED_PRICE Signal_Lsma_Source            =PRICE_CLOSE;
+input int                Signal_Lsma_Period            =18;
+input int                Signal_Lsma_Offset            =5;
+input int                Signal_Lsma_Pip_Long          =76;
+input int                Signal_Lsma_Pip_Short         =113;
+
+//--- inputs for TEMA
+input int                Signal_Tema_Timeframe         =PERIOD_CURRENT;
+input ENUM_APPLIED_PRICE Signal_Tema_Source            =PRICE_CLOSE;
+input int                Signal_Tema_Period            =72;
+
+//--- inputs for MEMO (ema open indicator)
+input int                Signal_Memo_Timeframe         =PERIOD_H2;
+input ENUM_APPLIED_PRICE Signal_Memo_Source            =PRICE_CLOSE;
+input int                Signal_Memo_Period            =10;
+input ENUM_MA_METHOD     Signal_Memo_Method            =MODE_EMA;
+input ENUM_APPLIED_PRICE Signal_Memo_Target            =PRICE_OPEN;
+
+//--- inputs for CSO Close 
+input int                Signal_Idx_Long               =4;
+input double             Signal_Pct_Long               =0.464;
+input int                Signal_Idx_Short              =2;
+input double             Signal_Pct_Short              =0.777;
+input ENUM_APPLIED_PRICE Signal_Target                 =PRICE_CLOSE;
+
+//--- inputs for CSO Open
+input int                Signal_Idx_Long               =1;
+input double             Signal_Pct_Long               =0.255;
+input int                Signal_Idx_Short              =1;
+input double             Signal_Pct_Short              =0.325;
+input ENUM_APPLIED_PRICE Signal_Target                 =PRICE_OPEN;
+
+//--- inputs for MEMA (rma close indicator)
+input int                Signal_Mema_Timeframe         =PERIOD_M20;
+input ENUM_APPLIED_PRICE Signal_Mema_Source            =PRICE_LOW;
+input int                Signal_Mema_Period            =60;
+input ENUM_MA_METHOD     Signal_Mema_Method            =MODE_SMMA;
+input ENUM_APPLIED_PRICE Signal_Mema_Target            =PRICE_CLOSE;
+
+//-- inputs for ATR Trailing
 
 //--- inputs for super trend indicator
 input double             Signal_ST_Weight              =0.3;
@@ -76,41 +122,6 @@ input int                Signal_Ma_Period               =60;
 input ENUM_MA_METHOD     Signal_Ma_Method               =MODE_SMMA;
 input ENUM_APPLIED_PRICE Signal_Ma_Target               =PRICE_CLOSE;
 
-//--- inputs for ema open indicator
-input double             Signal_EmaOpen_Weight          =0.4;
-input string             Signal_EmaOpen_Symbol          ="GBPJPY";
-input int                Signal_EmaOpen_Timeframe       =PERIOD_H2;
-input ENUM_APPLIED_PRICE Signal_EmaOpen_Source          =PRICE_CLOSE;
-input int                Signal_EmaOpen_Period          =10;
-input ENUM_MA_METHOD     Signal_EmaOpen_Method          =MODE_EMA;
-input ENUM_APPLIED_PRICE Signal_EmaOpen_Target          =PRICE_OPEN;
-
-//--- inputs for rma close indicator
-input double             Signal_MemaClose_Weight        =0.4;
-input string             Signal_MemaClose_Symbol        ="GBPJPY";
-input int                Signal_MemaClose_Timeframe     =PERIOD_M20;
-input ENUM_APPLIED_PRICE Signal_MemaClose_Source        =PRICE_LOW;
-input int                Signal_MemaClose_Period        =60;
-input ENUM_MA_METHOD     Signal_MemaClose_Method        =MODE_SMMA;
-input ENUM_APPLIED_PRICE Signal_MemaClose_Target        =PRICE_CLOSE;
-
-//--- inputs for linear regresssion indicator
-input double             Signal_Lr_Weight               =0.4;
-input string             Signal_Lr_Symbol               ="GBPJPY";
-input int                Signal_Lr_Timeframe            =PERIOD_CURRENT;
-input ENUM_APPLIED_PRICE Signal_Lr_Source               =PRICE_LOW;
-input int                Signal_Lr_Period               =18;
-input int                Signal_Lr_Offset               =5;
-input int                Signal_Lr_Pip_Long             =76;
-input int                Signal_Lr_Pip_Short            =113;
-
-//--- inputs for tema indicator
-input double             Signal_Tema_Weight             =0.4;
-input string             Signal_Tema_Symbol             ="GBPJPY";
-input int                Signal_Tema_Timeframe          =PERIOD_CURRENT;
-input ENUM_APPLIED_PRICE Signal_Tema_Source             =PRICE_CLOSE;
-input int                Signal_Tema_Period             =72;
-
 //--- inputs for trailing
 input int                Trailing_FixedPips_StopLevel  =30;          // Stop Loss trailing level (in points)
 input int                Trailing_FixedPips_ProfitLevel=50;          // Take Profit trailing level (in points)
@@ -150,6 +161,42 @@ int OnInit() {
     signal.StopLevel(Signal_StopLevel);
     signal.TakeLevel(Signal_TakeLevel);
     signal.Expiration(Signal_Expiration);
+    signal.SignalSymbol(Signal_Symbol);
+    signal.SignalTimeframe(Signal_Timeframe);
+
+// Set LSMA parameters
+    signal.LsmaTimeframe(Signal_Lsma_Timeframe);
+    signal.LsmaSource(Signal_Lsma_Source);
+    signal.LsmaPeriod(Signal_Lsma_Period);
+    signal.LsmaOffset(Signal_Lsma_Offset);
+    signal.LsmaPipLong(Signal_Lsma_Pip_Long);
+    signal.LsmaPipShort(Signal_Lsma_Pip_Short);
+
+// Set TEMA parameters
+    signal.TemaTimeframe(Signal_Tema_Timeframe);
+    signal.TemaSource(Signal_Tema_Source);
+    signal.TemaPeriod(Signal_Tema_Period);
+
+// Set MEMO parameters
+    signal.MemoTimeframe(Signal_Memo_Timeframe);
+    signal.MemoSource(Signal_Memo_Source);
+    signal.MemoPeriod(Signal_Memo_Period);
+    signal.MemoMethod(Signal_Memo_Method);
+    signal.MemoTarget(Signal_Memo_Target);
+
+// Set CSO Close parameters
+    signal.CsoCloseIdxLong(int value);
+    signal.CsoClosePctLong(double value);
+    signal.CsoCloseIdxShort(int value);
+    signal.CsoClosePctShort(double value);
+    signal.CsoCloseTarget(ENUM_APPLIED_PRICE value);
+
+// Set CSO Open parameters
+    signal.CsoOpenIdxLong(int value);
+    signal.CsoOpenPctLong(double value);
+    signal.CsoOpenIdxShort(int value);
+    signal.CsoOpenPctShort(double value);
+    signal.CsoOpenTarget(ENUM_APPLIED_PRICE value);
 
 //--- Creation of trailing object
     CTrailingFixedPips *trailing=new CTrailingFixedPips;
