@@ -250,10 +250,9 @@ int CopyTR(string symbol_name, int timeframe, int start_pos, int count, double &
     }
 }
 
-int CopyRatesCustom(string symbol, int timeframe, int start_pos, MqlRates &rates[]){
+int CopyRatesCustom(string symbol, int timeframe, int start_pos, int count, MqlRates &rates[]){
     if (timeframe < 50000) {
-        int bars = Bars(symbol, (ENUM_TIMEFRAMES)timeframe);
-        return CopyRates(symbol, (ENUM_TIMEFRAMES)timeframe, start_pos, bars, rates);
+        return CopyRates(symbol, (ENUM_TIMEFRAMES)timeframe, start_pos, count, rates);
     }
     else {
         int bars = Bars(symbol, PERIOD_M1);
@@ -322,6 +321,8 @@ int CopyRatesCustom(string symbol, int timeframe, int start_pos, MqlRates &rates
             j++;
         }
         ArrayResize(rates, j);
+        MqlRates newRates[];
+        ArrayCopy(newRates, rates, 0, ArraySize(rates)-1, count);
         return ArraySize(rates);
     }
 }
