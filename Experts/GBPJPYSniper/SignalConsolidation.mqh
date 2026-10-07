@@ -16,12 +16,8 @@ class SignalConsolidation: public CExpertSignal {
         //--- adjusted parameters
         string            m_sig_symbol;
         int               m_sig_timeframe;
-        int               m_atr_period_long;
-        double            m_atr_multiplier_long;
-        int               m_atr_period_short;
-        double            m_atr_multiplier_short;
-        bool              m_long_condition;
-        bool              m_short_condition;
+        int               m_cons_lookback;
+        int               m_cons_length;
 
     public:
         SignalConsolidation(void);
@@ -30,10 +26,8 @@ class SignalConsolidation: public CExpertSignal {
         //--- methods of setting adjustable indicator parameters
         void              IndicatorSymbol(string value)        { m_sig_symbol=value;             }
         void              IndicatorTimeframe(int value)        { m_sig_timeframe=value;          }
-        void              ATRPeriodLong(int value)             { m_atr_period_long=value;        }
-        void              ATRMultiplierLong(double value)      { m_atr_multiplier_long=value;    }
-        void              ATRPeriodShort(int value)            { m_atr_period_short=value;       }
-        void              ATRMultiplierShort(double value)     { m_atr_multiplier_short=value;    }
+        void              ATRPeriodLong(int value)             { m_cons_lookback=value;          }
+        void              ATRMultiplierLong(double value)      { m_cons_length=value;            }
         
         //--- method of verification of settings
         virtual bool      ValidationSettings(void);
@@ -73,9 +67,45 @@ bool SignalConsolidation::ValidationSettings(void) {
 
 void SignalConsolidation::CalculateCondition() {
     MqlRates rates[];
+    double high[];
+    double low[];
+    double close[];
     int bars = BarsCustom(m_sig_symbol, m_sig_timeframe);
-    CopyRatesCustom(m_sig_symbol, m_sig_timeframe, 0, rates);
-    
+    CopyRatesCustom(m_sig_symbol, m_sig_timeframe, 0, m_cons_lookback, rates);
+    CopyHighFromMqlRates(rates, high);
+    CopyLowFromMqlRates(rates, low);
+    CopyCloseFromMqlRates(rates, close);
+    ArraySetAsSeries(high, true);
+    ArraySetAsSeries(low, true);
+    ArraySetAsSeries(close, true);
+
+    double hb_ = ArrayMaximum(high, 0, WHOLE_ARRAY) == 0 ? high[0] : EMPTY_VALUE;
+    double lb_ = ArrayMinimum(low, 0, WHOLE_ARRAY) == 0 ? low[0] : EMPTY_VALUE;
+    int dir[];
+    InitializeArray(dir, ArraySize(high), 0);
+    double zz = 0;
+    double pp = 0;
+
+    for (int i=0; i<ArraySize(high); i++) {
+        dir[i] = 
+    }
+
+    dir = hb_ != EMPTY_VALUE && lb_ == EMPTY_VALUE ? 1 : lb_ != EMPTY_VALUE && hb_ == EMPTY_VALUE ? -1 : 0;
+    if (hb_ != EMPTY_VALUE && lb_ != EMPTY_VALUE) {
+        if (dir == 1) {
+            zz = hb_;
+        }
+        else {
+            zz = lb_;
+        }
+    }
+    else {
+        zz = hb_ != EMPTY_VALUE ? hb_ : lb_ != EMPTY_VALUE ? lb_ : EMPTY_VALUE;
+    }
+
+    for (int x=0; x<=1000; x++) {
+        if ()
+    }
 
     //m_long_condition = pos == 1 && poss != -1;
     //m_short_condition = poss == -1 && pos != 1;

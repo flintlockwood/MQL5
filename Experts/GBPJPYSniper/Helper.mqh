@@ -84,6 +84,11 @@ void InitializeArray(bool &array[], int size, bool value = false) {
     ArrayInitialize(array, value);
 }
 
+void InitializeArray(int &array[], int size, int value = false) {
+    ArrayResize(array, size);
+    ArrayInitialize(array, value);
+}
+
 void ArrayAppend(MqlRates &rates[], MqlRates &value) {
     int n = ArraySize(rates);
     ArrayResize(rates, n+1);
@@ -511,5 +516,41 @@ void LinRegOnBuffer(const int period, const int offset, double &price[], double 
     for (int i=period-1; i<ArraySize(price); i++) {
         double linreg = LinReg(period, offset, price, i);
         buffer[i] = linreg;
+    }
+}
+
+void PivotHighOnBuffer(const int leftbar, const int rightbar, double &high[], double &buffer[]) {
+    InitializeArray(buffer, ArraySize(high), EMPTY_VALUE);
+    for (int i=0; i<ArraySize(high); i++) {
+        if (i < leftbar + rightbar) {
+            continue;
+        }
+        double temp_highest = 0;
+        for (int j=i-leftbar-rightbar; j<=i; j++) {
+            if (high[j] > temp_highest) {
+                temp_highest = high[j];
+            }
+        }
+        if (temp_highest == high[i-rightbar]) {
+            buffer[i] = high[i-rightbar];
+        }
+    }
+}
+
+void PivotLowOnBuffer(const int leftbar, const int rightbar, double &low[], double &buffer[]) {
+    InitializeArray(buffer, ArraySize(low), EMPTY_VALUE);
+    for (int i=0; i<ArraySize(low); i++) {
+        if (i < leftbar + rightbar) {
+            continue;
+        }
+        double temp_lowest = 999999999;
+        for (int j=i-leftbar-rightbar; j<=i; j++) {
+            if (low[j] > temp_lowest) {
+                temp_lowest = low[j];
+            }
+        }
+        if (temp_lowest == low[i-rightbar]) {
+            buffer[i] = low[i-rightbar];
+        }
     }
 }
