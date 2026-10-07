@@ -78,7 +78,7 @@ void SignalATRTrailing::CalculateCondition() {
     double atr_array_long[];
     double atr_array_short[];
     int bars = BarsCustom(m_sig_symbol, m_sig_timeframe);
-    CopyRatesCustom(m_sig_symbol, m_sig_timeframe, 0, rates);
+    CopyRatesCustom(m_sig_symbol, m_sig_timeframe, 0, bars, rates);
     CopyCloseFromMqlRates(rates, close);
     CopyTR(m_sig_symbol, m_sig_timeframe, 0, bars, tr_array);
     InitializeArray(atr_array_short, ArraySize(tr_array), EMPTY_VALUE);

@@ -68,7 +68,7 @@ class SignalMain: public CExpertSignal {
         ENUM_APPLIED_PRICE m_csoo_target;
 
         //--- parameters for MEMA (rma close)
-        SignalSuperTrend  *m_sig_mema;
+        SignalMovingAverage *m_sig_mema;
         int                m_mema_timeframe;
         ENUM_APPLIED_PRICE m_mema_source;
         int                m_mema_period;
@@ -83,6 +83,7 @@ class SignalMain: public CExpertSignal {
         double             m_atrt_multiplier_short;
 
         //--- parameters for ZEMA
+        SignalZema        *m_sig_zema;
         int                m_zema_timeframe;
         int                m_zema_period_long;
         int                m_zema_period_short;
@@ -97,6 +98,7 @@ class SignalMain: public CExpertSignal {
         ENUM_APPLIED_PRICE m_st_source;
 
         //--- parameters for Stochastic RSI indicator
+        SignalStochRSI    *m_sig_stochrsi;
         ENUM_TIMEFRAMES    m_stochrsi_timeframe;
         int                m_stochrsi_rsi_period;
         int                m_stochrsi_stoch_period;
@@ -106,6 +108,7 @@ class SignalMain: public CExpertSignal {
         string             m_stochrsi_operator;
 
         //--- parameters for ATR indicator
+        SignalATR         *m_sig_atr;
         int                m_atr_timeframe;
         int                m_atr_period;
         ENUM_MA_METHOD     m_atr_method;
@@ -113,6 +116,7 @@ class SignalMain: public CExpertSignal {
         bool               m_atr_enable_atr_increase;
 
         //--- parameters for ma close indicator
+        SignalMovingAverage *m_sig_ma;
         int                m_ma_timeframe;
         ENUM_APPLIED_PRICE m_ma_source;
         int                m_ma_period;
@@ -301,17 +305,17 @@ bool SignalMain::Initialize() {
     m_sig_tema.TemaPeriod(m_tema_period);
 
     //--- Createing filter EMA Open
-    SignalMovingAverage *filterEmaOpen=new SignalMovingAverage;
-    AddFilter(filterEmaOpen);
-    filterEmaOpen.IndicatorSymbol(m_sig_symbol);
-    filterEmaOpen.IndicatorTimeframe(m_memo_timeframe);
-    filterEmaOpen.MaPeriod(m_memo_period);
-    filterEmaOpen.MaSource(m_memo_source);
-    filterEmaOpen.MaMethod(m_memo_method);
-    filterEmaOpen.MaTarget(m_memo_target);
+    m_sig_memo=new SignalMovingAverage;
+    AddFilter(m_sig_memo);
+    m_sig_memo.IndicatorSymbol(m_sig_symbol);
+    m_sig_memo.IndicatorTimeframe(m_memo_timeframe);
+    m_sig_memo.MaPeriod(m_memo_period);
+    m_sig_memo.MaSource(m_memo_source);
+    m_sig_memo.MaMethod(m_memo_method);
+    m_sig_memo.MaTarget(m_memo_target);
 
     //--- Createing filter Mema Close Signal
-    SignalMovingAverage *m_sig_mema=new SignalMovingAverage;
+    m_sig_mema=new SignalMovingAverage;
     AddFilter(m_sig_mema);
     m_sig_mema.IndicatorSymbol(m_sig_symbol);
     m_sig_mema.IndicatorTimeframe(m_mema_timeframe);
@@ -330,43 +334,43 @@ bool SignalMain::Initialize() {
     m_sig_st.Applied(m_st_source);
 
 //--- Createing filter StochRSI
-    SignalStochRSI *filterStochRsi=new SignalStochRSI;
-    AddFilter(filterStochRsi);
-    filterStochRsi.IndicatorSymbol(m_sig_symbol);
-    filterStochRsi.IndicatorTimeframe(m_stochrsi_timeframe);
-    filterStochRsi.RSIPeriod(m_stochrsi_rsi_period);
-    filterStochRsi.StochLength(m_stochrsi_stoch_period);
-    filterStochRsi.StochK(m_stochrsi_k);
-    filterStochRsi.StochD(m_stochrsi_d);
-    filterStochRsi.KDOperator(m_stochrsi_operator);
+    m_sig_stochrsi=new SignalStochRSI;
+    AddFilter(m_sig_stochrsi);
+    m_sig_stochrsi.IndicatorSymbol(m_sig_symbol);
+    m_sig_stochrsi.IndicatorTimeframe(m_stochrsi_timeframe);
+    m_sig_stochrsi.RSIPeriod(m_stochrsi_rsi_period);
+    m_sig_stochrsi.StochLength(m_stochrsi_stoch_period);
+    m_sig_stochrsi.StochK(m_stochrsi_k);
+    m_sig_stochrsi.StochD(m_stochrsi_d);
+    m_sig_stochrsi.KDOperator(m_stochrsi_operator);
 
 //--- Createing filter ATR Signal
-    SignalATR *filterATR=new SignalATR;
-    AddFilter(filterATR);
-    filterATR.IndicatorSymbol(m_sig_symbol);
-    filterATR.IndicatorTimeframe(m_atr_timeframe);
-    filterATR.ATRPeriod(m_atr_period);
-    filterATR.SmootingMethod(m_atr_method);
-    filterATR.EnableATRDirectionSignal(m_atr_enable_atr_direction);
-    filterATR.EnableATRIncreaseBySignal(m_atr_enable_atr_increase);
+    m_sig_atr=new SignalATR;
+    AddFilter(m_sig_atr);
+    m_sig_atr.IndicatorSymbol(m_sig_symbol);
+    m_sig_atr.IndicatorTimeframe(m_atr_timeframe);
+    m_sig_atr.ATRPeriod(m_atr_period);
+    m_sig_atr.SmootingMethod(m_atr_method);
+    m_sig_atr.EnableATRDirectionSignal(m_atr_enable_atr_direction);
+    m_sig_atr.EnableATRIncreaseBySignal(m_atr_enable_atr_increase);
 
 //--- Createing filter Zema Signal
-    SignalZema *filterZema=new SignalZema;
-    AddFilter(filterZema);
-    filterZema.IndicatorSymbol(m_sig_symbol);
-    filterZema.IndicatorTimeframe(m_zema_timeframe);
-    filterZema.ZemaPeriodLong(m_zema_period_long);
-    filterZema.ZemaPeriodShort(m_zema_period_short);
+    m_sig_zema=new SignalZema;
+    AddFilter(m_sig_zema);
+    m_sig_zema.IndicatorSymbol(m_sig_symbol);
+    m_sig_zema.IndicatorTimeframe(m_zema_timeframe);
+    m_sig_zema.ZemaPeriodLong(m_zema_period_long);
+    m_sig_zema.ZemaPeriodShort(m_zema_period_short);
 
 //--- Createing filter Ma Signal
-    SignalMovingAverage *filterMa=new SignalMovingAverage;
-    AddFilter(filterMa);
-    filterMa.IndicatorSymbol(m_sig_symbol);
-    filterMa.IndicatorTimeframe(m_ma_timeframe);
-    filterMa.MaPeriod(m_ma_period);
-    filterMa.MaSource(m_ma_source);
-    filterMa.MaMethod(m_ma_method);
-    filterMa.MaTarget(m_ma_target);
+    m_sig_ma=new SignalMovingAverage;
+    AddFilter(m_sig_ma);
+    m_sig_ma.IndicatorSymbol(m_sig_symbol);
+    m_sig_ma.IndicatorTimeframe(m_ma_timeframe);
+    m_sig_ma.MaPeriod(m_ma_period);
+    m_sig_ma.MaSource(m_ma_source);
+    m_sig_ma.MaMethod(m_ma_method);
+    m_sig_ma.MaTarget(m_ma_target);
 
     //--- ok
     return(true);

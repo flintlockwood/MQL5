@@ -188,9 +188,10 @@ void CiSuperTrend::Refresh(const int flags=OBJ_ALL_PERIODS) {
     double applied_prices[];
     MqlRates rates[];
     double close[];
-    CopyAppliedPrice(m_ind_symbol, m_ind_timeframe, m_applied, 0, BarsCustom(m_ind_symbol, m_ind_timeframe), applied_prices);
+    int bars = BarsCustom(m_ind_symbol, m_ind_timeframe);
+    CopyAppliedPrice(m_ind_symbol, m_ind_timeframe, m_applied, 0, bars, applied_prices);
     CopyTR(m_ind_symbol, m_ind_timeframe, 0, BarsCustom(m_ind_symbol, m_ind_timeframe), tr);
-    CopyRatesCustom(m_ind_symbol, m_ind_timeframe, 0, rates);
+    CopyRatesCustom(m_ind_symbol, m_ind_timeframe, 0, bars, rates);
     CopyCloseFromMqlRates(rates, close);
 
     ArrayResize(atr, ArraySize(tr));

@@ -147,7 +147,7 @@ int CopyAppliedPrice(string symbol_name, int timeframe, ENUM_APPLIED_PRICE appli
     }
     else {
         MqlRates rates[];
-        CopyRatesCustom(symbol_name, timeframe, 0, rates);
+        CopyRatesCustom(symbol_name, timeframe, 0, count, rates);
         CopyOpenFromMqlRates(rates, open_array);
         CopyHighFromMqlRates(rates, high_array);
         CopyLowFromMqlRates(rates, low_array);
@@ -239,7 +239,7 @@ int CopyTR(string symbol_name, int timeframe, int start_pos, int count, double &
     }
     else {
         MqlRates rates[];
-        CopyRatesCustom(symbol_name, timeframe, 0, rates);
+        CopyRatesCustom(symbol_name, timeframe, 0, count, rates);
         
         InitializeArray(tr_array, ArraySize(rates), EMPTY_VALUE);
         for (int i=0; i<ArraySize(rates); i++) {
@@ -270,7 +270,7 @@ int CopyRatesCustom(string symbol, int timeframe, int start_pos, int count, MqlR
 
         MqlRates temp[];
         int j = 0;
-        ArrayResize(rates, ArraySize(rates_m1) / pm + 2);
+        ArrayResize(temp, ArraySize(rates_m1) / pm + 2);
         for (int i=0; i<bars; i++) {
             if (rates_m1[i].time % ps == 0 && openTime != 0) {
                 MqlRates newRate;
@@ -281,7 +281,7 @@ int CopyRatesCustom(string symbol, int timeframe, int start_pos, int count, MqlR
                 newRate.close = close;
                 newRate.real_volume = realVolume;
                 newRate.tick_volume = tickVolume;
-                rates[j] = newRate;
+                temp[j] = newRate;
                 // reset
                 openTime = 0;
                 open = 0.0;
@@ -317,13 +317,60 @@ int CopyRatesCustom(string symbol, int timeframe, int start_pos, int count, MqlR
             newRate.close = close;
             newRate.real_volume = realVolume;
             newRate.tick_volume = tickVolume;
-            rates[j] = newRate;
+            temp[j] = newRate;
             j++;
         }
-        ArrayResize(rates, j);
-        MqlRates newRates[];
-        ArrayCopy(newRates, rates, 0, ArraySize(rates)-1, count);
+        ArrayResize(temp, j);
+        ArrayCopy(rates, temp, 0, ArraySize(rates)-count, count);
         return ArraySize(rates);
+    }
+}
+
+int CopyOpenCustom(string symbol, int timeframe, int start_pos, int count, double &open_array[]) {
+    if (timeframe < 50000) {
+        return CopyOpen(symbol, (ENUM_TIMEFRAMES)timeframe, start_pos, count, open_array);
+    }
+    else {
+        MqlRates rates[];
+        CopyRatesCustom(symbol, timeframe, start_pos, count, rates);
+        CopyOpenFromMqlRates(rates, open_array);
+        return ArraySize(open_array);
+    }
+}
+
+int CopyHighCustom(string symbol, int timeframe, int start_pos, int count, double &high_array[]) {
+    if (timeframe < 50000) {
+        return CopyOpen(symbol, (ENUM_TIMEFRAMES)timeframe, start_pos, count, high_array);
+    }
+    else {
+        MqlRates rates[];
+        CopyRatesCustom(symbol, timeframe, start_pos, count, rates);
+        CopyOpenFromMqlRates(rates, high_array);
+        return ArraySize(high_array);
+    }
+}
+
+int CopyLowCustom(string symbol, int timeframe, int start_pos, int count, double &low_array[]) {
+    if (timeframe < 50000) {
+        return CopyOpen(symbol, (ENUM_TIMEFRAMES)timeframe, start_pos, count, low_array);
+    }
+    else {
+        MqlRates rates[];
+        CopyRatesCustom(symbol, timeframe, start_pos, count, rates);
+        CopyOpenFromMqlRates(rates, low_array);
+        return ArraySize(low_array);
+    }
+}
+
+int CopyCloseCustom(string symbol, int timeframe, int start_pos, int count, double &close_array[]) {
+    if (timeframe < 50000) {
+        return CopyOpen(symbol, (ENUM_TIMEFRAMES)timeframe, start_pos, count, close_array);
+    }
+    else {
+        MqlRates rates[];
+        CopyRatesCustom(symbol, timeframe, start_pos, count, rates);
+        CopyOpenFromMqlRates(rates, close_array);
+        return ArraySize(close_array);
     }
 }
 
