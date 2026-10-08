@@ -79,32 +79,66 @@ void SignalConsolidation::CalculateCondition() {
     ArraySetAsSeries(low, true);
     ArraySetAsSeries(close, true);
 
-    double hb_ = ArrayMaximum(high, 0, WHOLE_ARRAY) == 0 ? high[0] : EMPTY_VALUE;
-    double lb_ = ArrayMinimum(low, 0, WHOLE_ARRAY) == 0 ? low[0] : EMPTY_VALUE;
+    double hb_[]; 
+    PivotHighOnBuffer(m_cons_lookback-1, 0, high, hb_);
+    double lb_[];
+    PivotLowOnBuffer(m_cons_lookback-1, 0, low, lb_);
     int dir[];
+    double zz[];
+    double pp[];
     InitializeArray(dir, ArraySize(high), 0);
-    double zz = 0;
-    double pp = 0;
+    InitializeArray(zz, ArraySize(high), 0);
+    InitializeArray(pp, ArraySize(high), 0);
 
-    for (int i=0; i<ArraySize(high); i++) {
-        dir[i] = 
-    }
-
-    dir = hb_ != EMPTY_VALUE && lb_ == EMPTY_VALUE ? 1 : lb_ != EMPTY_VALUE && hb_ == EMPTY_VALUE ? -1 : 0;
-    if (hb_ != EMPTY_VALUE && lb_ != EMPTY_VALUE) {
-        if (dir == 1) {
-            zz = hb_;
+    for (int i=0; i<ArraySize(hb_); i++) {
+        dir[i] = (hb_[i] != EMPTY_VALUE && lb_[i] == EMPTY_VALUE) ? 1 : (hb_[i] == EMPTY_VALUE && lb_[i] != EMPTY_VALUE) ? -1 : 0;
+        if (hb_[i] != EMPTY_VALUE && lb_[i] != EMPTY_VALUE) {
+            if (dir[i] == 1) {
+                zz[i] = hb_[i];
+            }
+            else {
+                zz[i] = lb_[i];
+            }
         }
         else {
-            zz = lb_;
+            zz[i] = hb_[i] != EMPTY_VALUE ? hb_[i] : lb_[i] != EMPTY_VALUE ? lb_[i] : EMPTY_VALUE;
         }
     }
-    else {
-        zz = hb_ != EMPTY_VALUE ? hb_ : lb_ != EMPTY_VALUE ? lb_ : EMPTY_VALUE;
-    }
 
-    for (int x=0; x<=1000; x++) {
-        if ()
+    ArraySetAsSeries(dir, true);
+    ArraySetAsSeries(zz, true);
+    ArraySetAsSeries(pp, true);
+    int conscnt = 0;
+    double condhigh = 0;
+    double condlow = 0;
+    for (int i=0; i<ArraySize(high); i++) {
+        for (int x=0; x<=1000; x++) {
+            if (dir[0] != dir[x]) {
+                break;
+            }
+            if (zz[x] != EMPTY_VALUE) {
+                if (pp[i] == EMPTY_VALUE) {
+                    pp[i] = zz[x];
+                }
+                else {
+                    if (dir[x] == 1 && zz[x] > pp[i]) {
+                        pp[i] = zz[x];
+                    }
+                    if (dir[x] == -1 && zz[x] < pp[i]) {
+                        pp[i] = zz[x];
+                    }
+                }
+            }
+        }
+
+        if (i > ArraySize(high)-1) {
+            break;
+        }
+        if (pp[i] != pp[i+1]) {
+            if (conscnt > m_cons_length) {
+                if (pp[i] > condhigh)
+            }
+        }
     }
 
     //m_long_condition = pos == 1 && poss != -1;
