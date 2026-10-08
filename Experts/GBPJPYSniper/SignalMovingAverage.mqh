@@ -13,6 +13,9 @@
 
 class SignalMovingAverage: public CExpertSignal {
     protected:
+        //--- private data
+        double            m_data[];
+
         //--- adjusted parameters
         string            m_sig_symbol;
         int               m_sig_timeframe;

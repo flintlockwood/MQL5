@@ -12,7 +12,7 @@
 #include "Helper.mqh"
 #include "IndicatorLinearRegression.mqh"
 
-class SignalLinearRegresssion: public CExpertSignal {
+class SignalLinearRegression: public CExpertSignal {
     protected:
         CiLinearRegression m_lr_indicator;
 
@@ -26,8 +26,8 @@ class SignalLinearRegresssion: public CExpertSignal {
         double            m_lsma_pip_short;
 
     public:
-        SignalLinearRegresssion(void);
-        ~SignalLinearRegresssion(void);
+        SignalLinearRegression(void);
+        ~SignalLinearRegression(void);
 
         //--- methods of setting adjustable indicator parameters
         void              IndicatorSymbol(string value)        { m_sig_symbol=value;    }
@@ -43,12 +43,16 @@ class SignalLinearRegresssion: public CExpertSignal {
         //--- methods of checking if the market models are formed
         virtual int       LongCondition(void);
         virtual int       ShortCondition(void);
+        virtual bool      LongTrendCondition(int idx);
+        virtual bool      ShortTrendCondition(int idx);
+        virtual bool      LongMomentumCondition(int idx);
+        virtual bool      ShortMomentumCondition(int idx);
 };
 
 //+------------------------------------------------------------------+
 //| Constructor                                                      |
 //+------------------------------------------------------------------+
-SignalLinearRegresssion::SignalLinearRegresssion(void) : m_lsma_source(PRICE_CLOSE),
+SignalLinearRegression::SignalLinearRegression(void) : m_lsma_source(PRICE_CLOSE),
                              m_lsma_period(18),
                              m_lsma_offset(5) {
     //--- initialization of protected data
@@ -58,13 +62,13 @@ SignalLinearRegresssion::SignalLinearRegresssion(void) : m_lsma_source(PRICE_CLO
 //+------------------------------------------------------------------+
 //| Destructor                                                       |
 //+------------------------------------------------------------------+
-SignalLinearRegresssion::~SignalLinearRegresssion(void){
+SignalLinearRegression::~SignalLinearRegression(void){
 }
 
 //+------------------------------------------------------------------+
 //| Validation settings protected data.                              |
 //+------------------------------------------------------------------+
-bool SignalLinearRegresssion::ValidationSettings(void) {
+bool SignalLinearRegression::ValidationSettings(void) {
     //--- validation settings of additional filters
     if(!CExpertSignal::ValidationSettings())
         return(false);
@@ -80,7 +84,7 @@ bool SignalLinearRegresssion::ValidationSettings(void) {
 //+------------------------------------------------------------------+
 //| "Voting" that price will grow.                                   |
 //+------------------------------------------------------------------+
-int SignalLinearRegresssion::LongCondition(void) {
+int SignalLinearRegression::LongCondition(void) {
     int result=0;
     int idx   =StartIndex();
 
@@ -93,7 +97,7 @@ int SignalLinearRegresssion::LongCondition(void) {
 //+------------------------------------------------------------------+
 //| "Voting" that price will fall.                                   |
 //+------------------------------------------------------------------+
-int SignalLinearRegresssion::ShortCondition(void) {
+int SignalLinearRegression::ShortCondition(void) {
     int result=0;
     int idx   =StartIndex();
     
@@ -103,3 +107,23 @@ int SignalLinearRegresssion::ShortCondition(void) {
     return(cond ? 100 : 0);
 }
 //+------------------------------------------------------------------+
+
+bool SignalLinearRegression::LongTrendCondition(int idx) {
+    int startIdx   =StartIndex();
+    return Close(startIdx + idx) > m_lr_indicator.LinReg(startIdx + idx);
+}
+
+bool SignalLinearRegression::ShortTrendCondition(int idx) {
+    int startIdx   =StartIndex();
+    return Close(startIdx + idx) < m_lr_indicator.LinReg(startIdx + idx);
+}
+
+bool SignalLinearRegression::LongMomentumCondition(int idx) {
+    int startIdx   =StartIndex();
+    return m_lr_indicator.LinReg(startIdx + idx) > m_lr_indicator.LinReg(startIdx + idx + 1);
+}
+
+bool SignalLinearRegression::ShortMomentumCondition(int idx) {
+    int startIdx   =StartIndex();
+    return m_lr_indicator.LinReg(startIdx + idx) < m_lr_indicator.LinReg(startIdx + idx + 1);
+}

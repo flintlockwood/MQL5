@@ -30,7 +30,6 @@ Entry Signal
             1.5.1.22 (choppy_zemam==false or z1_momentum_buy) --> zero lag ema > previous zero lag ema --> in progress
             1.5.1.23 (choppy_zema==false or zemab) --> done (Signal_Zema)
             1.5.1.24 (choppy_xatr==false or(choppy_xatr and xan==false)) --> not used
-            
             1.5.1.25 (choppy_cd==false or(choppy_cd and csd==false)) --> csd (1113 2193)
             1.5.1.26 (choppy_pst==false or pstb) --> not used
             1.5.1.27 (choppy_atr==false or atr18l) --> done (Signal_ATR)
@@ -38,19 +37,21 @@ Entry Signal
             1.5.1.29 (choppy_sk2==false or skbuy2) --> done (Signal_StochRsi)
             1.5.1.30 (choppy_st==false or stbuy12) --> done (Signal_ST)
         1.5.2 long3
-            1.5.2.1 (choppy_long3cp==false or (math.abs(open-close)<(choppy_long3cpi*GetPipSize())))
-            1.5.2.2 (choppy_st3==false or stbuy)
+            1.5.2.1 (choppy_long3cp==false or (math.abs(open-close)<(choppy_long3cpi*GetPipSize()))) --> done
+            1.5.2.2 (choppy_st3==false or stbuy) --> done
             1.5.2.3 (choppy_zemam3==false or z1_momentum_buy) --> not used
-            1.5.2.4 (choppy_sslm3==false or ssl_momentum_buy)
+            1.5.2.4 (choppy_sslm3==false or ssl_momentum_buy) --> done 
             1.5.2.5 (choppy_ao==false or aobuy) --> not used
             1.5.2.6 (choppy_color3==false or close>open) --> not used
             1.5.2.7 (choppy_atrp==false or atrn==false) --> not used
-            1.5.2.8 choppy_long3 
-            1.5.2.9 strategy.position_size==0 
+            1.5.2.8 choppy_long3 --> input always true
+            1.5.2.9 strategy.position_size==0 --> done
+
             1.5.2.10 tdir==1 
-            1.5.2.11 close >BBMC 
-            1.5.2.12 close>kernelEstimate 
-            1.5.2.13 close > ema_1502 
+            1.5.2.11 close >BBMC --> done
+            1.5.2.12 close>kernelEstimate --> done
+            1.5.2.13 close > ema_1502 --> done
+            
             1.5.2.14 upc2 
     1.6. barstate is confirmed
     1.7. enable long (input)

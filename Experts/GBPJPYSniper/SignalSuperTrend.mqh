@@ -22,6 +22,7 @@ class SignalSuperTrend: public CExpertSignal {
         double            m_st_multiplier;
         ENUM_MA_METHOD    m_st_ma_method;
         ENUM_APPLIED_PRICE m_st_applied_price;
+        bool              m_enable_close;
 
     public:
         SignalSuperTrend(void);
@@ -34,6 +35,7 @@ class SignalSuperTrend: public CExpertSignal {
         void              Multiplier(double value)            { m_st_multiplier=value;      }
         void              MaMethod(ENUM_MA_METHOD value)      { m_st_ma_method=value;       }
         void              Applied(ENUM_APPLIED_PRICE value)   { m_st_applied_price=value;   }
+        void              EnableClose(bool value)             { m_enable_close=value;       }
         
         //--- method of verification of settings
         virtual bool      ValidationSettings(void);
@@ -112,7 +114,10 @@ bool SignalSuperTrend::InitIndicators(CIndicators *indicators) {
 int SignalSuperTrend::LongCondition(void) {
     int result=0;
     int idx   =StartIndex();
-    bool cond = m_st_indicator.Trend(idx) == 1 && Close(idx) > Close(idx-1);
+    bool cond = m_st_indicator.Trend(idx) == 1;
+    if (m_enable_close) {
+        cond = cond && Close(idx) > Close(idx+1);
+    }
 
     //--- return the result
     return(cond == 1 ? 100 : 0);
@@ -124,7 +129,11 @@ int SignalSuperTrend::LongCondition(void) {
 int SignalSuperTrend::ShortCondition(void) {
     int result=0;
     int idx   =StartIndex();
-    bool cond = m_st_indicator.Trend(idx) == -1 && Close(idx) > Close(idx-1);
+    bool cond = m_st_indicator.Trend(idx) == -1;
+    if (m_enable_close) {
+        cond = cond && Close(idx) > Close(idx+1);
+    }
+    
     //--- return the result
     return(cond == -1 ? 100 : 0);
 }

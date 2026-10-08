@@ -94,29 +94,23 @@ input ENUM_MA_METHOD     Signal_ATR_MaMethod           =MODE_SMMA;
 input bool               Signal_ATR_EnableATRDirection =true;
 input bool               Signal_ATR_EnableATRIncrease  =true;
 
-//--- inputs for super trend indicator
-input double             Signal_ST_Weight              =0.3;
-input string             Signal_ST_Symbol              ="GBPJPY";
-input ENUM_TIMEFRAMES    Signal_ST_Timeframe           =PERIOD_M30;
-input int                Signal_ST_Period              =10;
-input double             Signal_ST_Multiplier          =3.1;
-input ENUM_MA_METHOD     Signal_ST_MaMethod            =MODE_SMMA;
-input ENUM_APPLIED_PRICE Signal_ST_AppliedPrice        =PRICE_OPEN;
-
 //--- inputs for Stochastic RSI indicator
-input double             Signal_StochRsi_Weight        =0.4;
-input string             Signal_StochRsi_Symbol        ="GBPJPY";
 input ENUM_TIMEFRAMES    Signal_StochRsi_Timeframe     =PERIOD_M30;
 input int                Signal_StochRsi_RsiPeriod     =22;
 input int                Signal_StochRsi_StochLength   =2;
 input int                Signal_StochRsi_K             =19;
 input int                Signal_StochRsi_D             =2;
-input ENUM_APPLIED_PRICE Signal_StochRsi_AppliedPrice  =PRICE_HIGH;
-input string             Signal_StochRsi_KDOperator    =">";
+input ENUM_APPLIED_PRICE Signal_StochRsi_Source        =PRICE_HIGH;
+input string             Signal_StochRsi_Operator      =">";
+
+//--- inputs for super trend indicator
+input ENUM_TIMEFRAMES    Signal_ST_Timeframe           =PERIOD_M30;
+input int                Signal_ST_Period              =10;
+input double             Signal_ST_Multiplier          =3.1;
+input ENUM_MA_METHOD     Signal_ST_MaMethod            =MODE_SMMA;
+input ENUM_APPLIED_PRICE Signal_ST_Source              =PRICE_OPEN;
 
 //--- inputs for ma close indicator
-input double             Signal_Ma_Weight               =0.4;
-input string             Signal_Ma_Symbol               ="GBPJPY";
 input int                Signal_Ma_Timeframe            =PERIOD_M20;
 input ENUM_APPLIED_PRICE Signal_Ma_Source               =PRICE_LOW;
 input int                Signal_Ma_Period               =60;
@@ -217,6 +211,19 @@ int OnInit() {
     signal.AtrMethod(Signal_ATR_MaMethod);
     signal.AtrEnableAtrDirection(Signal_ATR_EnableATRDirection);
     signal.AtrEnableAtrIncrease(Signal_ATR_EnableATRIncrease);
+
+    signal.StochRsiRsiPeriod(Signal_StochRsi_RsiPeriod);
+    signal.StochRsiStochPeriod(Signal_StochRsi_StochLength);
+    signal.StochRsiK(Signal_StochRsi_K);
+    signal.StochRsiD(Signal_StochRsi_D);
+    signal.StochRsiSource(Signal_StochRsi_Source);
+    signal.StochRsiOperator(Signal_StochRsi_Operator);
+
+    signal.StTimeframe(Signal_ST_Timeframe);
+    signal.StPeriod(Signal_ST_Period);
+    signal.StMultiplier(Signal_ST_Multiplier);
+    signal.StMethod(Signal_ST_MaMethod);
+    signal.StSource(Signal_ST_Source);
 
 //--- Creation of trailing object
     CTrailingFixedPips *trailing=new CTrailingFixedPips;
