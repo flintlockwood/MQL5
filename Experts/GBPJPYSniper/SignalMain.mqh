@@ -34,7 +34,7 @@ class SignalMain: public CExpertSignal {
         SignalLinearRegression *m_sig_lsma;
 
         //--- TEMA (triple ema)
-        SignalTema        *m_sig_tema;
+        SignalTema         *m_sig_tema;
 
         //--- parameters for MEMO (ema open)
         SignalMovingAverage *m_sig_memo;
@@ -56,37 +56,16 @@ class SignalMain: public CExpertSignal {
 
         //--- parameters for Consolidation
         SignalConsolidation *m_sig_cons;
-        int                m_cons_lookback_long;
-        int                m_cons_length_long;
-        int                m_cons_lookback_short;
-        int                m_cons_length_short;
 
         //--- parameters for ATR indicator
         SignalATR         *m_sig_atr;
-        int                m_atr_timeframe;
-        int                m_atr_period;
-        ENUM_MA_METHOD     m_atr_method;
-        bool               m_atr_enable_atr_direction;
-        bool               m_atr_enable_atr_increase;
 
         //--- parameters for Stochastic RSI indicator
         SignalStochRSI    *m_sig_stochrsi;
-        ENUM_TIMEFRAMES    m_stochrsi_timeframe;
-        int                m_stochrsi_rsi_period;
-        int                m_stochrsi_stoch_period;
-        int                m_stochrsi_k;
-        int                m_stochrsi_d;
-        ENUM_APPLIED_PRICE m_stochrsi_source;
-        string             m_stochrsi_operator;
 
         //--- parameters for ST (Super Trend)
         SignalSuperTrend  *m_sig_st;
         SignalSuperTrend  *m_sig_st2;
-        ENUM_TIMEFRAMES    m_st_timeframe;
-        int                m_st_period;
-        double             m_st_multiplier;
-        ENUM_MA_METHOD     m_st_method;
-        ENUM_APPLIED_PRICE m_st_source;
 
         //--- parameters for ma close indicator
         SignalMovingAverage *m_sig_ma;
@@ -175,6 +154,8 @@ class SignalMain: public CExpertSignal {
         void ZemaPeriodLong(int value)            { m_sig_zema.ZemaPeriodLong(value);      }
         void ZemaPeriodShort(int value)           { m_sig_zema.ZemaPeriodShort(value);     }
         void ZemaEnableMomentum(bool value)       { m_sig_zema.EnableZemaMomentum(value);  }
+        void ZemaMomentumCondLong(string value)   { m_sig_zema->ZemaMomentumCondLong(value);}
+        void ZemaMomentumCondShort(string value)  { m_sig_zema->ZemaMomentumCondShort(value);}
 
         // Consolidation
         void ConsLookbackLong(int value)          { m_sig_cons.ConsLookbackLong(value);    }
@@ -183,27 +164,27 @@ class SignalMain: public CExpertSignal {
         void ConsLengthShort(int value)           { m_sig_cons.ConsLengthShort(value);     }
 
         //--- ATR
-        void               AtrTimeframe(int value)              { m_atr_timeframe=value;          }
-        void               AtrPeriod(int value)                 { m_atr_period=value;             }
-        void               AtrMethod(ENUM_MA_METHOD value)      { m_atr_method=value;             }
-        void               AtrEnableAtrDirection(bool value)    { m_atr_enable_atr_direction=value; }
-        void               AtrEnableAtrIncrease(bool value)     { m_atr_enable_atr_increase=value; }
+        void AtrTimeframe(int value)              { m_sig_atr.IndicatorTimeframe(value);   }
+        void AtrPeriod(int value)                 { m_sig_atr.ATRPeriod(value);            }
+        void AtrMethod(ENUM_MA_METHOD value)      { m_sig_atr.SmootingMethod(value);       }
+        void AtrEnableAtrDirection(bool value)    { m_sig_atr.EnableATRDirectionSignal(value);}
+        void AtrEnableAtrIncrease(bool value)     { m_sig_atr.EnableATRIncreaseBySignal(value);}
 
         //--- Stochastic RSI
-        void               StochRsiTimeframe(ENUM_TIMEFRAMES value) { m_stochrsi_timeframe=value; }
-        void               StochRsiRsiPeriod(int value)         { m_stochrsi_rsi_period=value;    }
-        void               StochRsiStochPeriod(int value)       { m_stochrsi_stoch_period=value;  }
-        void               StochRsiK(int value)                 { m_stochrsi_k=value;             }
-        void               StochRsiD(int value)                 { m_stochrsi_d=value;             }
-        void               StochRsiSource(ENUM_APPLIED_PRICE value) { m_stochrsi_source=value;    }
-        void               StochRsiOperator(string value)       { m_stochrsi_operator=value;      }
+        void StochRsiTimeframe(ENUM_TIMEFRAMES value) { m_sig_stochrsi.IndicatorTimeframe(value);}
+        void StochRsiRsiPeriod(int value)         { m_sig_stochrsi.RSIPeriod(value);       }
+        void StochRsiStochPeriod(int value)       { m_sig_stochrsi.StochLength(value);     }
+        void StochRsiK(int value)                 { m_sig_stochrsi.StochK(value);          }
+        void StochRsiD(int value)                 { m_sig_stochrsi.StochD(value);          }
+        void StochRsiSource(ENUM_APPLIED_PRICE value) { m_sig_stochrsi.RsiSource(value);   }
+        void StochRsiOperator(string value)       { m_sig_stochrsi.KDOperator(value);      }
 
         //--- ST (Super Trend)
-        void               StTimeframe(ENUM_TIMEFRAMES value)   { m_st_timeframe=value;           }
-        void               StPeriod(int value)                  { m_st_period=value;              }
-        void               StMultiplier(double value)           { m_st_multiplier=value;          }
-        void               StMethod(ENUM_MA_METHOD value)       { m_st_method=value;              }
-        void               StSource(ENUM_APPLIED_PRICE value)   { m_st_source=value;              }
+        void StTimeframe(ENUM_TIMEFRAMES value)   { m_sig_st.SignalTimeframe(value);       }
+        void StPeriod(int value)                  { m_sig_st.PeriodMA(value);              }
+        void StMultiplier(double value)           { m_sig_st.Multiplier(value);            }
+        void StMethod(ENUM_MA_METHOD value)       { m_sig_st.MaMethod(value);              }
+        void StSource(ENUM_APPLIED_PRICE value)   { m_sig_st.Applied(value);               }
 
         //--- MA Close
         void               MaTimeframe(int value)               { m_ma_timeframe=value;           }
@@ -349,45 +330,47 @@ bool SignalMain::Initialize() {
     m_sig_zema.ZemaPeriodLong(73);
     m_sig_zema.ZemaPeriodShort(52);
     m_sig_zema.EnableZemaMomentum(true);
+    m_sig_zema.ZemaMomentumCondLong("0|4");
+    m_sig_zema.ZemaMomentumCondShort("0|1");
 
     //--- Creating filter Consolidation
     m_sig_cons=new SignalConsolidation;
     AddFilter(m_sig_cons);
-    m_sig_cons.ConsLookbackLong(m_cons_lookback_long);
-    m_sig_cons.ConsLengthLong(m_cons_length_long);
-    m_sig_cons.ConsLookbackShort(m_cons_lookback_short);
-    m_sig_cons.ConsLengthShort(m_cons_length_short);
+    m_sig_cons.ConsLookbackLong(16);
+    m_sig_cons.ConsLengthLong(7);
+    m_sig_cons.ConsLookbackShort(8);
+    m_sig_cons.ConsLengthShort(2);
 
     //--- Createing filter ATR Signal
     m_sig_atr=new SignalATR;
     AddFilter(m_sig_atr);
     m_sig_atr.IndicatorSymbol(m_sig_symbol);
-    m_sig_atr.IndicatorTimeframe(m_atr_timeframe);
-    m_sig_atr.ATRPeriod(m_atr_period);
-    m_sig_atr.SmootingMethod(m_atr_method);
-    m_sig_atr.EnableATRDirectionSignal(m_atr_enable_atr_direction);
-    m_sig_atr.EnableATRIncreaseBySignal(m_atr_enable_atr_increase);
+    m_sig_atr.IndicatorTimeframe(PERIOD_M45);
+    m_sig_atr.ATRPeriod(3);
+    m_sig_atr.SmootingMethod(MODE_SMMA);
+    m_sig_atr.EnableATRDirectionSignal(true);
+    m_sig_atr.EnableATRIncreaseBySignal(true);
 
     //--- Createing filter StochRSI
     m_sig_stochrsi=new SignalStochRSI;
     AddFilter(m_sig_stochrsi);
     m_sig_stochrsi.IndicatorSymbol(m_sig_symbol);
-    m_sig_stochrsi.IndicatorTimeframe(m_stochrsi_timeframe);
-    m_sig_stochrsi.RSIPeriod(m_stochrsi_rsi_period);
-    m_sig_stochrsi.StochLength(m_stochrsi_stoch_period);
-    m_sig_stochrsi.StochK(m_stochrsi_k);
-    m_sig_stochrsi.StochD(m_stochrsi_d);
-    m_sig_stochrsi.KDOperator(m_stochrsi_operator);
+    m_sig_stochrsi.IndicatorTimeframe(PERIOD_M30);
+    m_sig_stochrsi.RSIPeriod(22);
+    m_sig_stochrsi.StochLength(2);
+    m_sig_stochrsi.StochK(19);
+    m_sig_stochrsi.StochD(2);
+    m_sig_stochrsi.KDOperator(">");
 
     //--- Creating filter Super Trend with Close signal
     m_sig_st=new SignalSuperTrend;
-    AddFilter(GetPointer(m_sig_st));
+    AddFilter(m_sig_st);
     m_sig_st.SignalSymbol(m_sig_symbol);
-    m_sig_st.SignalTimeframe(m_st_timeframe);
-    m_sig_st.PeriodMA(m_st_period);
-    m_sig_st.Multiplier(m_st_multiplier);
-    m_sig_st.MaMethod(m_st_method);
-    m_sig_st.Applied(m_st_source);
+    m_sig_st.SignalTimeframe(PERIOD_M30);
+    m_sig_st.PeriodMA(10);
+    m_sig_st.Multiplier(3.1);
+    m_sig_st.MaMethod(MODE_SMMA);
+    m_sig_st.Applied(PRICE_OPEN);
     m_sig_st.EnableClose(true);
 
 //--- Createing filter Ma Signal
@@ -409,20 +392,20 @@ bool SignalMain::Initialize() {
     m_sig_st2=new SignalSuperTrend;
     AddFilter(GetPointer(m_sig_st2));
     m_sig_st2.SignalSymbol(m_sig_symbol);
-    m_sig_st2.SignalTimeframe(m_st_timeframe);
-    m_sig_st2.PeriodMA(m_st_period);
-    m_sig_st2.Multiplier(m_st_multiplier);
-    m_sig_st2.MaMethod(m_st_method);
-    m_sig_st2.Applied(m_st_source);
+    m_sig_st2.SignalTimeframe(PERIOD_M30);
+    m_sig_st2.PeriodMA(10);
+    m_sig_st2.Multiplier(3.1);
+    m_sig_st2.MaMethod(MODE_SMMA);
+    m_sig_st2.Applied(PRICE_OPEN);
     m_sig_st2.EnableClose(false);
 
-    //--- Createing filter TEMA
+    //--- Createing filter TEMA (BBMC)
     m_sig_tema_momentum=new SignalTema;
     AddFilter(m_sig_tema_momentum);
     m_sig_tema_momentum.IndicatorSymbol(m_sig_symbol);
-    m_sig_tema_momentum.IndicatorTimeframe(m_tema_timeframe);
-    m_sig_tema_momentum.TemaSource(m_tema_source);
-    m_sig_tema_momentum.TemaPeriod(m_tema_period);
+    m_sig_tema_momentum.IndicatorTimeframe(PERIOD_CURRENT);
+    m_sig_tema_momentum.TemaSource(PRICE_CLOSE);
+    m_sig_tema_momentum.TemaPeriod(54);
     m_sig_tema_momentum.TemaEnableMomentum(true);
 
     //--- Createing filter EMA SLOW

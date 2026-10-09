@@ -38,6 +38,7 @@ class SignalStochRSI: public CExpertSignal {
         void              StochLength(int value)              { m_ind_stoch_length=value;   }
         void              StochK(int value)                   { m_ind_k=value;              }
         void              StochD(int value)                   { m_ind_d=value;              }
+        void              RsiSource(ENUM_APPLIED_PRICE value) { m_applied_price=value;      }
         void              KDOperator(string value)            { m_kd_operator=value;        }
 
         //--- methods of adjusting "weights" of market models

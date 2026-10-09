@@ -86,6 +86,14 @@ input int                Signal_Zema_Timeframe         =PERIOD_CURRENT;
 input int                Signal_Zema_Period_Long       =73;
 input int                Signal_Zema_Period_Short      =52;
 input bool               Signal_Zema_Enable_Momentum   =true;
+input string             Signal_Zema_Momentum_Cond_Long="0|4";
+input string             Signal_Zema_Momentum_Cond_Short="0|1";
+
+//--- input for Consolidation Zone
+input int                Signal_Cons_Lookback_Long     =16;
+input int                Signal_Cons_Length_Long       =7;
+input int                Signal_Cons_Lookback_Short    =8;
+input int                Signal_Cons_Length_Short      =2;
 
 //--- inputs for atr indicator
 input int                Signal_ATR_Timeframe          =PERIOD_M45;
