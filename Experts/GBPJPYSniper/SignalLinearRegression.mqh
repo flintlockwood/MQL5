@@ -30,13 +30,13 @@ class SignalLinearRegression: public CExpertSignal {
         ~SignalLinearRegression(void);
 
         //--- methods of setting adjustable indicator parameters
-        void              IndicatorSymbol(string value)        { m_sig_symbol=value;    }
-        void              IndicatorTimeframe(int value)        { m_sig_timeframe=value; }
-        void              LrSource(ENUM_APPLIED_PRICE value)   { m_lsma_source=value;     }
-        void              LrPeriod(int value)                  { m_lsma_period=value;     }
-        void              LrOffset(int value)                  { m_lsma_offset=value;     }
-        void              LrPipLong(double value)              { m_lsma_pip_long=value;   }
-        void              LrPipShort(double value)             { m_lsma_pip_short=value;  }
+        void              IndicatorSymbol(string value)        { m_sig_symbol=value;      }
+        void              IndicatorTimeframe(int value)        { m_sig_timeframe=value;   }
+        void              LsmaSource(ENUM_APPLIED_PRICE value) { m_lsma_source=value;     }
+        void              LsmaPeriod(int value)                { m_lsma_period=value;     }
+        void              LsmaOffset(int value)                { m_lsma_offset=value;     }
+        void              LsmaPipLong(double value)            { m_lsma_pip_long=value;   }
+        void              LsmaPipShort(double value)           { m_lsma_pip_short=value;  }
         
         //--- method of verification of settings
         virtual bool      ValidationSettings(void);

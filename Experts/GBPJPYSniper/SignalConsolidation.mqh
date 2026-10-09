@@ -31,9 +31,9 @@ class SignalConsolidation: public CExpertSignal {
         void              IndicatorSymbol(string value)        { m_sig_symbol=value;             }
         void              IndicatorTimeframe(int value)        { m_sig_timeframe=value;          }
         void              ConsLookbackLong(int value)          { m_cons_lookback_long=value;     }
-        void              ConsLengthLong(double value)         { m_cons_length_long=value;       }
+        void              ConsLengthLong(int value)            { m_cons_length_long=value;       }
         void              ConsLookbackShort(int value)         { m_cons_lookback_short=value;    }
-        void              ConsLengthShort(double value)        { m_cons_length_short=value;      }
+        void              ConsLengthShort(int value)           { m_cons_length_short=value;      }
         
         //--- method of verification of settings
         virtual bool      ValidationSettings(void);

@@ -30,66 +30,29 @@ class SignalMain: public CExpertSignal {
         string            m_sig_symbol;
         int               m_sig_timeframe;
         
-        //--- parameters for LSMA (linear squares moving averages / linear regression)
+        //--- LSMA (linear squares moving averages / linear regression)
         SignalLinearRegression *m_sig_lsma;
-        int                m_lsma_timeframe;
-        ENUM_APPLIED_PRICE m_lsma_source;
-        int                m_lsma_period;
-        int                m_lsma_offset;
-        int                m_lsma_pip_long;
-        int                m_lsma_pip_short;
 
-        //--- parameters for TEMA (triple ema)
+        //--- TEMA (triple ema)
         SignalTema        *m_sig_tema;
-        int                m_tema_timeframe;
-        ENUM_APPLIED_PRICE m_tema_source;
-        int                m_tema_period;
 
         //--- parameters for MEMO (ema open)
         SignalMovingAverage *m_sig_memo;
-        int                m_memo_timeframe;
-        ENUM_APPLIED_PRICE m_memo_source;
-        int                m_memo_period;
-        ENUM_MA_METHOD     m_memo_method;
-        ENUM_APPLIED_PRICE m_memo_target;
 
         // parameters for CSO (candlestick increase limit) for close price
         SignalCandlestickLimit *m_sig_csoc;
-        int                m_csoc_idx_long;
-        double             m_csoc_pct_long;
-        int                m_csoc_idx_short;
-        double             m_csoc_pct_short;
-        ENUM_APPLIED_PRICE m_csoc_target;
 
         // parameters for CSO (candlestick increase limit) for open price
         SignalCandlestickLimit *m_sig_csoo;
-        int                m_csoo_idx_long;
-        double             m_csoo_pct_long;
-        int                m_csoo_idx_short;
-        double             m_csoo_pct_short;
-        ENUM_APPLIED_PRICE m_csoo_target;
 
         //--- parameters for MEMA (rma close)
         SignalMovingAverage *m_sig_mema;
-        int                m_mema_timeframe;
-        ENUM_APPLIED_PRICE m_mema_source;
-        int                m_mema_period;
-        ENUM_MA_METHOD     m_mema_method;
-        ENUM_APPLIED_PRICE m_mema_target;
 
         //--- parameters for ATR Trailing
         SignalATRTrailing *m_sig_atrt;
-        int                m_atrt_period_long;
-        double             m_atrt_multiplier_long;
-        int                m_atrt_period_short;
-        double             m_atrt_multiplier_short;
 
         //--- parameters for ZEMA
         SignalZema        *m_sig_zema;
-        int                m_zema_timeframe;
-        int                m_zema_period_long;
-        int                m_zema_period_short;
-        bool               m_zema_enable_momentum;
 
         //--- parameters for Consolidation
         SignalConsolidation *m_sig_cons;
@@ -157,67 +120,67 @@ class SignalMain: public CExpertSignal {
         ~SignalMain(void);
 
         //--- methods of setting adjustable indicator parameters
-        void               SignalSymbol(string value)           { m_sig_symbol=value;             }
-        void               SignalTimeframe(int value)           { m_sig_timeframe=value;          }
-        
+        void SignalSymbol(string value)           { m_sig_symbol=value;                   }
+        void SignalTimeframe(int value)           { m_sig_timeframe=value;                }
+
         //--- LSMA
-        void               LsmaTimeframe(int value)             { m_lsma_timeframe=value;         }
-        void               LsmaSource(ENUM_APPLIED_PRICE value) { m_lsma_source=value;            }
-        void               LsmaPeriod(int value)                { m_lsma_period=value;            }
-        void               LsmaOffset(int value)                { m_lsma_offset=value;            }
-        void               LsmaPipLong(int value)               { m_lsma_pip_long=value;          }
-        void               LsmaPipShort(int value)              { m_lsma_pip_short=value;         }
+        void LsmaTimeframe(int value)             { m_sig_lsma.IndicatorTimeframe(value); }
+        void LsmaSource(ENUM_APPLIED_PRICE value) { m_sig_lsma.LsmaSource(value);           }
+        void LsmaPeriod(int value)                { m_sig_lsma.LsmaPeriod(value);           }
+        void LsmaOffset(int value)                { m_sig_lsma.LsmaOffset(value);           }
+        void LsmaPipLong(int value)               { m_sig_lsma.LsmaPipLong(value);          }
+        void LsmaPipShort(int value)              { m_sig_lsma.LsmaPipShort(value);         }
 
         //--- TEMA
-        void               TemaTimeframe(int value)             { m_tema_timeframe=value;         }
-        void               TemaSource(ENUM_APPLIED_PRICE value) { m_tema_source=value;            }
-        void               TemaPeriod(int value)                { m_tema_period=value;            }
+        void TemaTimeframe(int value)             { m_sig_tema.IndicatorTimeframe(value);   }
+        void TemaSource(ENUM_APPLIED_PRICE value) { m_sig_tema.TemaSource(value);           }
+        void TemaPeriod(int value)                { m_sig_tema.TemaPeriod(value);           }
 
         //--- MEMO (EMA Open)
-        void               MemoTimeframe(int value)             { m_memo_timeframe=value;         }
-        void               MemoSource(ENUM_APPLIED_PRICE value) { m_memo_source=value;            }
-        void               MemoPeriod(int value)                { m_memo_period=value;            }
-        void               MemoMethod(ENUM_MA_METHOD value)     { m_memo_method=value;            }
-        void               MemoTarget(ENUM_APPLIED_PRICE value) { m_memo_target=value;            }
+        void MemoTimeframe(int value)             { m_sig_memo.IndicatorTimeframe(value);   }
+        void MemoSource(ENUM_APPLIED_PRICE value) { m_sig_memo.MaSource(value);             }
+        void MemoPeriod(int value)                { m_sig_memo.MaPeriod(value);             }
+        void MemoMethod(ENUM_MA_METHOD value)     { m_sig_memo.MaMethod(value);             }
+        void MemoTarget(ENUM_APPLIED_PRICE value) { m_sig_memo.MaTarget(value);             }
 
         //--- CSO Close
-        void               CsoCloseIdxLong(int value)           { m_csoc_idx_long=value;          }
-        void               CsoClosePctLong(double value)        { m_csoc_pct_long=value;          }
-        void               CsoCloseIdxShort(int value)          { m_csoc_idx_short=value;         }
-        void               CsoClosePctShort(double value)       { m_csoc_pct_short=value;         }
-        void               CsoCloseTarget(ENUM_APPLIED_PRICE value) { m_csoc_target=value;        }
+        void CsoCloseIdxLong(int value)           { m_sig_csoc.CsoIdxLong(value);           }
+        void CsoClosePctLong(double value)        { m_sig_csoc.CsoPctLong(value);           }
+        void CsoCloseIdxShort(int value)          { m_sig_csoc.CsoIdxShort(value);          }
+        void CsoClosePctShort(double value)       { m_sig_csoc.CsoPctShort(value);          }
+        void CsoCloseTarget(ENUM_APPLIED_PRICE value) { m_sig_csoc.CsoTarget(value);        }
 
         //--- CSO Open
-        void               CsoOpenIdxLong(int value)            { m_csoo_idx_long=value;          }
-        void               CsoOpenPctLong(double value)         { m_csoo_pct_long=value;          }
-        void               CsoOpenIdxShort(int value)           { m_csoo_idx_short=value;         }
-        void               CsoOpenPctShort(double value)        { m_csoo_pct_short=value;         }
-        void               CsoOpenTarget(ENUM_APPLIED_PRICE value) { m_csoo_target=value;         }
+        void CsoOpenIdxLong(int value)            { m_sig_csoo.CsoIdxLong(value);          }
+        void CsoOpenPctLong(double value)         { m_sig_csoo.CsoPctLong(value);          }
+        void CsoOpenIdxShort(int value)           { m_sig_csoo.CsoIdxShort(value);         }
+        void CsoOpenPctShort(double value)        { m_sig_csoo.CsoPctShort(value);         }
+        void CsoOpenTarget(ENUM_APPLIED_PRICE value) { m_sig_csoo.CsoTarget(value);        }
 
         //--- MEMA (RMA Close)
-        void               MemaTimeframe(int value)             { m_mema_timeframe=value;         }
-        void               MemaSource(ENUM_APPLIED_PRICE value) { m_mema_source=value;            }
-        void               MemaPeriod(int value)                { m_mema_period=value;            }
-        void               MemaMethod(ENUM_MA_METHOD value)     { m_mema_method=value;            }
-        void               MemaTarget(ENUM_APPLIED_PRICE value) { m_mema_target=value;            }
+        void MemaTimeframe(int value)             { m_sig_mema.IndicatorTimeframe(value);  }
+        void MemaSource(ENUM_APPLIED_PRICE value) { m_sig_mema.MaSource(value);            }
+        void MemaPeriod(int value)                { m_sig_mema.MaPeriod(value);            }
+        void MemaMethod(ENUM_MA_METHOD value)     { m_sig_mema.MaMethod(value);            }
+        void MemaTarget(ENUM_APPLIED_PRICE value) { m_sig_mema.MaTarget(value);            }
 
         //--- ATR Trailing
-        void               ATRTPeriodLong(int value)            { m_atrt_period_long=value;       }
-        void               ATRTMultiplierLong(double value)     { m_atrt_multiplier_long=value;   }
-        void               ATRTPeriodShort(int value)           { m_atrt_period_short=value;      }
-        void               ATRTMultiplierShort(double value)    { m_atrt_multiplier_short=value;  }
+        void ATRTPeriodLong(int value)            { m_sig_atrt.ATRPeriodLong(value);       }
+        void ATRTMultiplierLong(double value)     { m_sig_atrt.ATRMultiplierLong(value);   }
+        void ATRTPeriodShort(int value)           { m_sig_atrt.ATRPeriodShort(value);      }
+        void ATRTMultiplierShort(double value)    { m_sig_atrt.ATRMultiplierShort(value);  }
 
         //--- ZEMA
-        void               ZemaTimeframe(int value)             { m_zema_timeframe=value;         }
-        void               ZemaPeriodLong(int value)            { m_zema_period_long=value;       }
-        void               ZemaPeriodShort(int value)           { m_zema_period_short=value;      }
-        void               ZemaEnableMomentum(bool value)       { m_zema_enable_momentum=value;   }
+        void ZemaTimeframe(int value)             { m_sig_zema.IndicatorTimeframe(value);  }
+        void ZemaPeriodLong(int value)            { m_sig_zema.ZemaPeriodLong(value);      }
+        void ZemaPeriodShort(int value)           { m_sig_zema.ZemaPeriodShort(value);     }
+        void ZemaEnableMomentum(bool value)       { m_sig_zema.EnableZemaMomentum(value);  }
 
         // Consolidation
-        void               ConsLookbackLong(int value)          { m_cons_lookback_long=value;     }
-        void               ConsLengthLong(int value)            { m_cons_length_long=value;       }
-        void               ConsLookbackShort(int value)         { m_cons_lookback_short=value;    }
-        void               ConsLengthShort(int value)           { m_cons_length_short=value;      }
+        void ConsLookbackLong(int value)          { m_sig_cons.ConsLookbackLong(value);    }
+        void ConsLengthLong(int value)            { m_sig_cons.ConsLengthLong(value);      }
+        void ConsLookbackShort(int value)         { m_sig_cons.ConsLookbackShort(value);   }
+        void ConsLengthShort(int value)           { m_sig_cons.ConsLengthShort(value);     }
 
         //--- ATR
         void               AtrTimeframe(int value)              { m_atr_timeframe=value;          }
@@ -283,13 +246,6 @@ class SignalMain: public CExpertSignal {
 SignalMain::SignalMain(void) {
     //--- initialization of protected data
     m_used_series=USE_SERIES_OPEN+USE_SERIES_HIGH+USE_SERIES_LOW+USE_SERIES_CLOSE;
-
-    //--- parameters for ma close indicator
-    m_ma_timeframe            =PERIOD_M20;
-    m_ma_source               =PRICE_LOW;
-    m_ma_period               =60;
-    m_ma_method               =MODE_SMMA;
-    m_ma_target               =PRICE_CLOSE;
 }
 
 //+------------------------------------------------------------------+
@@ -317,41 +273,90 @@ bool SignalMain::Initialize() {
     m_sig_lsma=new SignalLinearRegression;
     AddFilter(m_sig_lsma);
     m_sig_lsma.IndicatorSymbol(m_sig_symbol);
-    m_sig_lsma.IndicatorTimeframe(m_lsma_timeframe);
-    m_sig_lsma.LrSource(m_lsma_source);
-    m_sig_lsma.LrPeriod(m_lsma_period);
-    m_sig_lsma.LrOffset(m_lsma_offset);
-    m_sig_lsma.LrPipLong(m_lsma_pip_long);
-    m_sig_lsma.LrPipShort(m_lsma_pip_short);
+    m_sig_lsma.IndicatorTimeframe(PERIOD_CURRENT);
+    m_sig_lsma.LsmaSource(PRICE_CLOSE);
+    m_sig_lsma.LsmaPeriod(18);
+    m_sig_lsma.LsmaOffset(5);
+    m_sig_lsma.LsmaPipLong(76);
+    m_sig_lsma.LsmaPipShort(113);
 
     //--- Createing filter TEMA
     m_sig_tema=new SignalTema;
     AddFilter(m_sig_tema);
     m_sig_tema.IndicatorSymbol(m_sig_symbol);
-    m_sig_tema.IndicatorTimeframe(m_tema_timeframe);
-    m_sig_tema.TemaSource(m_tema_source);
-    m_sig_tema.TemaPeriod(m_tema_period);
+    m_sig_tema.IndicatorTimeframe(PERIOD_CURRENT);
+    m_sig_tema.TemaSource(PRICE_CLOSE);
+    m_sig_tema.TemaPeriod(72);
     m_sig_tema.TemaEnableMomentum(false);
 
     //--- Createing filter EMA Open
     m_sig_memo=new SignalMovingAverage;
     AddFilter(m_sig_memo);
     m_sig_memo.IndicatorSymbol(m_sig_symbol);
-    m_sig_memo.IndicatorTimeframe(m_memo_timeframe);
-    m_sig_memo.MaPeriod(m_memo_period);
-    m_sig_memo.MaSource(m_memo_source);
-    m_sig_memo.MaMethod(m_memo_method);
-    m_sig_memo.MaTarget(m_memo_target);
+    m_sig_memo.IndicatorTimeframe(PERIOD_H2);
+    m_sig_memo.MaPeriod(10);
+    m_sig_memo.MaSource(PRICE_CLOSE);
+    m_sig_memo.MaMethod(MODE_EMA);
+    m_sig_memo.MaTarget(PRICE_OPEN);
 
-    //--- Createing filter Mema Close Signal
-    m_sig_mema=new SignalMovingAverage;
+    // Creating filter Candlestick Limit for Close
+    m_sig_csoc=new SignalCandlestickLimit();
+    AddFilter(m_sig_csoc);
+    m_sig_csoc.IndicatorSymbol(m_sig_symbol);
+    m_sig_csoc.IndicatorTimeframe(PERIOD_CURRENT);
+    m_sig_csoc.CsoIdxLong(4);
+    m_sig_csoc.CsoPctLong(0.464);
+    m_sig_csoc.CsoIdxShort(2);
+    m_sig_csoc.CsoPctShort(0.777);
+    m_sig_csoc.CsoTarget(PRICE_CLOSE);
+
+    // Creating filter Candlestick Limit for Open
+    m_sig_csoo=new SignalCandlestickLimit();
+    AddFilter(m_sig_csoo);
+    m_sig_csoo.IndicatorSymbol(m_sig_symbol);
+    m_sig_csoo.IndicatorTimeframe(PERIOD_CURRENT);
+    m_sig_csoo.CsoIdxLong(0);
+    m_sig_csoo.CsoPctLong(0.255);
+    m_sig_csoo.CsoIdxShort(0);
+    m_sig_csoo.CsoPctShort(0.325);
+    m_sig_csoo.CsoTarget(PRICE_OPEN);
+
+    //--- Creating filter Mema Close Signal
+    m_sig_mema=new SignalMovingAverage();
     AddFilter(m_sig_mema);
     m_sig_mema.IndicatorSymbol(m_sig_symbol);
-    m_sig_mema.IndicatorTimeframe(m_mema_timeframe);
-    m_sig_mema.MaPeriod(m_mema_period);
-    m_sig_mema.MaSource(m_mema_source);
-    m_sig_mema.MaMethod(m_mema_method);
-    m_sig_mema.MaTarget(m_mema_target);
+    m_sig_mema.IndicatorTimeframe(PERIOD_M20);
+    m_sig_mema.MaPeriod(60);
+    m_sig_mema.MaSource(PRICE_LOW);
+    m_sig_mema.MaMethod(MODE_SMMA);
+    m_sig_mema.MaTarget(PRICE_CLOSE);
+
+    //--- Creating filter ATR Trailing
+    m_sig_atrt=new SignalATRTrailing();
+    AddFilter(m_sig_atrt);
+    m_sig_atrt.IndicatorSymbol(m_sig_symbol);
+    m_sig_atrt.IndicatorTimeframe(m_sig_timeframe);
+    m_sig_atrt.ATRPeriodLong(10);
+    m_sig_atrt.ATRMultiplierLong(3.6);
+    m_sig_atrt.ATRPeriodShort(6);
+    m_sig_atrt.ATRMultiplierShort(2.2);
+
+    //--- Creating filter Zema Signal
+    m_sig_zema=new SignalZema;
+    AddFilter(m_sig_zema);
+    m_sig_zema.IndicatorSymbol(m_sig_symbol);
+    m_sig_zema.IndicatorTimeframe(PERIOD_CURRENT);
+    m_sig_zema.ZemaPeriodLong(73);
+    m_sig_zema.ZemaPeriodShort(52);
+    m_sig_zema.EnableZemaMomentum(true);
+
+    //--- Creating filter Consolidation
+    m_sig_cons=new SignalConsolidation;
+    AddFilter(m_sig_cons);
+    m_sig_cons.ConsLookbackLong(m_cons_lookback_long);
+    m_sig_cons.ConsLengthLong(m_cons_length_long);
+    m_sig_cons.ConsLookbackShort(m_cons_lookback_short);
+    m_sig_cons.ConsLengthShort(m_cons_length_short);
 
     //--- Createing filter ATR Signal
     m_sig_atr=new SignalATR;
@@ -384,22 +389,6 @@ bool SignalMain::Initialize() {
     m_sig_st.MaMethod(m_st_method);
     m_sig_st.Applied(m_st_source);
     m_sig_st.EnableClose(true);
-
-//--- Createing filter Zema Signal
-    m_sig_zema=new SignalZema;
-    AddFilter(m_sig_zema);
-    m_sig_zema.IndicatorSymbol(m_sig_symbol);
-    m_sig_zema.IndicatorTimeframe(m_zema_timeframe);
-    m_sig_zema.ZemaPeriodLong(m_zema_period_long);
-    m_sig_zema.ZemaPeriodShort(m_zema_period_short);
-
-//--- Creating filter Consolidation
-    m_sig_cons=new SignalConsolidation;
-    AddFilter(m_sig_cons);
-    m_sig_cons.ConsLookbackLong(m_cons_lookback_long);
-    m_sig_cons.ConsLengthLong(m_cons_length_long);
-    m_sig_cons.ConsLookbackShort(m_cons_lookback_short);
-    m_sig_cons.ConsLengthShort(m_cons_length_short);
 
 //--- Createing filter Ma Signal
     m_sig_ma=new SignalMovingAverage;
@@ -508,9 +497,8 @@ int SignalMain::LongCondition(void) {
         && (m_sig_st2.LongCondition() > 0)
         && (m_sig_tema_momentum.LongCondition() > 0)
         && (m_sig_tema.LongCondition() > 0) 
-        && (m_sig_lsma.LongTrendCondition())
-        && (m_sig_emaf.LongCondition() > 0)
-        && ();
+        && (m_sig_lsma.LongTrendCondition(idx))
+        && (m_sig_emaf.LongCondition() > 0);
 
     return cond1 || cond2;
 }

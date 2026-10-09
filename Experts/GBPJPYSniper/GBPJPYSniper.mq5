@@ -62,9 +62,9 @@ input double             Signal_Csoc_Pct_Short              =0.777;
 input ENUM_APPLIED_PRICE Signal_Csoc_Target                 =PRICE_CLOSE;
 
 //--- inputs for CSO Open
-input int                Signal_Csoo_Idx_Long               =1;
+input int                Signal_Csoo_Idx_Long               =0;
 input double             Signal_Csoo_Pct_Long               =0.255;
-input int                Signal_Csoo_Idx_Short              =1;
+input int                Signal_Csoo_Idx_Short              =0;
 input double             Signal_Csoo_Pct_Short              =0.325;
 input ENUM_APPLIED_PRICE Signal_Csoo_Target                 =PRICE_OPEN;
 
@@ -148,6 +148,7 @@ int OnInit() {
         ExtExpert.Deinit();
         return(INIT_FAILED);
     }
+    signal.Initialize();
 //--- Set main signal parameters
     ExtExpert.InitSignal(signal);
     signal.ThresholdOpen(Signal_ThresholdOpen);
