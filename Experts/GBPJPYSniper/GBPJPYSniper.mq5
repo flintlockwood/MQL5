@@ -156,9 +156,10 @@ int OnInit() {
         ExtExpert.Deinit();
         return(INIT_FAILED);
     }
-    signal.Initialize();
+    
 //--- Set main signal parameters
     ExtExpert.InitSignal(signal);
+    signal.Initialize(Symbol(), Period(), Expert_EveryTick);
     signal.ThresholdOpen(Signal_ThresholdOpen);
     signal.ThresholdClose(Signal_ThresholdClose);
     signal.PriceLevel(Signal_PriceLevel);

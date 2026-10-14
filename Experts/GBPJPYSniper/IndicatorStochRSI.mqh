@@ -104,6 +104,8 @@ bool CiStochRSI::Create(const string symbol,const int period,
         CIndicatorBuffer *d_buffer = new CIndicatorBuffer();
         d_buffer.Name("D");
         Add(d_buffer);
+
+        m_buffers_total=2;
         //--- ok
         return(true);
     }
@@ -188,9 +190,11 @@ void CiStochRSI::Refresh(const int flags=OBJ_ALL_PERIODS) {
     InitializeArray(d, ArraySize(stoch), EMPTY_VALUE);
     SimpleMAOnBuffer(ArraySize(stoch), 0, 0, m_stoch_d, k, d);
 
+    ArraySetAsSeries(k, true);
     CIndicatorBuffer *k_buffer = At(0);
     k_buffer.AssignArray(k);
     
+    ArraySetAsSeries(d, true);
     CIndicatorBuffer *d_buffer = At(1);
     d_buffer.AssignArray(d);
 }

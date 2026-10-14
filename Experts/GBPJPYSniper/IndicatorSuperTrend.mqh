@@ -104,6 +104,8 @@ bool CiSuperTrend::Create(const string symbol,const int period,
         CIndicatorBuffer *trend_buffer = new CIndicatorBuffer();
         trend_buffer.Name("Trend");
         Add(trend_buffer);
+
+        m_buffers_total=3;
         //--- ok
         return(true);
     }
@@ -240,12 +242,15 @@ void CiSuperTrend::Refresh(const int flags=OBJ_ALL_PERIODS) {
         }
     }
 
+    ArraySetAsSeries(upper_band, true);
     CIndicatorBuffer *upper_band_buffer = At(0);
     upper_band_buffer.AssignArray(upper_band);
     
+    ArraySetAsSeries(lower_band, true);
     CIndicatorBuffer *lower_band_buffer = At(1);
     lower_band_buffer.AssignArray(lower_band);
 
+    ArraySetAsSeries(trend, true);
     CIndicatorBuffer *trend_buffer = At(2);
     trend_buffer.AssignArray(trend);
 }

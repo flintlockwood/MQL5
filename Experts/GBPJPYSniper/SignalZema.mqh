@@ -33,7 +33,7 @@ class SignalZema: public CExpertSignal {
         void              IndicatorSymbol(string value)        { m_sig_symbol=value;             }
         void              IndicatorTimeframe(int value)        { m_sig_timeframe=value;          }
         void              ZemaPeriodLong(int value)            { m_zema_period_long=value;       }
-        void              ZemaPeriodShort(int value)           { m_zema_period_long=value;       }
+        void              ZemaPeriodShort(int value)           { m_zema_period_short=value;      }
         void              EnableZemaMomentum(bool value)       { m_enable_zema_momentum=value;   }
         void              ZemaMomentumCondLong(string value)   { m_zema_momentum_cond_long=value;}
         void              ZemaMomentumCondShort(string value)  { m_zema_momentum_cond_short=value;}

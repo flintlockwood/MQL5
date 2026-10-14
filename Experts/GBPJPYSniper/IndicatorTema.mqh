@@ -85,6 +85,8 @@ bool CiTema::Create(const string symbol,const int period,
         CIndicatorBuffer *tema_buffer = new CIndicatorBuffer();
         tema_buffer.Name("Tema");
         Add(tema_buffer);
+
+        m_buffers_total=1;
         //--- ok
         return(true);
     }
@@ -161,6 +163,7 @@ void CiTema::Refresh(const int flags=OBJ_ALL_PERIODS) {
         tema[i] = 3 * ema1[i] - 3 * ema2[i] + ema3[i];
     }
 
+    ArraySetAsSeries(tema, true);
     CIndicatorBuffer *linreg_buffer = At(0);
     linreg_buffer.AssignArray(tema);
 }

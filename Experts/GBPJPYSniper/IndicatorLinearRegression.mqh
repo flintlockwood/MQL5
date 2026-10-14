@@ -13,11 +13,11 @@
 
 class CiLinearRegression: public CIndicator {
     protected:
-        string            m_ind_symbol;
-        int               m_ind_timeframe;
-        int               m_lr_period;
-        int               m_lr_offset;
-        ENUM_APPLIED_PRICE m_applied;
+        string          m_ind_symbol;
+        int             m_ind_timeframe;
+        int             m_lsma_period;
+        int             m_lsma_offset;
+        ENUM_APPLIED_PRICE m_lsma_source;
 
     public:
         CiLinearRegression(void);
@@ -26,16 +26,14 @@ class CiLinearRegression: public CIndicator {
         //--- methods to set to protected data
         void            IndSymbol(string value) { m_ind_symbol = value; }
         void            IndTimeframe(int value) { m_ind_timeframe = value; }
-        void            LrPeriod(int value) { m_lr_period = value;  }
-        void            LrOffset(int value) { m_lr_offset = value; }
-        void            Applied(ENUM_APPLIED_PRICE value) { m_applied = value; }
+        void            LsmaPeriod(int value) { m_lsma_period = value;  }
+        void            LsmaOffset(int value) { m_lsma_offset = value; }
+        void            LsmaSource(ENUM_APPLIED_PRICE value) { m_lsma_source = value; }
         
         //--- method of creation
         bool            Create(const string symbol,const ENUM_TIMEFRAMES period,
                             const ENUM_INDICATOR type,const int num_params,const MqlParam &params[]);
-        bool            Create(const string symbol,const int period,
-                            const int lr_period,const int lr_ofset,
-                            const ENUM_APPLIED_PRICE applied);
+        bool            Create(const string symbol,const int period);
         
         //--- methods of access to indicator data
         double          GetData(const int buffer_num,const int index);
@@ -49,9 +47,9 @@ class CiLinearRegression: public CIndicator {
 //+------------------------------------------------------------------+
 CiLinearRegression::CiLinearRegression(void) : m_ind_symbol("GBPJPY"),
                    m_ind_timeframe(PERIOD_M30),
-                   m_lr_period(18),
-                   m_lr_offset(5),
-                   m_applied(PRICE_OPEN) {
+                   m_lsma_period(18),
+                   m_lsma_offset(5),
+                   m_lsma_source(PRICE_OPEN) {
 }
 
 //+------------------------------------------------------------------+
@@ -65,31 +63,28 @@ CiLinearRegression::~CiLinearRegression(void) {
 //+------------------------------------------------------------------+
 bool CiLinearRegression::Create(const string symbol,const ENUM_TIMEFRAMES period,
                             const ENUM_INDICATOR type,const int num_params,const MqlParam &params[]) {
-    return(Create(params[1].string_value, (int)params[2].integer_value, 
-                    (int)params[3].integer_value, (int)params[4].integer_value,
-                    (ENUM_APPLIED_PRICE)params[5].integer_value));
+    return(Create(symbol, period));
 }
 
-bool CiLinearRegression::Create(const string symbol,const int period,
-                        const int lr_period,const int lr_offset,
-                        const ENUM_APPLIED_PRICE applied) {
+bool CiLinearRegression::Create(const string symbol,const int period) {
 //--- we do not need to create indicator here
     if(Reserve(3)) {
         //--- string of status of drawing
-        m_name  ="ST";
+        m_name  ="LSMA";
         m_status="("+symbol+","+PeriodDescription()+","+
-               IntegerToString(lr_period)+","+IntegerToString(lr_offset)+","+
-               ","+PriceDescription(applied)+")";
+               IntegerToString(m_lsma_period)+","+IntegerToString(m_lsma_offset)+","+
+               ","+PriceDescription(m_lsma_source)+")";
         //--- save settings
         m_ind_symbol = symbol;
         m_ind_timeframe = period;
-        m_lr_period=lr_period;
-        m_lr_offset=lr_offset;
-        m_applied  =applied;
+        m_lsma_period = m_lsma_period;
+        m_lsma_offset = m_lsma_offset;
+        m_lsma_source =m_lsma_source;
         //--- create buffers
         CIndicatorBuffer *lr_buffer = new CIndicatorBuffer();
-        lr_buffer.Name("Linear Regression");
+        lr_buffer.Name("LSMA");
         Add(lr_buffer);
+        m_buffers_total=1;
         //--- ok
         return(true);
     }
@@ -147,8 +142,9 @@ int CiLinearRegression::GetData(const int start_pos,const int count,const int bu
 void CiLinearRegression::Refresh(const int flags=OBJ_ALL_PERIODS) {
     double applied_prices[];
     double linreg[];
-    CopyAppliedPrice(m_ind_symbol, m_ind_timeframe, m_applied, 0, BarsCustom(m_ind_symbol, m_ind_timeframe), applied_prices);
-    LinRegOnBuffer(m_lr_period, m_lr_offset, applied_prices, linreg);
+    CopyAppliedPrice(m_ind_symbol, m_ind_timeframe, m_lsma_source, 0, BarsCustom(m_ind_symbol, m_ind_timeframe), applied_prices);
+    LinRegOnBuffer(m_lsma_period, m_lsma_offset, applied_prices, linreg);
+    ArraySetAsSeries(linreg, true);
 
     CIndicatorBuffer *linreg_buffer = At(0);
     linreg_buffer.AssignArray(linreg);

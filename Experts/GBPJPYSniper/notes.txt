@@ -272,3 +272,12 @@ Implement CheckCloseLong check long position exists and check close long conditi
 Implement CheckCloseShort check short position exists and check close short conditon 
 Implement CheckReverseLong for reverse long signal 
 Implement CheckReverseShort for reverse short signal
+
+SignalMain -> SignalIndicator -> Indicator -> BufferSeries
+
+constructor -> INIT_PHASE_FIRST
+init -> INIT_PHASE_TUNING
+set (symbol, period, parameters)-> INIT_PHASE_TUNING
+validation -> INIT_PHASE_VALIDATION
+set price (open, high, low, close, volume) -> INIT_PHASE_VALIDATION
+init indicator -> INIT_PHASE_COMPLETE
