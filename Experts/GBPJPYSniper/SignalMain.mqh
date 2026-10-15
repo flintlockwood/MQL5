@@ -36,53 +36,70 @@ class SignalMain: public CExpertSignal {
 
         //--- TEMA (triple ema)
         SignalTema         *m_sig_tema;
+        int m_tema_timeframe;
 
         //--- parameters for MEMO (ema open)
         SignalMovingAverage *m_sig_memo;
+        int m_memo_timeframe;
 
         // parameters for CSO (candlestick increase limit) for close price
         SignalCandlestickLimit *m_sig_csoc;
+        int m_csoc_timeframe;
 
         // parameters for CSO (candlestick increase limit) for open price
         SignalCandlestickLimit *m_sig_csoo;
+        int m_csoo_timeframe;
 
         //--- parameters for MEMA (rma close)
         SignalMovingAverage *m_sig_mema;
+        int m_mema_timeframe;
 
         //--- parameters for ATR Trailing
         SignalATRTrailing *m_sig_atrt;
+        int m_atrt_timeframe;
 
         //--- parameters for ZEMA
         SignalZema        *m_sig_zema;
+        int m_zema_timeframe;
 
         //--- parameters for Consolidation
         SignalConsolidation *m_sig_cons;
+        int m_cons_timeframe;
 
         //--- parameters for ATR indicator
         SignalATR         *m_sig_atr;
+        int m_atr_timeframe;
 
         //--- parameters for Stochastic RSI indicator
         SignalStochRSI    *m_sig_stochrsi;
+        int m_stochrsi_timeframe;
 
         //--- parameters for ST (Super Trend)
         SignalSuperTrend  *m_sig_st;
         SignalSuperTrend  *m_sig_st2;
+        int m_st_timeframe;
+        int m_st2_timeframe;
 
         // candlestick body
         SignalCandlestickBody *m_sig_csb;
         int                m_csb_pip_long;
+        int m_csb_timeframe;
 
         // TEMA Momentum
         SignalTema        *m_sig_tema_momentum;
+        int m_temam_timeframe;
 
         //--- parameters for ema fast
         SignalMovingAverage *m_sig_emaf;
+        int m_emaf_timeframe;
 
         //--- parameters for ema medium
         SignalMovingAverage *m_sig_emam;
+        int m_emam_timeframe;
 
         //--- parameters for ema slow
         SignalMovingAverage *m_sig_emas;
+        int m_emas_timeframe;
 
     public:
         SignalMain(void);

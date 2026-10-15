@@ -17,8 +17,6 @@ class SignalTema: public CExpertSignal {
         CiTema            m_tema_indicator;
 
         //--- adjusted parameters
-        string            m_sig_symbol;
-        int               m_sig_timeframe;
         ENUM_APPLIED_PRICE m_tema_source;
         int               m_tema_period;
         bool              m_enable_tema_momentum;
@@ -28,12 +26,11 @@ class SignalTema: public CExpertSignal {
         ~SignalTema(void);
 
         //--- methods of setting adjustable indicator parameters
-        void              IndicatorSymbol(string value)        { m_sig_symbol=value;    }
-        void              IndicatorTimeframe(int value)        { m_sig_timeframe=value; }
         void              TemaSource(ENUM_APPLIED_PRICE value) { m_tema_source=value;   }
         void              TemaPeriod(int value)                { m_tema_period=value;   }
         void              TemaEnableMomentum(bool value)       { m_enable_tema_momentum=value; }
         
+        bool              Initialize(string symbol,int period,bool every_tick);
         //--- method of verification of settings
         virtual bool      ValidationSettings(void);
         //--- methods of checking if the market models are formed
@@ -48,12 +45,31 @@ SignalTema::SignalTema(void) : m_tema_source(PRICE_CLOSE),
                              m_tema_period(18) {
     //--- initialization of protected data
     m_used_series=USE_SERIES_OPEN+USE_SERIES_HIGH+USE_SERIES_LOW+USE_SERIES_CLOSE;
+
+    m_tema_indicator = new CiTema();
 }
 
 //+------------------------------------------------------------------+
 //| Destructor                                                       |
 //+------------------------------------------------------------------+
 SignalTema::~SignalTema(void){
+}
+
+bool SignalTema::Initialize(string symbol,int period,bool every_tick) {
+    if(m_symbol==NULL) {
+        if((m_symbol=new CSymbolInfo)==NULL)
+            return(false);
+    }
+    if(!m_symbol.Name(symbol))
+        return(false);
+    m_period    =period;
+    m_every_tick=every_tick;
+    
+    m_tema_indicator.Create(m_symbol.Name(), m_period);
+
+    CExpertBase::Init(m_symbol, (ENUM_TIMEFRAMES)period, 1);
+
+    return (true);
 }
 
 //+------------------------------------------------------------------+

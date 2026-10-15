@@ -42,6 +42,7 @@ class SignalLinearRegression: public CExpertSignal {
         virtual bool      LongMomentumCondition(int idx);
         virtual bool      ShortMomentumCondition(int idx);
 
+    protected:
         bool              InitIndicators(CIndicators *indicators);
 };
 
