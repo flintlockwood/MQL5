@@ -13,28 +13,22 @@
 
 class CiTema: public CIndicator {
     protected:
-        string            m_ind_symbol;
-        int               m_ind_timeframe;
         int               m_tema_period;
-        ENUM_APPLIED_PRICE m_applied;
+        ENUM_APPLIED_PRICE m_tema_source;
 
     public:
         CiTema(void);
-        ~CiTema(void);
+       ~CiTema(void);
 
         //--- methods to set to protected data
-        void            IndSymbol(string value) { m_ind_symbol = value; }
-        void            IndTimeframe(int value) { m_ind_timeframe = value; }
+        void            Symbol(string value) { m_symbol = value; }
+        void            Period(int value) { m_period = value; }
         void            TemaPeriod(int value) { m_tema_period = value;  }
-        void            Applied(ENUM_APPLIED_PRICE value) { m_applied = value; }
+        void            TemaSource(ENUM_APPLIED_PRICE value) { m_tema_source = value; }
         
         //--- method of creation
-        bool            Create(const string symbol,const ENUM_TIMEFRAMES period,
-                            const ENUM_INDICATOR type,const int num_params,const MqlParam &params[]);
-        bool            Create(const string symbol,const int period,
-                            const int tema_period,
-                            const ENUM_APPLIED_PRICE applied);
-        
+        bool            Initialize(const string symbol,const int timeframe);
+
         //--- methods of access to indicator data
         double          GetData(const int buffer_num,const int index);
         int             GetData(const int start_pos,const int count,const int buffer_num,double &buffer[]);
@@ -45,10 +39,7 @@ class CiTema: public CIndicator {
 //+------------------------------------------------------------------+
 //| Constructor                                                      |
 //+------------------------------------------------------------------+
-CiTema::CiTema(void) : m_ind_symbol("GBPJPY"),
-                   m_ind_timeframe(PERIOD_M30),
-                   m_tema_period(72),
-                   m_applied(PRICE_OPEN) {
+CiTema::CiTema(void) {
 }
 
 //+------------------------------------------------------------------+
@@ -60,37 +51,23 @@ CiTema::~CiTema(void) {
 //+------------------------------------------------------------------+
 //| Create indicator                                                 |
 //+------------------------------------------------------------------+
-bool CiTema::Create(const string symbol,const ENUM_TIMEFRAMES period,
-                            const ENUM_INDICATOR type,const int num_params,const MqlParam &params[]) {
-    return(Create(params[1].string_value, (int)params[2].integer_value, 
-                    (int)params[3].integer_value,
-                    (ENUM_APPLIED_PRICE)params[4].integer_value));
-}
-
-bool CiTema::Create(const string symbol,const int period,
-                        const int tema_period, const ENUM_APPLIED_PRICE applied) {
+bool CiTema::Initialize(const string symbol,const int timeframe) {
 //--- we do not need to create indicator here
-    if(Reserve(3)) {
-        //--- string of status of drawing
-        m_name  ="ST";
-        m_status="("+symbol+","+PeriodDescription()+","+
-               IntegerToString(tema_period)+","+
-               ","+PriceDescription(applied)+")";
-        //--- save settings
-        m_ind_symbol = symbol;
-        m_ind_timeframe = period;
-        m_tema_period=tema_period;
-        m_applied  =applied;
-        //--- create buffers
-        CIndicatorBuffer *tema_buffer = new CIndicatorBuffer();
-        tema_buffer.Name("Tema");
-        Add(tema_buffer);
-
-        m_buffers_total=1;
-        //--- ok
-        return(true);
+    if(!Reserve(1)) {
+        return false;
     }
-    return(false);
+    //--- save settings
+    m_symbol = symbol;
+    m_period = timeframe;
+
+    //--- create buffers
+    CIndicatorBuffer *tema_buffer = new CIndicatorBuffer();
+    tema_buffer.Name("TEMA");
+    Add(tema_buffer);
+    m_buffers_total=1;
+    
+    //--- ok
+    return(true);
 }
 
 //+------------------------------------------------------------------+
@@ -147,7 +124,7 @@ void CiTema::Refresh(const int flags=OBJ_ALL_PERIODS) {
     double ema2[];
     double ema3[];
     double tema[];
-    CopyAppliedPrice(m_ind_symbol, m_ind_timeframe, m_applied, 0, BarsCustom(m_ind_symbol, m_ind_timeframe), applied_prices);
+    CopyAppliedPrice(m_symbol, m_period, m_tema_source, 0, BarsCustom(m_symbol, m_period), applied_prices);
     InitializeArray(ema1, ArraySize(applied_prices), EMPTY_VALUE);
     InitializeArray(ema2, ArraySize(applied_prices), EMPTY_VALUE);
     InitializeArray(ema3, ArraySize(applied_prices), EMPTY_VALUE);
@@ -164,6 +141,6 @@ void CiTema::Refresh(const int flags=OBJ_ALL_PERIODS) {
     }
 
     ArraySetAsSeries(tema, true);
-    CIndicatorBuffer *linreg_buffer = At(0);
-    linreg_buffer.AssignArray(tema);
+    CIndicatorBuffer *tema_buffer = At(0);
+    tema_buffer.AssignArray(tema);
 }

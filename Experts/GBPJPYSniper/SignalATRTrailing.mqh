@@ -14,8 +14,8 @@
 class SignalATRTrailing: public CExpertSignal {
     protected:
         //--- adjusted parameters
-        string            m_sig_symbol;
-        int               m_sig_timeframe;
+        string            m_atr_symbol;
+        int               m_atr_timeframe;
         int               m_atr_period_long;
         double            m_atr_multiplier_long;
         int               m_atr_period_short;
@@ -25,21 +25,24 @@ class SignalATRTrailing: public CExpertSignal {
 
     public:
         SignalATRTrailing(void);
-        ~SignalATRTrailing(void);
+       ~SignalATRTrailing(void);
 
         //--- methods of setting adjustable indicator parameters
-        void              IndicatorSymbol(string value)        { m_sig_symbol=value;             }
-        void              IndicatorTimeframe(int value)        { m_sig_timeframe=value;          }
+        void              IndicatorSymbol(string value)        { m_atr_symbol=value;             }
+        void              IndicatorTimeframe(int value)        { m_atr_timeframe=value;          }
         void              ATRPeriodLong(int value)             { m_atr_period_long=value;        }
         void              ATRMultiplierLong(double value)      { m_atr_multiplier_long=value;    }
         void              ATRPeriodShort(int value)            { m_atr_period_short=value;       }
         void              ATRMultiplierShort(double value)     { m_atr_multiplier_short=value;    }
         
+        bool              Initialize(string symbol,int period,bool every_tick);        
         //--- method of verification of settings
         virtual bool      ValidationSettings(void);
         //--- methods of checking if the market models are formed
         virtual int       LongCondition(void);
         virtual int       ShortCondition(void);
+
+        bool              InitIndicators(CIndicators *indicators);
 
     protected:
         void              CalculateCondition();
@@ -57,6 +60,21 @@ SignalATRTrailing::SignalATRTrailing(void) {
 //| Destructor                                                       |
 //+------------------------------------------------------------------+
 SignalATRTrailing::~SignalATRTrailing(void){
+}
+
+bool SignalATRTrailing::Initialize(string symbol,int period,bool every_tick) {
+    if(m_symbol==NULL) {
+        if((m_symbol=new CSymbolInfo)==NULL)
+            return(false);
+    }
+    if(!m_symbol.Name(symbol))
+        return(false);
+    m_period    =period;
+    m_every_tick=every_tick;
+
+    CExpertBase::Init(m_symbol, (ENUM_TIMEFRAMES)period, 1);
+
+    return (true);
 }
 
 //+------------------------------------------------------------------+
@@ -77,10 +95,10 @@ void SignalATRTrailing::CalculateCondition() {
     double tr_array[];
     double atr_array_long[];
     double atr_array_short[];
-    int bars = BarsCustom(m_sig_symbol, m_sig_timeframe);
-    CopyRatesCustom(m_sig_symbol, m_sig_timeframe, 0, bars, rates);
+    int bars = BarsCustom(m_symbol.Name(), m_period);
+    CopyRatesCustom(m_symbol.Name(), m_period, 0, bars, rates);
     CopyCloseFromMqlRates(rates, close);
-    CopyTR(m_sig_symbol, m_sig_timeframe, 0, bars, tr_array);
+    CopyTR(m_symbol.Name(), m_period, 0, bars, tr_array);
     InitializeArray(atr_array_short, ArraySize(tr_array), EMPTY_VALUE);
     MAOnBuffer(ArraySize(tr_array), 0, 0, m_atr_period_long, MODE_SMMA, tr_array, atr_array_long);
     MAOnBuffer(ArraySize(tr_array), 0, 0, m_atr_period_short, MODE_SMMA, tr_array, atr_array_short);

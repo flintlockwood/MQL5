@@ -13,27 +13,22 @@
 
 class CiZema: public CIndicator {
     protected:
-        string            m_ind_symbol;
-        int               m_ind_timeframe;
         int               m_zema_period_long;
         int               m_zema_period_short;
 
     public:
         CiZema(void);
-        ~CiZema(void);
+       ~CiZema(void);
 
         //--- methods to set to protected data
-        void            IndSymbol(string value)    { m_ind_symbol = value;        }
-        void            IndTimeframe(int value)    { m_ind_timeframe = value;     }
+        void            Symbol(string value)    { m_symbol = value;        }
+        void            Period(int value)    { m_period = value;     }
         void            ZemaPeriodLong(int value)  { m_zema_period_long = value;  }
         void            ZemaPeriodShort(int value) { m_zema_period_short = value; }
         
         //--- method of creation
-        bool            Create(const string symbol,const ENUM_TIMEFRAMES period,
-                            const ENUM_INDICATOR type,const int num_params,const MqlParam &params[]);
-        bool            Create(const string symbol,const int period,
-                            const int zema_period_long, const int zema_period_short);
-        
+        bool            Initialize(const string symbol,const int timeframe);
+
         //--- methods of access to indicator data
         double          GetData(const int buffer_num,const int index);
         int             GetData(const int start_pos,const int count,const int buffer_num,double &buffer[]);
@@ -47,10 +42,7 @@ class CiZema: public CIndicator {
 //+------------------------------------------------------------------+
 //| Constructor                                                      |
 //+------------------------------------------------------------------+
-CiZema::CiZema(void) : m_ind_symbol("GBPJPY"),
-                   m_ind_timeframe(PERIOD_M30),
-                   m_zema_period_long(73),
-                   m_zema_period_short(73) {
+CiZema::CiZema(void) {
 }
 
 //+------------------------------------------------------------------+
@@ -62,49 +54,36 @@ CiZema::~CiZema(void) {
 //+------------------------------------------------------------------+
 //| Create indicator                                                 |
 //+------------------------------------------------------------------+
-bool CiZema::Create(const string symbol,const ENUM_TIMEFRAMES period,
-                            const ENUM_INDICATOR type,const int num_params,const MqlParam &params[]) {
-    return(Create(params[1].string_value, (int)params[2].integer_value, 
-                    (int)params[3].integer_value, (int)params[4].integer_value));
-}
-
-bool CiZema::Create(const string symbol,const int period,
-                        const int zema_period_long, const int zema_period_short) {
+bool CiZema::Initialize(const string symbol,const int timeframe) {
 //--- we do not need to create indicator here
-    if(Reserve(2)) {
-        //--- string of status of drawing
-        m_name  ="ST";
-        m_status="("+symbol+","+PeriodDescription()+","+
-               IntegerToString(zema_period_long)+","+IntegerToString(zema_period_short)+")";
-        //--- save settings
-        m_ind_symbol = symbol;
-        m_ind_timeframe = period;
-        m_zema_period_long = zema_period_long;
-        m_zema_period_long = zema_period_short;
-
-        //--- create buffers        
-        CIndicatorBuffer *zema_buffer_long = new CIndicatorBuffer();
-        zema_buffer_long.Name("Zema Long");
-        Add(zema_buffer_long);
-
-        CIndicatorBuffer *zema_buffer_short = new CIndicatorBuffer();
-        zema_buffer_short.Name("Zema Short");
-        Add(zema_buffer_short);
-
-        CIndicatorBuffer *zema_buffer_momentum_long = new CIndicatorBuffer();
-        zema_buffer_momentum_long.Name("Zema Momentum Long");
-        Add(zema_buffer_momentum_long);
-        
-        CIndicatorBuffer *zema_buffer_momentum_short = new CIndicatorBuffer();
-        zema_buffer_momentum_short.Name("Zema Momentum Short");
-        Add(zema_buffer_momentum_short);
-        
-        m_buffers_total=4;
-        
-        //--- ok
-        return(true);
+    if(!Reserve(4)) {
+        return false;
     }
-    return(false);
+    //--- save settings
+    m_symbol = symbol;
+    m_period = timeframe;
+
+    //--- create buffers
+    CIndicatorBuffer *zema_long_buffer = new CIndicatorBuffer();
+    zema_long_buffer.Name("ZEMA Long");
+    Add(zema_long_buffer);
+
+    CIndicatorBuffer *zema_short_buffer = new CIndicatorBuffer();
+    zema_short_buffer.Name("ZEMA Short");
+    Add(zema_short_buffer);
+
+    CIndicatorBuffer *zema_momentum_long_buffer = new CIndicatorBuffer();
+    zema_momentum_long_buffer.Name("ZEMA Momentum Long");
+    Add(zema_momentum_long_buffer);
+
+    CIndicatorBuffer *zema_momentum_short_buffer = new CIndicatorBuffer();
+    zema_momentum_short_buffer.Name("ZEMA Momentum Short");
+    Add(zema_momentum_short_buffer);
+
+    m_buffers_total=4;
+    
+    //--- ok
+    return(true);
 }
 
 //+------------------------------------------------------------------+
@@ -196,8 +175,8 @@ int CiZema::GetData(const int start_pos,const int count,const int buffer_num,dou
 //+------------------------------------------------------------------+
 void CiZema::Refresh(const int flags=OBJ_ALL_PERIODS) {
     double close[];
-    int bars = BarsCustom(m_ind_symbol, m_ind_timeframe);
-    CopyCloseCustom(m_ind_symbol, m_ind_timeframe, 0, bars, close);
+    int bars = BarsCustom(m_symbol, m_period);
+    CopyCloseCustom(m_symbol, m_period, 0, bars, close);
 
     double ema1_long[];
     MAOnBuffer(ArraySize(close), 0, 0, m_zema_period_long, MODE_EMA, close, ema1_long);

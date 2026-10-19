@@ -14,11 +14,9 @@
 
 class SignalZema: public CExpertSignal {
     protected:
-        CiZema            m_zema_indicator;
+        CiZema           *m_zema_indicator;
 
         //--- adjusted parameters
-        string            m_sig_symbol;
-        int               m_sig_timeframe;
         int               m_zema_period_long;
         int               m_zema_period_short;
         bool              m_enable_zema_momentum;
@@ -27,17 +25,18 @@ class SignalZema: public CExpertSignal {
 
     public:
         SignalZema(void);
-        ~SignalZema(void);
+       ~SignalZema(void);
 
         //--- methods of setting adjustable indicator parameters
-        void              IndicatorSymbol(string value)        { m_sig_symbol=value;             }
-        void              IndicatorTimeframe(int value)        { m_sig_timeframe=value;          }
-        void              ZemaPeriodLong(int value)            { m_zema_period_long=value;       }
-        void              ZemaPeriodShort(int value)           { m_zema_period_short=value;      }
+        void              ZemaSymbol(string value)             { m_zema_indicator.Symbol(value); }
+        void              ZemaTimeframe(int value)             { m_zema_indicator.Period(value); }
+        void              ZemaPeriodLong(int value)            { m_zema_indicator.ZemaPeriodLong(value); }
+        void              ZemaPeriodShort(int value)           { m_zema_indicator.ZemaPeriodShort(value); }
         void              EnableZemaMomentum(bool value)       { m_enable_zema_momentum=value;   }
         void              ZemaMomentumCondLong(string value)   { m_zema_momentum_cond_long=value;}
         void              ZemaMomentumCondShort(string value)  { m_zema_momentum_cond_short=value;}
-        
+
+        bool              Initialize(string symbol,int period,bool every_tick);
         //--- method of verification of settings
         virtual bool      ValidationSettings(void);
         //--- method of creating the indicator and timeseries
@@ -50,15 +49,35 @@ class SignalZema: public CExpertSignal {
 //+------------------------------------------------------------------+
 //| Constructor                                                      |
 //+------------------------------------------------------------------+
-SignalZema::SignalZema(void) : m_zema_period_long(73) {
+SignalZema::SignalZema(void) {
     //--- initialization of protected data
     m_used_series=USE_SERIES_OPEN+USE_SERIES_HIGH+USE_SERIES_LOW+USE_SERIES_CLOSE;
+
+    m_zema_indicator = new CiZema();
 }
 
 //+------------------------------------------------------------------+
 //| Destructor                                                       |
 //+------------------------------------------------------------------+
 SignalZema::~SignalZema(void){
+    delete m_zema_indicator;
+}
+
+bool SignalZema::Initialize(string symbol,int period,bool every_tick) {
+    if(m_symbol==NULL) {
+        if((m_symbol=new CSymbolInfo)==NULL)
+            return(false);
+    }
+    if(!m_symbol.Name(symbol))
+        return(false);
+    m_period    =period;
+    m_every_tick=every_tick;
+    
+    m_zema_indicator.Initialize(symbol, period);
+
+    CExpertBase::Init(m_symbol, (ENUM_TIMEFRAMES)period, 1);
+
+    return (true);
 }
 
 //+------------------------------------------------------------------+
@@ -70,7 +89,7 @@ bool SignalZema::ValidationSettings(void) {
         return(false);
     //--- initial data checks
     if(m_zema_period_long<=0) {
-        printf(__FUNCTION__+": period ATR must be greater than 0");
+        printf(__FUNCTION__+": period Zema must be greater than 0");
         return(false);
     }
     //--- ok
@@ -84,20 +103,9 @@ bool SignalZema::InitIndicators(CIndicators *indicators) {
     //--- check pointer
     if(indicators==NULL)
         return(false);
-    //--- initialization of indicators and timeseries of additional filters
-    if(!CExpertSignal::InitIndicators(indicators))
-        return(false);
-    //--- create and initialize MA indicator
-    if(!m_zema_indicator.Create(m_sig_symbol, (ENUM_TIMEFRAMES)m_sig_timeframe,
-                        m_zema_period_long, m_zema_period_short)) {
-        printf(__FUNCTION__+": error initializing object");
-        return(false);
-    }
-    //--- add object to collection
-    if(!indicators.Add(GetPointer(m_zema_indicator))) {
-        printf(__FUNCTION__+": error adding object");
-        return(false);
-    }
+
+    indicators.Add(m_zema_indicator);
+
     //--- ok
     return(true);
 }

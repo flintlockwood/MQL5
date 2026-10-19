@@ -110,7 +110,7 @@ class SignalMain: public CExpertSignal {
         void SignalTimeframe(int value)           { m_sig_timeframe=value;                  }
 
         //--- LSMA
-        void LsmaTimeframe(int value)             { m_lsma_timeframe=value;                 }
+        void LsmaTimeframe(int value)             { m_sig_lsma.LsmaTimeframe(value);        }
         void LsmaSource(ENUM_APPLIED_PRICE value) { m_sig_lsma.LsmaSource(value);           }
         void LsmaPeriod(int value)                { m_sig_lsma.LsmaPeriod(value);           }
         void LsmaOffset(int value)                { m_sig_lsma.LsmaOffset(value);           }
@@ -118,7 +118,7 @@ class SignalMain: public CExpertSignal {
         void LsmaPipShort(int value)              { m_sig_lsma.LsmaPipShort(value);         }
 
         //--- TEMA
-        void TemaTimeframe(int value)             { m_sig_tema.IndicatorTimeframe(value);   }
+        void TemaTimeframe(int value)             { m_sig_tema.TemaTimeframe(value);   }
         void TemaSource(ENUM_APPLIED_PRICE value) { m_sig_tema.TemaSource(value);           }
         void TemaPeriod(int value)                { m_sig_tema.TemaPeriod(value);           }
 
@@ -266,78 +266,41 @@ bool SignalMain::Initialize(string symbol,ENUM_TIMEFRAMES period,bool every_tick
 
     //--- Createing filter TEMA
     m_sig_tema=new SignalTema;
-    m_sig_tema.IndicatorSymbol(m_sig_symbol);
-    m_sig_tema.IndicatorTimeframe(PERIOD_CURRENT);
-    m_sig_tema.TemaSource(PRICE_CLOSE);
-    m_sig_tema.TemaPeriod(72);
-    m_sig_tema.TemaEnableMomentum(false);
+    m_sig_tema.Initialize(m_sig_symbol, m_tema_timeframe, every_tick);
 
     //--- Createing filter EMA Open
     m_sig_memo=new SignalMovingAverage;
-    m_sig_memo.IndicatorSymbol(m_sig_symbol);
-    m_sig_memo.IndicatorTimeframe(PERIOD_H2);
-    m_sig_memo.MaPeriod(10);
-    m_sig_memo.MaSource(PRICE_CLOSE);
-    m_sig_memo.MaMethod(MODE_EMA);
-    m_sig_memo.MaTarget(PRICE_OPEN);
+    m_sig_memo.Initialize(m_sig_symbol, m_memo_timeframe, every_tick);
 
     // Creating filter Candlestick Limit for Close
     m_sig_csoc=new SignalCandlestickLimit();
-    m_sig_csoc.IndicatorSymbol(m_sig_symbol);
-    m_sig_csoc.IndicatorTimeframe(PERIOD_CURRENT);
-    m_sig_csoc.CsoIdxLong(4);
-    m_sig_csoc.CsoPctLong(0.464);
-    m_sig_csoc.CsoIdxShort(2);
-    m_sig_csoc.CsoPctShort(0.777);
-    m_sig_csoc.CsoTarget(PRICE_CLOSE);
+    m_sig_csoc.Initialize(m_sig_symbol, m_csoc_timeframe, every_tick);
 
     // Creating filter Candlestick Limit for Open
     m_sig_csoo=new SignalCandlestickLimit();
-    m_sig_csoo.IndicatorSymbol(m_sig_symbol);
-    m_sig_csoo.IndicatorTimeframe(PERIOD_CURRENT);
-    m_sig_csoo.CsoIdxLong(0);
-    m_sig_csoo.CsoPctLong(0.255);
-    m_sig_csoo.CsoIdxShort(0);
-    m_sig_csoo.CsoPctShort(0.325);
-    m_sig_csoo.CsoTarget(PRICE_OPEN);
+    m_sig_csoo.Initialize(m_sig_symbol, m_csoo_timeframe, every_tick);
 
     //--- Creating filter Mema Close Signal
     m_sig_mema=new SignalMovingAverage();
-    m_sig_mema.IndicatorSymbol(m_sig_symbol);
-    m_sig_mema.IndicatorTimeframe(PERIOD_M20);
-    m_sig_mema.MaPeriod(60);
-    m_sig_mema.MaSource(PRICE_LOW);
-    m_sig_mema.MaMethod(MODE_SMMA);
-    m_sig_mema.MaTarget(PRICE_CLOSE);
+    m_sig_mema.Initialize(m_sig_symbol, m_mema_timeframe, every_tick);
 
     //--- Creating filter ATR Trailing
     m_sig_atrt=new SignalATRTrailing();
-    m_sig_atrt.IndicatorSymbol(m_sig_symbol);
-    m_sig_atrt.IndicatorTimeframe(m_sig_timeframe);
-    m_sig_atrt.ATRPeriodLong(10);
-    m_sig_atrt.ATRMultiplierLong(3.6);
-    m_sig_atrt.ATRPeriodShort(6);
-    m_sig_atrt.ATRMultiplierShort(2.2);
+    m_sig_atrt.Initialize(m_sig_symbol, m_atrt_timeframe, every_tick);
 
     //--- Creating filter Zema Signal
     m_sig_zema=new SignalZema;
-    m_sig_zema.IndicatorSymbol(m_sig_symbol);
-    m_sig_zema.IndicatorTimeframe(PERIOD_CURRENT);
-    m_sig_zema.ZemaPeriodLong(73);
-    m_sig_zema.ZemaPeriodShort(52);
-    m_sig_zema.EnableZemaMomentum(true);
-    m_sig_zema.ZemaMomentumCondLong("0|4");
-    m_sig_zema.ZemaMomentumCondShort("0|1");
+    m_sig_zema.Initialize(m_sig_symbol, m_zema_timeframe, every_tick);
 
     //--- Creating filter Consolidation
-    m_sig_cons=new SignalConsolidation;
+    m_sig_cons=new SignalConsolidation();
     m_sig_cons.ConsLookbackLong(16);
     m_sig_cons.ConsLengthLong(7);
     m_sig_cons.ConsLookbackShort(8);
     m_sig_cons.ConsLengthShort(2);
 
     //--- Createing filter ATR Signal
-    m_sig_atr=new SignalATR;
+    m_sig_atr=new SignalATR();
     m_sig_atr.IndicatorSymbol(m_sig_symbol);
     m_sig_atr.IndicatorTimeframe(PERIOD_M45);
     m_sig_atr.ATRPeriod(3);
@@ -346,7 +309,7 @@ bool SignalMain::Initialize(string symbol,ENUM_TIMEFRAMES period,bool every_tick
     m_sig_atr.EnableATRIncreaseBySignal(true);
 
     //--- Createing filter StochRSI
-    m_sig_stochrsi=new SignalStochRSI;
+    m_sig_stochrsi=new SignalStochRSI();
     m_sig_stochrsi.IndicatorSymbol(m_sig_symbol);
     m_sig_stochrsi.IndicatorTimeframe(PERIOD_M30);
     m_sig_stochrsi.RSIPeriod(22);
@@ -356,7 +319,7 @@ bool SignalMain::Initialize(string symbol,ENUM_TIMEFRAMES period,bool every_tick
     m_sig_stochrsi.KDOperator(">");
 
     //--- Creating filter Super Trend with Close signal
-    m_sig_st=new SignalSuperTrend;
+    m_sig_st=new SignalSuperTrend();
     m_sig_st.SignalSymbol(m_sig_symbol);
     m_sig_st.SignalTimeframe(PERIOD_M30);
     m_sig_st.PeriodMA(10);
@@ -366,11 +329,11 @@ bool SignalMain::Initialize(string symbol,ENUM_TIMEFRAMES period,bool every_tick
     m_sig_st.EnableClose(true);
 
 //--- Creating filter Candlestick Body
-    m_sig_csb=new SignalCandlestickBody;
+    m_sig_csb=new SignalCandlestickBody();
     m_sig_csb.CsbPipLong(m_csb_pip_long);
 
     //--- Creating filter Super Trend without Close signal
-    m_sig_st2=new SignalSuperTrend;
+    m_sig_st2=new SignalSuperTrend();
     m_sig_st2.SignalSymbol(m_sig_symbol);
     m_sig_st2.SignalTimeframe(PERIOD_M30);
     m_sig_st2.PeriodMA(10);
@@ -380,39 +343,20 @@ bool SignalMain::Initialize(string symbol,ENUM_TIMEFRAMES period,bool every_tick
     m_sig_st2.EnableClose(false);
 
     //--- Createing filter TEMA (BBMC)
-    m_sig_tema_momentum=new SignalTema;
-    m_sig_tema_momentum.IndicatorSymbol(m_sig_symbol);
-    m_sig_tema_momentum.IndicatorTimeframe(PERIOD_CURRENT);
-    m_sig_tema_momentum.TemaSource(PRICE_CLOSE);
-    m_sig_tema_momentum.TemaPeriod(54);
-    m_sig_tema_momentum.TemaEnableMomentum(true);
+    m_sig_tema_momentum=new SignalTema();
+    m_sig_tema_momentum.Initialize(m_sig_symbol, m_temam_timeframe, every_tick);
 
     //--- Createing filter EMA SLOW
-    m_sig_emaf=new SignalMovingAverage;
-    m_sig_emaf.IndicatorSymbol(m_sig_symbol);
-    m_sig_emaf.IndicatorTimeframe(m_sig_timeframe);
-    m_sig_emaf.MaSource(PRICE_CLOSE);
-    m_sig_emaf.MaPeriod(145);
-    m_sig_emaf.MaMethod(MODE_EMA);
-    m_sig_emaf.MaTarget(PRICE_CLOSE);
+    m_sig_emaf=new SignalMovingAverage();
+    m_sig_emaf.Initialize(m_sig_symbol, m_temam_timeframe, every_tick);
 
     //--- Createing filter EMA MEDIUM
-    m_sig_emam=new SignalMovingAverage;
-    m_sig_emam.IndicatorSymbol(m_sig_symbol);
-    m_sig_emam.IndicatorTimeframe(m_sig_timeframe);
-    m_sig_emam.MaSource(PRICE_CLOSE);
-    m_sig_emam.MaPeriod(55);
-    m_sig_emam.MaMethod(MODE_EMA);
-    m_sig_emam.MaTarget(PRICE_CLOSE);
+    m_sig_emam=new SignalMovingAverage();
+    m_sig_emam.Initialize(m_sig_symbol, m_temam_timeframe, every_tick);
 
     //--- Createing filter EMA FAST
-    m_sig_emas=new SignalMovingAverage;
-    m_sig_emas.IndicatorSymbol(m_sig_symbol);
-    m_sig_emas.IndicatorTimeframe(m_sig_timeframe);
-    m_sig_emas.MaSource(PRICE_CLOSE);
-    m_sig_emas.MaPeriod(20);
-    m_sig_emas.MaMethod(MODE_EMA);
-    m_sig_emas.MaTarget(PRICE_CLOSE);
+    m_sig_emas=new SignalMovingAverage();
+    m_sig_emas.Initialize(m_sig_symbol, m_temam_timeframe, every_tick);
 
     //--- ok
     return(true);

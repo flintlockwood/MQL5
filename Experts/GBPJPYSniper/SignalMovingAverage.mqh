@@ -17,8 +17,8 @@ class SignalMovingAverage: public CExpertSignal {
         double            m_data[];
 
         //--- adjusted parameters
-        string            m_sig_symbol;
-        int               m_sig_timeframe;
+        string            m_ma_symbol;
+        int               m_ma_timeframe;
         ENUM_APPLIED_PRICE m_ma_source;
         int               m_ma_period;
         ENUM_MA_METHOD    m_ma_method;
@@ -26,31 +26,31 @@ class SignalMovingAverage: public CExpertSignal {
 
     public:
         SignalMovingAverage(void);
-        ~SignalMovingAverage(void);
+       ~SignalMovingAverage(void);
 
         //--- methods of setting adjustable indicator parameters
-        void              IndicatorSymbol(string value)        { m_sig_symbol=value;    }
-        void              IndicatorTimeframe(int value)        { m_sig_timeframe=value; }
+        void              MaSymbol(string value)               { m_ma_symbol=value;    }
+        void              MaTimeframe(int value)               { m_ma_timeframe=value; }
         void              MaSource(ENUM_APPLIED_PRICE value)   { m_ma_source=value;     }
         void              MaPeriod(int value)                  { m_ma_period=value;     }
         void              MaMethod(ENUM_MA_METHOD value)       { m_ma_method=value;     }
         void              MaTarget(ENUM_APPLIED_PRICE value)   { m_ma_target=value;     }
-        
+ 
+        bool              Initialize(string symbol,int period,bool every_tick);
         //--- method of verification of settings
         virtual bool      ValidationSettings(void);
-        //--- method of creating the indicator and timeseries
-        virtual bool      InitIndicators(CIndicators *indicators);
         //--- methods of checking if the market models are formed
         virtual int       LongCondition(void);
         virtual int       ShortCondition(void);
+
+        //--- method of creating the indicator and timeseries
+        virtual bool      InitIndicators(CIndicators *indicators);
 };
 
 //+------------------------------------------------------------------+
 //| Constructor                                                      |
 //+------------------------------------------------------------------+
-SignalMovingAverage::SignalMovingAverage(void) : m_ma_source(PRICE_LOW),
-                             m_ma_period(60),
-                             m_ma_method(MODE_SMMA) {
+SignalMovingAverage::SignalMovingAverage(void) {
     //--- initialization of protected data
     m_used_series=USE_SERIES_OPEN+USE_SERIES_HIGH+USE_SERIES_LOW+USE_SERIES_CLOSE;
 }
@@ -59,6 +59,23 @@ SignalMovingAverage::SignalMovingAverage(void) : m_ma_source(PRICE_LOW),
 //| Destructor                                                       |
 //+------------------------------------------------------------------+
 SignalMovingAverage::~SignalMovingAverage(void){
+}
+
+bool SignalMovingAverage::Initialize(string symbol,int period,bool every_tick) {
+    if(m_symbol==NULL) {
+        if((m_symbol=new CSymbolInfo)==NULL)
+            return(false);
+    }
+    if(!m_symbol.Name(symbol))
+        return(false);
+    m_ma_symbol = symbol;
+    m_ma_timeframe = period;
+    m_period    =period;
+    m_every_tick=every_tick;
+
+    CExpertBase::Init(m_symbol, (ENUM_TIMEFRAMES)period, 1);
+
+    return (true);
 }
 
 //+------------------------------------------------------------------+
@@ -84,9 +101,6 @@ bool SignalMovingAverage::InitIndicators(CIndicators *indicators) {
     //--- check pointer
     if(indicators==NULL)
         return(false);
-    //--- initialization of indicators and timeseries of additional filters
-    if(!CExpertSignal::InitIndicators(indicators))
-        return(false);
 
     //--- ok
     return(true);
@@ -99,14 +113,14 @@ int SignalMovingAverage::LongCondition(void) {
     int result=0;
     int idx   =StartIndex();
     
-    int bars = BarsCustom(m_sig_symbol, m_sig_timeframe);
+    int bars = BarsCustom(m_symbol.Name(), m_period);
     double source[];
-    CopyAppliedPrice(m_sig_symbol, m_sig_timeframe, m_ma_source, 0, bars, source);
+    CopyAppliedPrice(m_symbol.Name(), m_ma_timeframe, m_ma_source, 0, bars, source);
     double ma[];
     MAOnBuffer(ArraySize(source), 0, 0, m_ma_period, m_ma_method, source, ma);
     
     ArraySetAsSeries(ma, true);
-    double target_price = GetAppliedPrice(m_sig_symbol, m_sig_timeframe, m_ma_target, idx);
+    double target_price = GetAppliedPrice(m_symbol.Name(), m_ma_timeframe, m_ma_target, idx);
     bool cond = target_price > ma[idx];
 
     //--- return the result
@@ -120,14 +134,14 @@ int SignalMovingAverage::ShortCondition(void) {
     int result=0;
     int idx   =StartIndex();
     
-    int bars = BarsCustom(m_sig_symbol, m_sig_timeframe);
+    int bars = BarsCustom(m_symbol.Name(), m_ma_timeframe);
     double source[];
-    CopyAppliedPrice(m_sig_symbol, m_sig_timeframe, m_ma_source, 0, bars, source);
+    CopyAppliedPrice(m_symbol.Name(), m_ma_timeframe, m_ma_source, 0, bars, source);
     double ma[];
     MAOnBuffer(ArraySize(source), 0, 0, m_ma_period, m_ma_method, source, ma);
     
     ArraySetAsSeries(ma, true);
-    double target_price = GetAppliedPrice(m_sig_symbol, m_sig_timeframe, m_ma_target, idx);
+    double target_price = GetAppliedPrice(m_symbol.Name(), m_ma_timeframe, m_ma_target, idx);
     bool cond = target_price < ma[idx];
 
     //--- return the result

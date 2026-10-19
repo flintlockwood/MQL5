@@ -25,6 +25,8 @@ class SignalLinearRegression: public CExpertSignal {
         ~SignalLinearRegression(void);
 
         //--- methods of setting adjustable indicator parameters
+        void              LsmaSymbol(string value)             { m_lsma_indicator.Symbol(value); }
+        void              LsmaTimeframe(int value)             { m_lsma_indicator.Period(value); }
         void              LsmaSource(ENUM_APPLIED_PRICE value) { m_lsma_indicator.LsmaSource(value);}
         void              LsmaPeriod(int value)                { m_lsma_indicator.LsmaPeriod(value);}
         void              LsmaOffset(int value)                { m_lsma_indicator.LsmaOffset(value);}
@@ -42,7 +44,6 @@ class SignalLinearRegression: public CExpertSignal {
         virtual bool      LongMomentumCondition(int idx);
         virtual bool      ShortMomentumCondition(int idx);
 
-    protected:
         bool              InitIndicators(CIndicators *indicators);
 };
 
@@ -60,6 +61,7 @@ SignalLinearRegression::SignalLinearRegression(void) {
 //| Destructor                                                       |
 //+------------------------------------------------------------------+
 SignalLinearRegression::~SignalLinearRegression(void){
+    delete m_lsma_indicator;
 }
 
 bool SignalLinearRegression::Initialize(string symbol,int period,bool every_tick) {
@@ -72,7 +74,7 @@ bool SignalLinearRegression::Initialize(string symbol,int period,bool every_tick
     m_period    =period;
     m_every_tick=every_tick;
     
-    m_lsma_indicator.Create(m_symbol.Name(), m_period);
+    m_lsma_indicator.Initialize(symbol, period);
 
     CExpertBase::Init(m_symbol, (ENUM_TIMEFRAMES)period, 1);
 

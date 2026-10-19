@@ -14,8 +14,8 @@
 class SignalCandlestickLimit: public CExpertSignal {
     protected:
         //--- adjusted parameters
-        string            m_sig_symbol;
-        int               m_sig_timeframe;
+        string            m_cso_symbol;
+        int               m_cso_timeframe;
         int               m_cso_idx_long;
         double            m_cso_pct_long;
         int               m_cso_idx_short;
@@ -24,22 +24,26 @@ class SignalCandlestickLimit: public CExpertSignal {
 
     public:
         SignalCandlestickLimit(void);
-        ~SignalCandlestickLimit(void);
+       ~SignalCandlestickLimit(void);
 
         //--- methods of setting adjustable indicator parameters
-        void              IndicatorSymbol(string value)         { m_sig_symbol=value;    }
-        void              IndicatorTimeframe(int value)         { m_sig_timeframe=value; }
+        void              CsoSymbol(string value)               { m_cso_symbol=value;    }
+        void              CsoTimeframe(int value)               { m_cso_timeframe=value; }
         void              CsoIdxLong(int value)                 { m_cso_idx_long=value;  }
         void              CsoPctLong(double value)              { m_cso_pct_long=value;  }
         void              CsoIdxShort(int value)                { m_cso_idx_short=value; }
         void              CsoPctShort(double value)             { m_cso_pct_short=value; }
         void              CsoTarget(ENUM_APPLIED_PRICE value)   { m_cso_target=value;    }
         
+        bool              Initialize(string symbol,int period,bool every_tick);
         //--- method of verification of settings
         virtual bool      ValidationSettings(void);
         //--- methods of checking if the market models are formed
         virtual int       LongCondition(void);
         virtual int       ShortCondition(void);
+
+        //--- method of creating the indicator and timeseries
+        virtual bool      InitIndicators(CIndicators *indicators);
 };
 
 //+------------------------------------------------------------------+
@@ -56,6 +60,23 @@ SignalCandlestickLimit::SignalCandlestickLimit(void) {
 SignalCandlestickLimit::~SignalCandlestickLimit(void){
 }
 
+bool SignalCandlestickLimit::Initialize(string symbol,int period,bool every_tick) {
+    if(m_symbol==NULL) {
+        if((m_symbol=new CSymbolInfo)==NULL)
+            return(false);
+    }
+    if(!m_symbol.Name(symbol))
+        return(false);
+    m_cso_symbol = symbol;
+    m_cso_timeframe = period;
+    m_period    =period;
+    m_every_tick=every_tick;
+
+    CExpertBase::Init(m_symbol, (ENUM_TIMEFRAMES)period, 1);
+
+    return (true);
+}
+
 //+------------------------------------------------------------------+
 //| Validation settings protected data.                              |
 //+------------------------------------------------------------------+
@@ -69,15 +90,27 @@ bool SignalCandlestickLimit::ValidationSettings(void) {
 }
 
 //+------------------------------------------------------------------+
+//| Create indicators.                                               |
+//+------------------------------------------------------------------+
+bool SignalCandlestickLimit::InitIndicators(CIndicators *indicators) {
+    //--- check pointer
+    if(indicators==NULL)
+        return(false);
+
+    //--- ok
+    return(true);
+}
+
+//+------------------------------------------------------------------+
 //| "Voting" that price will grow.                                   |
 //+------------------------------------------------------------------+
 int SignalCandlestickLimit::LongCondition(void) {
     int result=0;
     int idx   =StartIndex();
     
-    int bars = BarsCustom(m_sig_symbol, m_sig_timeframe);
+    int bars = BarsCustom(m_symbol.Name(), m_period);
     double target[];
-    CopyAppliedPrice(m_sig_symbol, m_sig_timeframe, m_cso_target, 0, bars, target);
+    CopyAppliedPrice(m_symbol.Name(), m_period, m_cso_target, 0, bars, target);
     
     ArraySetAsSeries(target, true);
     bool cond = target[idx] < Open(m_cso_idx_long + idx) * (1 + m_cso_pct_long / 100);
@@ -93,9 +126,9 @@ int SignalCandlestickLimit::ShortCondition(void) {
     int result=0;
     int idx   =StartIndex();
     
-    int bars = BarsCustom(m_sig_symbol, m_sig_timeframe);
+    int bars = BarsCustom(m_symbol.Name(), m_period);
     double target[];
-    CopyAppliedPrice(m_sig_symbol, m_sig_timeframe, m_cso_target, 0, bars, target);
+    CopyAppliedPrice(m_symbol.Name(), m_period, m_cso_target, 0, bars, target);
     
     ArraySetAsSeries(target, true);
     bool cond = target[idx] > Open(m_cso_idx_short + idx) * (1 - m_cso_pct_short / 100);

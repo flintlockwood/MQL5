@@ -14,11 +14,9 @@
 
 class SignalTema: public CExpertSignal {
     protected:
-        CiTema            m_tema_indicator;
+        CiTema           *m_tema_indicator;
 
         //--- adjusted parameters
-        ENUM_APPLIED_PRICE m_tema_source;
-        int               m_tema_period;
         bool              m_enable_tema_momentum;
 
     public:
@@ -26,8 +24,10 @@ class SignalTema: public CExpertSignal {
         ~SignalTema(void);
 
         //--- methods of setting adjustable indicator parameters
-        void              TemaSource(ENUM_APPLIED_PRICE value) { m_tema_source=value;   }
-        void              TemaPeriod(int value)                { m_tema_period=value;   }
+        void              TemaSymbol(string value)             { m_tema_indicator.Symbol(value); }
+        void              TemaTimeframe(int value)             { m_tema_indicator.Period(value); }
+        void              TemaSource(ENUM_APPLIED_PRICE value) { m_tema_indicator.TemaSource(value); }
+        void              TemaPeriod(int value)                { m_tema_indicator.TemaPeriod(value); }
         void              TemaEnableMomentum(bool value)       { m_enable_tema_momentum=value; }
         
         bool              Initialize(string symbol,int period,bool every_tick);
@@ -36,13 +36,16 @@ class SignalTema: public CExpertSignal {
         //--- methods of checking if the market models are formed
         virtual int       LongCondition(void);
         virtual int       ShortCondition(void);
+        virtual bool      LongTrendCondition(int idx);
+        virtual bool      ShortTrendCondition(int idx);
+        virtual bool      LongMomentumCondition(int idx);
+        virtual bool      ShortMomentumCondition(int idx);
 };
 
 //+------------------------------------------------------------------+
 //| Constructor                                                      |
 //+------------------------------------------------------------------+
-SignalTema::SignalTema(void) : m_tema_source(PRICE_CLOSE),
-                             m_tema_period(18) {
+SignalTema::SignalTema(void) {
     //--- initialization of protected data
     m_used_series=USE_SERIES_OPEN+USE_SERIES_HIGH+USE_SERIES_LOW+USE_SERIES_CLOSE;
 
@@ -53,6 +56,7 @@ SignalTema::SignalTema(void) : m_tema_source(PRICE_CLOSE),
 //| Destructor                                                       |
 //+------------------------------------------------------------------+
 SignalTema::~SignalTema(void){
+    delete m_tema_indicator;
 }
 
 bool SignalTema::Initialize(string symbol,int period,bool every_tick) {
@@ -65,7 +69,7 @@ bool SignalTema::Initialize(string symbol,int period,bool every_tick) {
     m_period    =period;
     m_every_tick=every_tick;
     
-    m_tema_indicator.Create(m_symbol.Name(), m_period);
+    m_tema_indicator.Initialize(symbol, period);
 
     CExpertBase::Init(m_symbol, (ENUM_TIMEFRAMES)period, 1);
 
@@ -79,11 +83,6 @@ bool SignalTema::ValidationSettings(void) {
     //--- validation settings of additional filters
     if(!CExpertSignal::ValidationSettings())
         return(false);
-    //--- initial data checks
-    if(m_tema_period<=0) {
-        printf(__FUNCTION__+": period MA must be greater than 0");
-        return(false);
-    }
     //--- ok
     return(true);
 }
@@ -120,3 +119,23 @@ int SignalTema::ShortCondition(void) {
     return(cond ? 100 : 0);
 }
 //+------------------------------------------------------------------+
+
+bool SignalTema::LongTrendCondition(int idx) {
+    int startIdx   =StartIndex();
+    return false; // Close(startIdx + idx) > m_tema_indicator.LinReg(startIdx + idx);
+}
+
+bool SignalTema::ShortTrendCondition(int idx) {
+    int startIdx   =StartIndex();
+    return false; //Close(startIdx + idx) < m_lsma_indicator.LinReg(startIdx + idx);
+}
+
+bool SignalTema::LongMomentumCondition(int idx) {
+    int startIdx   =StartIndex();
+    return false; //m_lsma_indicator.LinReg(startIdx + idx) > m_lsma_indicator.LinReg(startIdx + idx + 1);
+}
+
+bool SignalTema::ShortMomentumCondition(int idx) {
+    int startIdx   =StartIndex();
+    return false; //m_lsma_indicator.LinReg(startIdx + idx) < m_lsma_indicator.LinReg(startIdx + idx + 1);
+}
