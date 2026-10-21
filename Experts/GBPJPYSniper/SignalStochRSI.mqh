@@ -12,15 +12,13 @@
 
 class SignalStochRSI: public CExpertSignal {
     protected:
-        CiStochRSI        m_ind_stoch;
+        CiStochRSI       *m_ind_stoch;
         
         //--- adjusted indicator parameters
-        string            m_ind_symbol;
-        ENUM_TIMEFRAMES   m_ind_timeframe;
-        int               m_ind_rsi_period;
-        int               m_ind_stoch_length;
-        int               m_ind_k;
-        int               m_ind_d;
+        int               m_stochrsi_period;
+        int               m_stochrsi_length;
+        int               m_stochrsi_k;
+        int               m_stochrsi_d;
         ENUM_APPLIED_PRICE m_applied_price;
         string            m_kd_operator;
 
@@ -32,18 +30,16 @@ class SignalStochRSI: public CExpertSignal {
         ~SignalStochRSI(void);
 
         //--- methods of setting adjustable indicator parameters
-        void              IndicatorSymbol(string value)       { m_ind_symbol=value;         }
-        void              IndicatorTimeframe(ENUM_TIMEFRAMES value) { m_ind_timeframe=value;}
-        void              RSIPeriod(int value)                { m_ind_rsi_period=value;     }
-        void              StochLength(int value)              { m_ind_stoch_length=value;   }
-        void              StochK(int value)                   { m_ind_k=value;              }
-        void              StochD(int value)                   { m_ind_d=value;              }
-        void              RsiSource(ENUM_APPLIED_PRICE value) { m_applied_price=value;      }
+        void              IndicatorSymbol(string value)       { m_ind_stoch.Symbol(value);  }
+        void              IndicatorTimeframe(ENUM_TIMEFRAMES value) { m_ind_stoch.Timeframe(value);}
+        void              RSIPeriod(int value)                { m_ind_stoch.RsiPeriod(value);     }
+        void              StochLength(int value)              { m_ind_stoch.StochLength(value);   }
+        void              StochK(int value)                   { m_ind_stoch.StochK(value);              }
+        void              StochD(int value)                   { m_ind_stoch.StochD(value);              }
+        void              RsiSource(ENUM_APPLIED_PRICE value) { m_ind_stoch.Applied(value);      }
         void              KDOperator(string value)            { m_kd_operator=value;        }
 
-        //--- methods of adjusting "weights" of market models
-        void              Pattern_0(int value)                { m_pattern_0=value;          }
-        
+        bool              Initialize(string symbol,int period,bool every_tick);
         //--- method of verification of settings
         virtual bool      ValidationSettings(void);
         //--- method of creating the indicator and timeseries
@@ -56,20 +52,18 @@ class SignalStochRSI: public CExpertSignal {
 //+------------------------------------------------------------------+
 //| Constructor                                                      |
 //+------------------------------------------------------------------+
-SignalStochRSI::SignalStochRSI(void) : m_ind_rsi_period(22),
-                             m_ind_stoch_length(2),
-                             m_ind_k(19),
-                             m_ind_d(2),
-                             m_applied_price(PRICE_HIGH),
-                             m_kd_operator(">") {
+SignalStochRSI::SignalStochRSI(void) {
     //--- initialization of protected data
     m_used_series=USE_SERIES_OPEN+USE_SERIES_HIGH+USE_SERIES_LOW+USE_SERIES_CLOSE;
+
+    m_ind_stoch = new CiStochRSI();
 }
 
 //+------------------------------------------------------------------+
 //| Destructor                                                       |
 //+------------------------------------------------------------------+
 SignalStochRSI::~SignalStochRSI(void){
+    delete m_ind_stoch;
 }
 
 //+------------------------------------------------------------------+
@@ -79,25 +73,26 @@ bool SignalStochRSI::ValidationSettings(void) {
     //--- validation settings of additional filters
     if(!CExpertSignal::ValidationSettings())
         return(false);
-    //--- initial data checks
-    if(m_ind_rsi_period<=0) {
-        printf(__FUNCTION__+": RSI period must be greater than 0");
-        return(false);
-    }
-    if(m_ind_stoch_length<=0) {
-        printf(__FUNCTION__+": Stochastic period must be greater than 0");
-        return(false);
-    }
-    if(m_ind_k<=0) {
-        printf(__FUNCTION__+": Stochastic K length must be greater than 0");
-        return(false);
-    }
-    if(m_ind_d<=0) {
-        printf(__FUNCTION__+": Stochastic D length must be greater than 0");
-        return(false);
-    }
+
     //--- ok
     return(true);
+}
+
+bool SignalStochRSI::Initialize(string symbol,int period,bool every_tick) {
+    if(m_symbol==NULL) {
+        if((m_symbol=new CSymbolInfo)==NULL)
+            return(false);
+    }
+    if(!m_symbol.Name(symbol))
+        return(false);
+    m_period    =period;
+    m_every_tick=every_tick;
+    
+    m_ind_stoch.Initialize(symbol, period);
+
+    CExpertBase::Init(m_symbol, (ENUM_TIMEFRAMES)period, 1);
+
+    return (true);
 }
 
 //+------------------------------------------------------------------+
@@ -111,19 +106,8 @@ bool SignalStochRSI::InitIndicators(CIndicators *indicators) {
     if(!CExpertSignal::InitIndicators(indicators))
         return(false);
 
-    //--- create and initialize MA indicator
-    if(!m_ind_stoch.Create(m_ind_symbol,m_ind_timeframe,
-                        m_ind_rsi_period, m_ind_stoch_length,
-                        m_ind_k, m_ind_d, m_applied_price)) {
-        printf(__FUNCTION__+": error initializing object");
-        return(false);
-    }
+    indicators.Add(m_ind_stoch);
 
-    //--- add object to collection
-    if(!indicators.Add(GetPointer(m_ind_stoch))) {
-        printf(__FUNCTION__+": error adding object");
-        return(false);
-    }
     //--- ok
     return(true);
 }

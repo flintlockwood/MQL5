@@ -13,8 +13,6 @@
 
 class CiSuperTrend: public CIndicator {
     protected:
-        string            m_ind_symbol;
-        int               m_ind_timeframe;
         int               m_atr_period;
         double            m_atr_multiplier;
         ENUM_MA_METHOD    m_ma_method;
@@ -22,22 +20,18 @@ class CiSuperTrend: public CIndicator {
 
     public:
         CiSuperTrend(void);
-        ~CiSuperTrend(void);
+       ~CiSuperTrend(void);
 
         //--- methods to set to protected data
-        void            IndSymbol(string value) { m_ind_symbol = value; }
-        void            IndTimeframe(int value) { m_ind_timeframe = value; }
+        void            Symbol(string value) { m_symbol = value; }
+        void            Timeframe(int value) { m_period = value; }
         void            AtrPeriod(int value) { m_atr_period = value;  }
         void            AtrMultiplier(double value) { m_atr_multiplier = value; }
         void            MaMethod(ENUM_MA_METHOD value) {m_ma_method = value; }
         void            Applied(ENUM_APPLIED_PRICE value) { m_applied = value; }
         
         //--- method of creation
-        bool            Create(const string symbol,const ENUM_TIMEFRAMES period,
-                            const ENUM_INDICATOR type,const int num_params,const MqlParam &params[]);
-        bool            Create(const string symbol,const int period,
-                            const int atr_period,const double atr_mutiplier,
-                            const ENUM_MA_METHOD ma_method,const ENUM_APPLIED_PRICE applied);
+        bool            Initialize(const string symbol,const int timeframe);
         
         //--- methods of access to indicator data
         double          GetData(const int buffer_num,const int index);
@@ -51,12 +45,7 @@ class CiSuperTrend: public CIndicator {
 //+------------------------------------------------------------------+
 //| Constructor                                                      |
 //+------------------------------------------------------------------+
-CiSuperTrend::CiSuperTrend(void) : m_ind_symbol("GBPJPY"),
-                   m_ind_timeframe(PERIOD_M30),
-                   m_atr_period(10),
-                   m_atr_multiplier(3.1),
-                   m_ma_method(MODE_SMMA),
-                   m_applied(PRICE_OPEN) {
+CiSuperTrend::CiSuperTrend(void) {
 }
 
 //+------------------------------------------------------------------+
@@ -65,51 +54,32 @@ CiSuperTrend::CiSuperTrend(void) : m_ind_symbol("GBPJPY"),
 CiSuperTrend::~CiSuperTrend(void) {
 }
 
-//+------------------------------------------------------------------+
-//| Create indicator                                                 |
-//+------------------------------------------------------------------+
-bool CiSuperTrend::Create(const string symbol,const ENUM_TIMEFRAMES period,
-                            const ENUM_INDICATOR type,const int num_params,const MqlParam &params[]) {
-    return(Create(params[1].string_value, (int)params[2].integer_value, 
-                    (int)params[3].integer_value, params[4].double_value,
-                    (ENUM_MA_METHOD)params[5].integer_value, (ENUM_APPLIED_PRICE)params[6].integer_value));
-}
-
-bool CiSuperTrend::Create(const string symbol,const int period,
-                        const int atr_period,const double atr_mutiplier,
-                        const ENUM_MA_METHOD ma_method,const ENUM_APPLIED_PRICE applied) {
+bool CiSuperTrend::Initialize(const string symbol,const int timeframe) {
 //--- we do not need to create indicator here
-    if(Reserve(3)) {
-        //--- string of status of drawing
-        m_name  ="ST";
-        m_status="("+symbol+","+PeriodDescription()+","+
-               IntegerToString(atr_period)+","+DoubleToString(atr_mutiplier)+","+
-               MethodDescription(ma_method)+","+PriceDescription(applied)+")";
-        //--- save settings
-        m_ind_symbol = symbol;
-        m_ind_timeframe = period;
-        m_atr_period=atr_period;
-        m_atr_multiplier=atr_mutiplier;
-        m_ma_method=ma_method;
-        m_applied  =applied;
-        //--- create buffers
-        CIndicatorBuffer *upper_band_buffer = new CIndicatorBuffer();
-        upper_band_buffer.Name("Upper Band");
-        Add(upper_band_buffer);
-
-        CIndicatorBuffer *lower_band_buffer = new CIndicatorBuffer();
-        lower_band_buffer.Name("Lower Band");
-        Add(lower_band_buffer);
-
-        CIndicatorBuffer *trend_buffer = new CIndicatorBuffer();
-        trend_buffer.Name("Trend");
-        Add(trend_buffer);
-
-        m_buffers_total=3;
-        //--- ok
-        return(true);
+    if(!Reserve(3)) {
+        return false;
     }
-    return(false);
+    //--- save settings
+    m_symbol = symbol;
+    m_period = timeframe;
+
+    //--- create buffers
+    CIndicatorBuffer *upper_band_buffer = new CIndicatorBuffer();
+    upper_band_buffer.Name("Upper Band");
+    Add(upper_band_buffer);
+
+    CIndicatorBuffer *lower_band_buffer = new CIndicatorBuffer();
+    lower_band_buffer.Name("Lower Band");
+    Add(lower_band_buffer);
+
+    CIndicatorBuffer *trend_buffer = new CIndicatorBuffer();
+    trend_buffer.Name("Trend");
+    Add(trend_buffer);
+
+    m_buffers_total=3;
+    
+    //--- ok
+    return(true);
 }
 
 //+------------------------------------------------------------------+
@@ -190,10 +160,10 @@ void CiSuperTrend::Refresh(const int flags=OBJ_ALL_PERIODS) {
     double applied_prices[];
     MqlRates rates[];
     double close[];
-    int bars = BarsCustom(m_ind_symbol, m_ind_timeframe);
-    CopyAppliedPrice(m_ind_symbol, m_ind_timeframe, m_applied, 0, bars, applied_prices);
-    CopyTR(m_ind_symbol, m_ind_timeframe, 0, BarsCustom(m_ind_symbol, m_ind_timeframe), tr);
-    CopyRatesCustom(m_ind_symbol, m_ind_timeframe, 0, bars, rates);
+    int bars = BarsCustom(m_symbol, m_period);
+    CopyAppliedPrice(m_symbol, m_period, m_applied, 0, bars, applied_prices);
+    CopyTR(m_symbol, m_period, 0, BarsCustom(m_symbol, m_period), tr);
+    CopyRatesCustom(m_symbol, m_period, 0, bars, rates);
     CopyCloseFromMqlRates(rates, close);
 
     ArrayResize(atr, ArraySize(tr));

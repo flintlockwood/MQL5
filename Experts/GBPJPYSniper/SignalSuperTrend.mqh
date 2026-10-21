@@ -13,11 +13,9 @@
 
 class SignalSuperTrend: public CExpertSignal {
     protected:
-        CiSuperTrend      m_st_indicator;
+        CiSuperTrend     *m_st_indicator;
         
         //--- adjusted signal & indicator parameters
-        string            m_sig_symbol;
-        int               m_sig_timeframe;
         int               m_st_period;
         double            m_st_multiplier;
         ENUM_MA_METHOD    m_st_ma_method;
@@ -26,17 +24,18 @@ class SignalSuperTrend: public CExpertSignal {
 
     public:
         SignalSuperTrend(void);
-        ~SignalSuperTrend(void);
+       ~SignalSuperTrend(void);
 
         //--- methods of setting adjustable indicator parameters
-        void              SignalSymbol(string value)          { m_sig_symbol=value;         }
-        void              SignalTimeframe(int value)          { m_sig_timeframe=value; }
-        void              PeriodMA(int value)                 { m_st_period=value;          }
-        void              Multiplier(double value)            { m_st_multiplier=value;      }
-        void              MaMethod(ENUM_MA_METHOD value)      { m_st_ma_method=value;       }
-        void              Applied(ENUM_APPLIED_PRICE value)   { m_st_applied_price=value;   }
+        void              SignalSymbol(string value)          { m_st_indicator.Symbol(value);         }
+        void              SignalTimeframe(int value)          { m_st_indicator.Timeframe(value); }
+        void              PeriodMA(int value)                 { m_st_indicator.AtrPeriod(value);          }
+        void              Multiplier(double value)            { m_st_indicator.AtrMultiplier(value);      }
+        void              MaMethod(ENUM_MA_METHOD value)      { m_st_indicator.MaMethod(value);       }
+        void              Applied(ENUM_APPLIED_PRICE value)   { m_st_indicator.Applied(value);   }
         void              EnableClose(bool value)             { m_enable_close=value;       }
-        
+
+        bool              Initialize(string symbol,int period,bool every_tick);
         //--- method of verification of settings
         virtual bool      ValidationSettings(void);
         //--- method of creating the indicator and timeseries
@@ -49,20 +48,35 @@ class SignalSuperTrend: public CExpertSignal {
 //+------------------------------------------------------------------+
 //| Constructor                                                      |
 //+------------------------------------------------------------------+
-SignalSuperTrend::SignalSuperTrend(void) : m_sig_symbol("GBPJPY"),
-                            m_sig_timeframe(PERIOD_M30),
-                            m_st_period(10),
-                            m_st_multiplier(3.1),
-                            m_st_ma_method(ENUM_MA_METHOD::MODE_SMMA),
-                            m_st_applied_price(PRICE_OPEN) {
+SignalSuperTrend::SignalSuperTrend(void) {
     //--- initialization of protected data
     m_used_series=USE_SERIES_OPEN+USE_SERIES_HIGH+USE_SERIES_LOW+USE_SERIES_CLOSE;
+
+    m_st_indicator = new CiSuperTrend();
 }
 
 //+------------------------------------------------------------------+
 //| Destructor                                                       |
 //+------------------------------------------------------------------+
 SignalSuperTrend::~SignalSuperTrend(void){
+    delete m_st_indicator;
+}
+
+bool SignalSuperTrend::Initialize(string symbol,int period,bool every_tick) {
+    if(m_symbol==NULL) {
+        if((m_symbol=new CSymbolInfo)==NULL)
+            return(false);
+    }
+    if(!m_symbol.Name(symbol))
+        return(false);
+    m_period    =period;
+    m_every_tick=every_tick;
+    
+    m_st_indicator.Initialize(symbol, period);
+
+    CExpertBase::Init(m_symbol, (ENUM_TIMEFRAMES)period, 1);
+
+    return (true);
 }
 
 //+------------------------------------------------------------------+
@@ -92,18 +106,8 @@ bool SignalSuperTrend::InitIndicators(CIndicators *indicators) {
     if(!CExpertSignal::InitIndicators(indicators))
         return(false);
     
-    //--- create and initialize MA indicator
-    if(!m_st_indicator.Create(m_sig_symbol, (ENUM_TIMEFRAMES)m_sig_timeframe,
-                        m_st_period, m_st_multiplier,
-                        m_st_ma_method, m_st_applied_price)) {
-        printf(__FUNCTION__+": error initializing object");
-        return(false);
-    }
-    //--- add object to collection
-    if(!indicators.Add(GetPointer(m_st_indicator))) {
-        printf(__FUNCTION__+": error adding object");
-        return(false);
-    }
+    indicators.Add(m_st_indicator);
+    
     //--- ok
     return(true);
 }

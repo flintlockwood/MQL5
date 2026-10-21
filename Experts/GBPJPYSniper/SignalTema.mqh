@@ -21,7 +21,7 @@ class SignalTema: public CExpertSignal {
 
     public:
         SignalTema(void);
-        ~SignalTema(void);
+       ~SignalTema(void);
 
         //--- methods of setting adjustable indicator parameters
         void              TemaSymbol(string value)             { m_tema_indicator.Symbol(value); }

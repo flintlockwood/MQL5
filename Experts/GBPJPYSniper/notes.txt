@@ -1,7 +1,7 @@
 Entry Signal
 1. "Long" (2174)
     1.1. inDateRange (not used)
-    1.2. no open position --> done
+    1.2. no open position or long3 --> done (check long3)
     1.3. tpo (enable only one buy) --> done
     1.4. calculated lot size > 0 --> money management
     1.5. long or long3 --> line: 2124

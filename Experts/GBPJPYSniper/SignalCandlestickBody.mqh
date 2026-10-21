@@ -14,19 +14,20 @@
 class SignalCandlestickBody: public CExpertSignal {
     protected:
         //--- adjusted parameters
-        string            m_sig_symbol;
-        int               m_sig_timeframe;
+        string            m_csb_symbol;
+        int               m_csb_timeframe;
         int               m_csb_pip_long;
 
     public:
         SignalCandlestickBody(void);
-        ~SignalCandlestickBody(void);
+       ~SignalCandlestickBody(void);
 
         //--- methods of setting adjustable indicator parameters
-        void              IndicatorSymbol(string value)         { m_sig_symbol=value;    }
-        void              IndicatorTimeframe(int value)         { m_sig_timeframe=value; }
+        void              IndicatorSymbol(string value)         { m_csb_symbol=value;    }
+        void              IndicatorTimeframe(int value)         { m_csb_timeframe=value; }
         void              CsbPipLong(int value)                 { m_csb_pip_long=value;  }
         
+        bool              Initialize(string symbol,int period,bool every_tick);        
         //--- method of verification of settings
         virtual bool      ValidationSettings(void);
         //--- methods of checking if the market models are formed
@@ -48,6 +49,21 @@ SignalCandlestickBody::SignalCandlestickBody(void) {
 SignalCandlestickBody::~SignalCandlestickBody(void){
 }
 
+bool SignalCandlestickBody::Initialize(string symbol,int period,bool every_tick) {
+    if(m_symbol==NULL) {
+        if((m_symbol=new CSymbolInfo)==NULL)
+            return(false);
+    }
+    if(!m_symbol.Name(symbol))
+        return(false);
+    m_period    =period;
+    m_every_tick=every_tick;
+
+    CExpertBase::Init(m_symbol, (ENUM_TIMEFRAMES)period, 1);
+
+    return (true);
+}
+
 //+------------------------------------------------------------------+
 //| Validation settings protected data.                              |
 //+------------------------------------------------------------------+
@@ -67,7 +83,7 @@ int SignalCandlestickBody::LongCondition(void) {
     int result=0;
     int idx   =StartIndex();
         
-    bool cond = MathAbs(Close(idx) - Open(idx)) < m_csb_pip_long * GetPoint(m_sig_symbol) * 10;
+    bool cond = MathAbs(Close(idx) - Open(idx)) < m_csb_pip_long * GetPoint(m_csb_symbol) * 10;
 
     //--- return the result
     return(cond ? 100 : 0);

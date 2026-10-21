@@ -42,8 +42,6 @@ class SignalATRTrailing: public CExpertSignal {
         virtual int       LongCondition(void);
         virtual int       ShortCondition(void);
 
-        bool              InitIndicators(CIndicators *indicators);
-
     protected:
         void              CalculateCondition();
 };

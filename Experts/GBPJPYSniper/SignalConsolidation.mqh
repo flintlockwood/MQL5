@@ -14,8 +14,7 @@
 class SignalConsolidation: public CExpertSignal {
     protected:
         //--- adjusted parameters
-        string            m_sig_symbol;
-        int               m_sig_timeframe;
+        string            m_cons_symbol;
         int               m_cons_lookback_long;
         int               m_cons_length_long;
         int               m_cons_lookback_short;
@@ -25,16 +24,17 @@ class SignalConsolidation: public CExpertSignal {
 
     public:
         SignalConsolidation(void);
-        ~SignalConsolidation(void);
+       ~SignalConsolidation(void);
 
         //--- methods of setting adjustable indicator parameters
-        void              IndicatorSymbol(string value)        { m_sig_symbol=value;             }
-        void              IndicatorTimeframe(int value)        { m_sig_timeframe=value;          }
+        void              ConsSymbol(string value)             { m_cons_symbol=value;            }
+        void              ConsTimeframe(int value)             { m_period=value;                 }
         void              ConsLookbackLong(int value)          { m_cons_lookback_long=value;     }
         void              ConsLengthLong(int value)            { m_cons_length_long=value;       }
         void              ConsLookbackShort(int value)         { m_cons_lookback_short=value;    }
         void              ConsLengthShort(int value)           { m_cons_length_short=value;      }
-        
+
+        bool              Initialize(string symbol,int period,bool every_tick);
         //--- method of verification of settings
         virtual bool      ValidationSettings(void);
         //--- methods of checking if the market models are formed
@@ -54,6 +54,22 @@ SignalConsolidation::SignalConsolidation(void) {
 //| Destructor                                                       |
 //+------------------------------------------------------------------+
 SignalConsolidation::~SignalConsolidation(void){
+}
+
+bool SignalConsolidation::Initialize(string symbol,int period,bool every_tick) {
+    if(m_symbol==NULL) {
+        if((m_symbol=new CSymbolInfo)==NULL)
+            return(false);
+    }
+    if(!m_symbol.Name(symbol))
+        return(false);
+    m_cons_symbol = symbol;
+    m_period      =period;
+    m_every_tick  =every_tick;
+
+    CExpertBase::Init(m_symbol, (ENUM_TIMEFRAMES)period, 1);
+
+    return (true);
 }
 
 //+------------------------------------------------------------------+
@@ -79,8 +95,8 @@ int SignalConsolidation::LongCondition(void) {
     double high[];
     double low[];
     double close[];
-    int bars = BarsCustom(m_sig_symbol, m_sig_timeframe);
-    CopyRatesCustom(m_sig_symbol, m_sig_timeframe, 0, m_cons_lookback_long, rates);
+    int bars = BarsCustom(m_cons_symbol, m_period);
+    CopyRatesCustom(m_cons_symbol, m_period, 0, m_cons_lookback_long, rates);
     CopyHighFromMqlRates(rates, high);
     CopyLowFromMqlRates(rates, low);
     CopyCloseFromMqlRates(rates, close);
@@ -171,8 +187,8 @@ int SignalConsolidation::ShortCondition(void) {
     double high[];
     double low[];
     double close[];
-    int bars = BarsCustom(m_sig_symbol, m_sig_timeframe);
-    CopyRatesCustom(m_sig_symbol, m_sig_timeframe, 0, m_cons_lookback_short, rates);
+    int bars = BarsCustom(m_cons_symbol, m_period);
+    CopyRatesCustom(m_cons_symbol, m_period, 0, m_cons_lookback_short, rates);
     CopyHighFromMqlRates(rates, high);
     CopyLowFromMqlRates(rates, low);
     CopyCloseFromMqlRates(rates, close);

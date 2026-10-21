@@ -14,8 +14,8 @@
 class SignalATR: public CExpertSignal {
     protected:
         //--- adjusted parameters
-        string            m_sig_symbol;
-        int               m_sig_timeframe;
+        string            m_atr_symbol;
+        int               m_atr_timeframe;
         int               m_atr_period;
         ENUM_MA_METHOD    m_smoothing_method;
         bool              m_enable_atr_direction;
@@ -27,11 +27,11 @@ class SignalATR: public CExpertSignal {
 
     public:
         SignalATR(void);
-        ~SignalATR(void);
+       ~SignalATR(void);
 
         //--- methods of setting adjustable indicator parameters
-        void              IndicatorSymbol(string value)        { m_sig_symbol=value;             }
-        void              IndicatorTimeframe(int value)        { m_sig_timeframe=value;          }
+        void              IndicatorSymbol(string value)        { m_atr_symbol=value;             }
+        void              IndicatorTimeframe(int value)        { m_atr_timeframe=value;          }
         void              ATRPeriod(int value)                 { m_atr_period=value;             }
         void              SmootingMethod(ENUM_MA_METHOD value) { m_smoothing_method=value;       }
         void              EnableATRDirectionSignal(bool value) { m_enable_atr_direction=value;   }
@@ -41,25 +41,19 @@ class SignalATR: public CExpertSignal {
         void              ATRDownByShort(double value)         { m_atr_down_by_short=value;      }
         void              ATRUpByShort(double value)           { m_atr_up_by_short=value;        }
         
+        bool              Initialize(string symbol,int period,bool every_tick);        
         //--- method of verification of settings
         virtual bool      ValidationSettings(void);
-        //--- method of creating the indicator and timeseries
-        virtual bool      InitIndicators(CIndicators *indicators);
+
         //--- methods of checking if the market models are formed
         virtual int       LongCondition(void);
         virtual int       ShortCondition(void);
-
-    protected:
-        //--- method of initialization of the indicator
-        bool              InitATR(CIndicators *indicators);
-        //--- methods of getting data
 };
 
 //+------------------------------------------------------------------+
 //| Constructor                                                      |
 //+------------------------------------------------------------------+
-SignalATR::SignalATR(void) : m_atr_period(3),
-                             m_smoothing_method(MODE_SMMA) {
+SignalATR::SignalATR(void) {
     //--- initialization of protected data
     m_used_series=USE_SERIES_OPEN+USE_SERIES_HIGH+USE_SERIES_LOW+USE_SERIES_CLOSE;
 }
@@ -68,6 +62,21 @@ SignalATR::SignalATR(void) : m_atr_period(3),
 //| Destructor                                                       |
 //+------------------------------------------------------------------+
 SignalATR::~SignalATR(void){
+}
+
+bool SignalATR::Initialize(string symbol,int period,bool every_tick) {
+    if(m_symbol==NULL) {
+        if((m_symbol=new CSymbolInfo)==NULL)
+            return(false);
+    }
+    if(!m_symbol.Name(symbol))
+        return(false);
+    m_period    =period;
+    m_every_tick=every_tick;
+
+    CExpertBase::Init(m_symbol, (ENUM_TIMEFRAMES)period, 1);
+
+    return (true);
 }
 
 //+------------------------------------------------------------------+
@@ -87,35 +96,6 @@ bool SignalATR::ValidationSettings(void) {
 }
 
 //+------------------------------------------------------------------+
-//| Create indicators.                                               |
-//+------------------------------------------------------------------+
-bool SignalATR::InitIndicators(CIndicators *indicators) {
-    //--- check pointer
-    if(indicators==NULL)
-        return(false);
-    //--- initialization of indicators and timeseries of additional filters
-    if(!CExpertSignal::InitIndicators(indicators))
-        return(false);
-    //--- create and initialize MA indicator
-    if(!InitATR(indicators))
-        return(false);
-    //--- ok
-    return(true);
-}
-
-//+------------------------------------------------------------------+
-//| Initialize Super Trend indicators.                                        |
-//+------------------------------------------------------------------+
-bool SignalATR::InitATR(CIndicators *indicators) {
-    //--- check pointer
-    if(indicators==NULL)
-        return(false);
-
-    //--- ok
-    return(true);
-}
-
-//+------------------------------------------------------------------+
 //| "Voting" that price will grow.                                   |
 //+------------------------------------------------------------------+
 int SignalATR::LongCondition(void) {
@@ -124,8 +104,8 @@ int SignalATR::LongCondition(void) {
     
     double tr_array[];
     double atr_array[];
-    int bars = BarsCustom(m_sig_symbol, m_sig_timeframe);
-    CopyTR(m_sig_symbol, m_sig_timeframe, 0, bars, tr_array);
+    int bars = BarsCustom(m_atr_symbol, m_atr_timeframe);
+    CopyTR(m_atr_symbol, m_atr_timeframe, 0, bars, tr_array);
     InitializeArray(atr_array, ArraySize(tr_array), EMPTY_VALUE);
     MAOnBuffer(ArraySize(tr_array), 0, 0, m_atr_period, m_smoothing_method, tr_array, atr_array);
     ArraySetAsSeries(atr_array, true);
@@ -147,8 +127,8 @@ int SignalATR::ShortCondition(void) {
     
     double tr_array[];
     double atr_array[];
-    int bars = BarsCustom(m_sig_symbol, m_sig_timeframe);
-    CopyTR(m_sig_symbol, m_sig_timeframe, 0, bars, tr_array);
+    int bars = BarsCustom(m_atr_symbol, m_atr_timeframe);
+    CopyTR(m_atr_symbol, m_atr_timeframe, 0, bars, tr_array);
     InitializeArray(atr_array, ArraySize(tr_array), EMPTY_VALUE);
     MAOnBuffer(ArraySize(tr_array), 0, 0, m_atr_period, m_smoothing_method, tr_array, atr_array);
     ArraySetAsSeries(atr_array, true);
