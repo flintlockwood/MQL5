@@ -1,0 +1,146 @@
+//+------------------------------------------------------------------+
+//|                                          IndicatorSuperTrend.mqh |
+//|                                  Copyright 2026, Mufraeli Rahman |
+//|                                                 https://mql5.com |
+//| 21.09.2026 - Initial release                                     |
+//+------------------------------------------------------------------+
+#property copyright "Copyright 2026, Mufraeli Rahman"
+#property link      "https://mql5.com"
+
+#include <Indicators/Indicator.mqh>
+#include <MovingAverages.mqh>
+#include "Helper.mqh"
+
+class CiTema: public CIndicator {
+    protected:
+        int               m_tema_period;
+        ENUM_APPLIED_PRICE m_tema_source;
+
+    public:
+        CiTema(void);
+       ~CiTema(void);
+
+        //--- methods to set to protected data
+        void            Symbol(string value) { m_symbol = value; }
+        void            Period(int value) { m_period = value; }
+        void            TemaPeriod(int value) { m_tema_period = value;  }
+        void            TemaSource(ENUM_APPLIED_PRICE value) { m_tema_source = value; }
+        
+        //--- method of creation
+        bool            Initialize(const string symbol,const int timeframe);
+
+        //--- methods of access to indicator data
+        double          GetData(const int buffer_num,const int index);
+        int             GetData(const int start_pos,const int count,const int buffer_num,double &buffer[]);
+        double          Tema(const int index);
+        virtual void    Refresh(const int flags=OBJ_ALL_PERIODS);
+};
+
+//+------------------------------------------------------------------+
+//| Constructor                                                      |
+//+------------------------------------------------------------------+
+CiTema::CiTema(void) {
+}
+
+//+------------------------------------------------------------------+
+//| Destructor                                                       |
+//+------------------------------------------------------------------+
+CiTema::~CiTema(void) {
+}
+
+//+------------------------------------------------------------------+
+//| Create indicator                                                 |
+//+------------------------------------------------------------------+
+bool CiTema::Initialize(const string symbol,const int timeframe) {
+//--- we do not need to create indicator here
+    if(!Reserve(1)) {
+        return false;
+    }
+    //--- save settings
+    m_symbol = symbol;
+    m_period = timeframe;
+
+    //--- create buffers
+    CIndicatorBuffer *tema_buffer = new CIndicatorBuffer();
+    tema_buffer.Name("TEMA");
+    Add(tema_buffer);
+    m_buffers_total=1;
+    
+    //--- ok
+    return(true);
+}
+
+//+------------------------------------------------------------------+
+//| Access to linear regression buffer                               |
+//+------------------------------------------------------------------+
+double CiTema::Tema(const int index) {
+    CIndicatorBuffer *buffer=At(0);
+    //--- check
+    if(buffer==NULL)
+        return(EMPTY_VALUE);
+    //---
+    return(buffer.At(index));
+}
+
+double CiTema::GetData(const int buffer_num,const int index) {
+    CIndicatorBuffer *buffer=At(buffer_num);
+    //--- check
+    if(buffer==NULL) {
+        Print(__FUNCTION__,": invalid buffer");
+        return(EMPTY_VALUE);
+    }
+    //---
+    return(buffer.At(index));
+}
+
+//+------------------------------------------------------------------+
+//| API access method "Copying the buffer of indicator by specifying |
+//| a start position and number of elements"                         |
+//+------------------------------------------------------------------+
+int CiTema::GetData(const int start_pos,const int count,const int buffer_num,double &buffer[]) {
+    //--- check
+    CIndicatorBuffer *ind_buffer=At(buffer_num);
+    if(ind_buffer==NULL) {
+        Print(__FUNCTION__,": invalid buffer");
+        return(-1);
+    }
+    if(buffer_num>=m_buffers_total) {
+        SetUserError(ERR_USER_INVALID_BUFF_NUM);
+        return(-1);
+    }
+    for (int i=start_pos; i<count; i++) {
+        ArrayAppend(buffer, ind_buffer.At(i));
+    }
+    //---
+    return(ArraySize(buffer));
+}
+
+//+------------------------------------------------------------------+
+//| Refreshing data of indicator                                     |
+//+------------------------------------------------------------------+
+void CiTema::Refresh(const int flags=OBJ_ALL_PERIODS) {
+    double applied_prices[];
+    double ema1[];
+    double ema2[];
+    double ema3[];
+    double tema[];
+    CopyAppliedPrice(m_symbol, m_period, m_tema_source, 0, BarsCustom(m_symbol, m_period), applied_prices);
+    InitializeArray(ema1, ArraySize(applied_prices), EMPTY_VALUE);
+    InitializeArray(ema2, ArraySize(applied_prices), EMPTY_VALUE);
+    InitializeArray(ema3, ArraySize(applied_prices), EMPTY_VALUE);
+    InitializeArray(tema, ArraySize(applied_prices), EMPTY_VALUE);
+    ExponentialMAOnBuffer(ArraySize(applied_prices), 0, 0, m_tema_period, applied_prices, ema1);
+    ExponentialMAOnBuffer(ArraySize(applied_prices), 0, 0, m_tema_period, ema1, ema2);
+    ExponentialMAOnBuffer(ArraySize(applied_prices), 0, 0, m_tema_period, ema2, ema3);
+
+    for (int i=0; i<ArraySize(applied_prices); i++) {
+        if (ema1[i] == EMPTY_VALUE || ema2[i] == EMPTY_VALUE || ema3[i] == EMPTY_VALUE) {
+            continue;
+        }
+        tema[i] = 3 * ema1[i] - 3 * ema2[i] + ema3[i];
+    }
+
+    ArraySetAsSeries(tema, true);
+    CIndicatorBuffer *tema_buffer = At(0);
+    tema_buffer.AssignArray(tema);
+}
