@@ -59,14 +59,14 @@ Entry Signal
     2.1. sell position exists
     2.2. "Long" signal
 3. "Short"
-    3.1. inDateRange (not used)
+    3.1. x inDateRange (not used)
     3.2. no open position
     3.3. tpos (enable only one sell)
     3.4. calculated lot size > 0 --> money management
     3.5. barstate.isconfirmed  
     3.6. (strategy.position_size==0 or e34) --> no open position or enable long reversal
     3.7. sn --> enable short
-    3.8. (ale==0 or alt==false or altn==1 or ta.barssince(strategy.position_size<0)>altc) --> not used (aways true) because alt is false
+    3.8. x (ale==0 or alt==false or altn==1 or ta.barssince(strategy.position_size<0)>altc) --> not used (aways true) because alt is false
     3.9. short = choppy_sell
         3.9.1 (choppy_lsmaph==false or close> (lsma-(lsmapipsh*GetPipSize())))
         3.9.2 (choppy_tema==false or temaso)
@@ -74,29 +74,29 @@ Entry Signal
         3.9.4 (choppy_zemas1==false or zemaso)
         3.9.5 (choppy_csos==false or(choppy_csos and close> open[csobs]*(1-csops)))
         3.9.6 (choppy_css==false or (choppy_css and open>open[1]*(1-csps) ))
-        3.9.7 (choppy_sellprl==false or open<lcis)
-        3.9.8 (choppy_zl==false or trendz==-1)
-        3.9.9 (choppy_ao==false or aosell)
-        3.9.10 (choppy_lo2==false or startShortTrade)
-        3.9.11 (choppy_sslm==false or ssl_momentum_sell)
-        3.9.12 (choppy_ssl==false or ssls)
-        3.9.13 (choppy_emacloud3==false or downc3) 
-        3.9.14 (choppy_emacloud2==false or downc2) 
-        3.9.15 (choppy_emacloud1==false or downc)
+        3.9.7 x (choppy_sellprl==false or open<lcis)
+        3.9.8 x (choppy_zl==false or trendz==-1)
+        3.9.9 x (choppy_ao==false or aosell)
+        3.9.10 x (choppy_lo2==false or startShortTrade)
+        3.9.11 x (choppy_sslm==false or ssl_momentum_sell)
+        3.9.12 x (choppy_ssl==false or ssls)
+        3.9.13 x (choppy_emacloud3==false or downc3) 
+        3.9.14 x (choppy_emacloud2==false or downc2) 
+        3.9.15 x (choppy_emacloud1==false or downc)
         3.9.16 (choppy_toos==false or toos==false)
-        3.9.17 (choppy_selwb==false or sellwb==false)
+        3.9.17 x (choppy_selwb==false or sellwb==false)
         3.9.18 (choppy_memo==false or memos)
-        3.9.19 (choppy_tm==false or tsell)
-        3.9.20 (choppy_band==false or colorTrend==color.red)
+        3.9.19 x (choppy_tm==false or tsell)
+        3.9.20 x (choppy_band==false or colorTrend==color.red)
         3.9.21 (choppy_color==false or close<open)
-        3.9.22 (choppy_lo==false or lcsell) 
+        3.9.22 x (choppy_lo==false or lcsell) 
         3.9.23 (choppy_mema==false or memasell)
         3.9.24 (choppy_avtr==false or avtrsell)
         3.9.25 (choppy_zemam==false or z1_momentum_sell)
         3.9.26 (choppy_zema==false or zemas) 
-        3.9.27 (choppy_xatr==false or(choppy_xatr and xans==false)) 
+        3.9.27 x (choppy_xatr==false or(choppy_xatr and xans==false)) 
         3.9.28 (choppy_cd==false or(choppy_cd and csds==false))
-        3.9.29 (choppy_pst==false or psts)
+        3.9.29 x (choppy_pst==false or psts)
         3.9.29 (choppy_atr==false or atr18ls) 
         3.9.30 (choppy_atr0==false or atr18lso)
         3.9.31 (choppy_sk2==false or sksell2)
@@ -281,3 +281,60 @@ set (symbol, period, parameters)-> INIT_PHASE_TUNING
 validation -> INIT_PHASE_VALIDATION
 set price (open, high, low, close, volume) -> INIT_PHASE_VALIDATION
 init indicator -> INIT_PHASE_COMPLETE
+
+"Long"
+    no open position or long3 --> done (check long3)
+    tpo (enable only one buy) --> done
+    calculated lot size > 0 --> money management
+    long or long3 --> line: 2124
+    long
+    (choppy_lsmap==false or open< (lsma+(lsmapips*GetPipSize()))) --> open price < linear regression of close price + some pips --> done (sig_lsma)
+    (choppy_tema==false or temab) --> triple ema --> done (sig_tema)
+    (choppy_memo == false or memob) --> open > 2H ema --> done (Signal_EmaOpen)
+    (choppy_cso==false or(choppy_cso and close< open[csob]*(1+csop))) --> prevent large bull --> done
+    (choppy_cs==false or (choppy_cs and open<open[1]*(1+csp) )) --> prevent large candle --> done
+    (choppy_color==false or close>open) --> green candle --> done
+    (choppy_mema==false or memabuy) --> close > 20M RMA  --> done (Signal_MemaClose)
+    (choppy_avtr==false or avtrbuy) --> ATR --> done
+    (choppy_zemam==false or z1_momentum_buy) --> zero lag ema > previous zero lag ema --> done
+    (choppy_zema==false or zemab) --> done (Signal_Zema)
+    (choppy_cd==false or(choppy_cd and csd==false)) --> csd (1113 2193)
+    (choppy_atr==false or atr18l) --> done (Signal_ATR)
+    (choppy_atr0==false or atr18lo) --> done (Signal_ATR)
+    (choppy_sk2==false or skbuy2) --> done (Signal_StochRsi)
+    (choppy_st==false or stbuy12) --> done (Signal_ST)
+    long3
+    (choppy_long3cp==false or (math.abs(open-close)<(choppy_long3cpi*GetPipSize()))) --> done
+    (choppy_st3==false or stbuy) --> done
+    (choppy_sslm3==false or ssl_momentum_buy) --> done 
+    strategy.position_size==0 --> done
+    tdir==1 
+    close >BBMC --> done
+    close>kernelEstimate --> done
+    close > ema_1502 --> done
+    upc2 
+    enable long (input)
+
+"Short"
+    tpos (enable only one sell)
+    (strategy.position_size==0 or e34) --> no open position or enable long reversal
+    sn --> enable short
+    (choppy_lsmaph==false or close> (lsma-(lsmapipsh*GetPipSize())))
+    (choppy_tema==false or temaso)
+    (choppy_tema==false or temas)
+    (choppy_zemas1==false or zemaso)
+    (choppy_csos==false or(choppy_csos and close> open[csobs]*(1-csops)))
+    (choppy_css==false or (choppy_css and open>open[1]*(1-csps) ))
+    (choppy_toos==false or toos==false)
+    (choppy_memo==false or memos)
+    (choppy_color==false or close<open)
+    (choppy_mema==false or memasell)
+    (choppy_avtr==false or avtrsell)
+    (choppy_zemam==false or z1_momentum_sell)
+    (choppy_zema==false or zemas) 
+    (choppy_cd==false or(choppy_cd and csds==false))
+    (choppy_atr==false or atr18ls) 
+    (choppy_atr0==false or atr18lso)
+    (choppy_sk2==false or sksell2)
+    (choppy_st==false or stsell12 )   
+
