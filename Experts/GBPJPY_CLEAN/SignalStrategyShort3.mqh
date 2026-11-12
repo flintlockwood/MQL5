@@ -21,6 +21,9 @@ protected:
     CSignalExporter         m_exporter;
     CPositionInfo           m_position;
 
+    //--- Strategy ID for Trade Comment (Pine Script: "Short3")
+    string                  m_strategy_id;
+
     //--- Strategy Inputs
     bool                    m_enable_short3;            // choppy_short3
 
@@ -39,6 +42,10 @@ public:
         datetime dt = (m_time != NULL && m_time.GetData(0) > 0) ? m_time.GetData(0) : iTime(m_symbol != NULL ? m_symbol.Name() : _Symbol, m_period, 0);
         m_exporter.Export(dt);
     }
+
+    //--- Strategy ID
+    string           StrategyId(void) const                      { return m_strategy_id; }
+    void             StrategyId(string id)                       { m_strategy_id = id; }
 
     void             EnableShort3(bool value)                    { m_enable_short3 = value; }
 
@@ -63,7 +70,8 @@ protected:
 //| Constructor                                                      |
 //+------------------------------------------------------------------+
 CSignalStrategyShort3::CSignalStrategyShort3(void)
-    : m_enable_short3(true),
+    : m_strategy_id("Short3"),
+      m_enable_short3(true),
       m_sig_zema(NULL),
       m_sig_st(NULL) {
     m_used_series = USE_SERIES_OPEN + USE_SERIES_HIGH + USE_SERIES_LOW + USE_SERIES_CLOSE;

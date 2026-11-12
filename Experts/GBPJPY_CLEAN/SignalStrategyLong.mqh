@@ -32,6 +32,9 @@ protected:
     CSignalExporter         m_exporter;
     CPositionInfo           m_position;
 
+    //--- Strategy ID for Trade Comment (Pine Script: "Long")
+    string                  m_strategy_id;
+
     //--- Strategy Inputs
     bool                    m_enable_long;              // ln input
     bool                    m_enable_long3;             // choppy_long3 input
@@ -66,6 +69,10 @@ public:
         datetime dt = (m_time != NULL && m_time.GetData(0) > 0) ? m_time.GetData(0) : iTime(m_symbol != NULL ? m_symbol.Name() : _Symbol, m_period, 0);
         m_exporter.Export(dt);
     }
+
+    //--- Strategy ID
+    string           StrategyId(void) const                      { return m_strategy_id; }
+    void             StrategyId(string id)                       { m_strategy_id = id; }
 
     //--- Parameter setters
     void             EnableLong(bool value)              { m_enable_long = value; }
@@ -110,7 +117,8 @@ protected:
 //| Constructor                                                      |
 //+------------------------------------------------------------------+
 CSignalStrategyLong::CSignalStrategyLong(void)
-    : m_enable_long(true),
+    : m_strategy_id("Long"),
+      m_enable_long(true),
       m_enable_long3(true),
       m_enable_reversal(true),
       m_long3_pip_limit(10),

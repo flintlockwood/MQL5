@@ -153,6 +153,7 @@ int SignalTema::ShortCondition(void) {
     int idx   =StartIndex();
     
     bool cond = Close(idx) < m_tema_indicator.Tema(idx);
+    cond = cond && Open(idx) < m_tema_indicator.Tema(idx);
     if (m_enable_tema_momentum) {
         cond = cond && m_tema_indicator.Tema(idx) < m_tema_indicator.Tema(idx+1);
     }

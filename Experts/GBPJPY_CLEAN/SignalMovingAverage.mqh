@@ -54,6 +54,9 @@ class SignalMovingAverage: public CExpertSignal {
 
         //--- method of creating the indicator and timeseries
         virtual bool      InitIndicators(CIndicators *indicators);
+    
+    protected:
+        virtual int       StartIndex();
 };
 
 //+------------------------------------------------------------------+
@@ -119,6 +122,13 @@ bool SignalMovingAverage::InitIndicators(CIndicators *indicators) {
 
     //--- ok
     return(true);
+}
+
+int SignalMovingAverage::StartIndex() {
+    if (GetPeriodSeconds(m_ma_timeframe) != PeriodSeconds(_Period)) {
+        return 0;
+    }
+    return CExpertBase::StartIndex();
 }
 
 //+------------------------------------------------------------------+

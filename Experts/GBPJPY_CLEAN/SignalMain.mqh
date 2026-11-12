@@ -50,6 +50,10 @@ protected:
     CSignalStrategyShort3   *m_strat_short3;
     CSignalStrategyShort4   *m_strat_short4;
 
+    //--- Active Strategy ID tracking for trade comment
+    string                   m_active_long_id;
+    string                   m_active_short_id;
+
     //--- Shared Indicator Filters
     SignalLinearRegression  *m_sig_lsma;
     SignalTema              *m_sig_tema;
@@ -189,6 +193,20 @@ public:
     void                     EnableStrategyShort3(bool value)       { m_strat_short3.EnableShort3(value); }
     void                     EnableStrategyShort4(bool value)       { m_strat_short4.EnableShort4(value); }
 
+    //--- Strategy ID accessors
+    string                   ActiveLongId(void) const               { return m_active_long_id; }
+    string                   ActiveShortId(void) const              { return m_active_short_id; }
+    void                     ActiveLongId(string id)                { m_active_long_id = id; }
+    void                     ActiveShortId(string id)               { m_active_short_id = id; }
+
+    //--- Strategy ID configuration setters
+    void                     StrategyIdLong(string id)              { if(m_strat_long != NULL) m_strat_long.StrategyId(id); }
+    void                     StrategyIdLong2(string id)             { if(m_strat_long2 != NULL) m_strat_long2.StrategyId(id); }
+    void                     StrategyIdShort(string id)             { if(m_strat_short != NULL) m_strat_short.StrategyId(id); }
+    void                     StrategyIdShort2(string id)            { if(m_strat_short2 != NULL) m_strat_short2.StrategyId(id); }
+    void                     StrategyIdShort3(string id)            { if(m_strat_short3 != NULL) m_strat_short3.StrategyId(id); }
+    void                     StrategyIdShort4(string id)            { if(m_strat_short4 != NULL) m_strat_short4.StrategyId(id); }
+
     //--- Virtual standard overrides
     bool                     Initialize(string symbol, int period, bool every_tick);
     virtual bool             ValidationSettings(void);
@@ -234,7 +252,9 @@ SignalMain::SignalMain(void)
       m_atr_timeframe(PERIOD_M45),
       m_stochrsi_timeframe(PERIOD_M30),
       m_st_timeframe(PERIOD_M30),
-      m_csb_pip_long(10) {
+      m_csb_pip_long(10),
+      m_active_long_id(""),
+      m_active_short_id("") {
     m_used_series = USE_SERIES_OPEN + USE_SERIES_HIGH + USE_SERIES_LOW + USE_SERIES_CLOSE;
 
     // Instantiate Sub-filters
@@ -588,21 +608,27 @@ bool SignalMain::SelectPosition(void) {
 //| Long voting condition: Combines Strategy Long and Long2         |
 //+------------------------------------------------------------------+
 int SignalMain::LongCondition(void) {
+    m_active_long_id = "";
+
     int vote1 = m_strat_long.LongCondition();
 
     m_exporter.UpdateLong(vote1);
     ExportConditions();
 
-    if(vote1 > 0)
+    if(vote1 > 0) {
+        m_active_long_id = m_strat_long.StrategyId();
         return(vote1);
+    }
 
     int vote2 = m_strat_long2.LongCondition();
 
     m_exporter.UpdateLong(vote2);
     ExportConditions();
 
-    if(vote2 > 0)
+    if(vote2 > 0) {
+        m_active_long_id = m_strat_long2.StrategyId();
         return(vote2);
+    }
 
     return(0);
 }
@@ -611,29 +637,39 @@ int SignalMain::LongCondition(void) {
 //| Short voting condition: Combines Strategy Short, Short2, 3, 4   |
 //+------------------------------------------------------------------+
 int SignalMain::ShortCondition(void) {
+    m_active_short_id = "";
+
     int vote1 = m_strat_short.ShortCondition();
     m_exporter.UpdateShort(vote1);
     ExportConditions();
-    if(vote1 > 0)
+    if(vote1 > 0) {
+        m_active_short_id = m_strat_short.StrategyId();
         return(vote1);
+    }
 
     int vote2 = m_strat_short2.ShortCondition();
     m_exporter.UpdateShort(vote2);
     ExportConditions();
-    if(vote2 > 0)
+    if(vote2 > 0) {
+        m_active_short_id = m_strat_short2.StrategyId();
         return(vote2);
+    }
 
     int vote3 = m_strat_short3.ShortCondition();
     m_exporter.UpdateShort(vote3);
     ExportConditions();
-    if(vote3 > 0)
+    if(vote3 > 0) {
+        m_active_short_id = m_strat_short3.StrategyId();
         return(vote3);
+    }
 
     int vote4 = m_strat_short4.ShortCondition();
     m_exporter.UpdateShort(vote4);
     ExportConditions();
-    if(vote4 > 0)
+    if(vote4 > 0) {
+        m_active_short_id = m_strat_short4.StrategyId();
         return(vote4);
+    }
 
     return(0);
 }

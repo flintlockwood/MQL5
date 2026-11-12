@@ -31,6 +31,9 @@ protected:
     CSignalExporter         m_exporter;
     CPositionInfo           m_position;
 
+    //--- Strategy ID for Trade Comment (Pine Script: "Short")
+    string                  m_strategy_id;
+
     //--- Strategy Inputs
     bool                    m_enable_short;             // sn input
     bool                    m_enable_reversal;          // e34 / e38 long-to-short reversal
@@ -59,6 +62,10 @@ public:
         datetime dt = (m_time != NULL && m_time.GetData(0) > 0) ? m_time.GetData(0) : iTime(m_symbol != NULL ? m_symbol.Name() : _Symbol, m_period, 0);
         m_exporter.Export(dt);
     }
+
+    //--- Strategy ID
+    string           StrategyId(void) const                      { return m_strategy_id; }
+    void             StrategyId(string id)                       { m_strategy_id = id; }
 
     void             EnableShort(bool value)                     { m_enable_short = value; }
     void             EnableReversal(bool value)                  { m_enable_reversal = value; }
@@ -94,7 +101,8 @@ protected:
 //| Constructor                                                      |
 //+------------------------------------------------------------------+
 CSignalStrategyShort::CSignalStrategyShort(void)
-    : m_enable_short(true),
+    : m_strategy_id("Short"),
+      m_enable_short(true),
       m_enable_reversal(true),
       m_sig_lsma(NULL),
       m_sig_tema(NULL),

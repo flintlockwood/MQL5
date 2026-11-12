@@ -12,6 +12,7 @@
 //| Includes                                                         |
 //+------------------------------------------------------------------+
 #include <Expert/Expert.mqh>
+#include "ExpertSniper.mqh"
 #include "Helper.mqh"
 #include "SignalMain.mqh"
 #include "MoneySniperRisk.mqh"
@@ -42,6 +43,14 @@ input bool               Strategy_Enable_Short          = true;        // Enable
 input bool               Strategy_Enable_Short2         = true;        // Enable Strategy Short2
 input bool               Strategy_Enable_Short3         = true;        // Enable Strategy Short3
 input bool               Strategy_Enable_Short4         = true;        // Enable Strategy Short4 (short33)
+
+//--- Strategy Trade Comment / ID Settings (Pine Script strategy.entry IDs)
+input string             Strategy_Id_Long               = "Long";      // Long Strategy ID / Comment
+input string             Strategy_Id_Long2              = "Long2";     // Long2 Strategy ID / Comment
+input string             Strategy_Id_Short              = "Short";     // Short Strategy ID / Comment
+input string             Strategy_Id_Short2             = "Short2";    // Short2 Strategy ID / Comment
+input string             Strategy_Id_Short3             = "Short3";    // Short3 Strategy ID / Comment
+input string             Strategy_Id_Short4             = "Short";     // Short4 Strategy ID / Comment
 
 //--- Money Management & Position Sizing
 input ENUM_POSITION_SIZING_TYPE Money_Sizing_Type_Buy   = SIZING_RISK_EQUITY_PER_TRADE; // Buy Sizing Model
@@ -150,7 +159,7 @@ input int                Signal_Csb_Pip_Long            = 10;
 //+------------------------------------------------------------------+
 //| Global Expert Object                                             |
 //+------------------------------------------------------------------+
-CExpert ExtExpert;
+CExpertSniper ExtExpert;
 
 //+------------------------------------------------------------------+
 //| Expert Initialization                                            |
@@ -172,6 +181,7 @@ int OnInit(void) {
     }
 
     ExtExpert.InitSignal(signal);
+    ExtExpert.SignalMainPtr(signal);
     signal.Initialize(Symbol(), Period(), Expert_EveryTick);
     signal.ThresholdOpen(Signal_ThresholdOpen);
     signal.ThresholdClose(Signal_ThresholdClose);
@@ -189,6 +199,14 @@ int OnInit(void) {
     signal.EnableStrategyShort2(Strategy_Enable_Short2);
     signal.EnableStrategyShort3(Strategy_Enable_Short3);
     signal.EnableStrategyShort4(Strategy_Enable_Short4);
+
+    // Strategy Trade Comment IDs (Pine Script strategy.entry IDs)
+    signal.StrategyIdLong(Strategy_Id_Long);
+    signal.StrategyIdLong2(Strategy_Id_Long2);
+    signal.StrategyIdShort(Strategy_Id_Short);
+    signal.StrategyIdShort2(Strategy_Id_Short2);
+    signal.StrategyIdShort3(Strategy_Id_Short3);
+    signal.StrategyIdShort4(Strategy_Id_Short4);
 
     // Configure LSMA
     signal.LsmaTimeframe(Signal_Lsma_Timeframe);

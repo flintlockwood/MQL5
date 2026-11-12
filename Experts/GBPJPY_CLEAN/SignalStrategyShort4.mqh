@@ -23,6 +23,9 @@ protected:
     CSignalExporter         m_exporter;
     CPositionInfo           m_position;
 
+    //--- Strategy ID for Trade Comment (Pine Script line 2642: "Short")
+    string                  m_strategy_id;
+
     //--- Strategy Inputs
     bool                    m_enable_short4;            // choppy_short4
     int                     m_pip_limit;                // pips4
@@ -43,6 +46,10 @@ public:
         datetime dt = (m_time != NULL && m_time.GetData(0) > 0) ? m_time.GetData(0) : iTime(m_symbol != NULL ? m_symbol.Name() : _Symbol, m_period, 0);
         m_exporter.Export(dt);
     }
+
+    //--- Strategy ID
+    string           StrategyId(void) const                      { return m_strategy_id; }
+    void             StrategyId(string id)                       { m_strategy_id = id; }
 
     void             EnableShort4(bool value)                    { m_enable_short4 = value; }
     void             PipLimit(int value)                         { m_pip_limit = value; }
@@ -69,7 +76,8 @@ protected:
 //| Constructor                                                      |
 //+------------------------------------------------------------------+
 CSignalStrategyShort4::CSignalStrategyShort4(void)
-    : m_enable_short4(true),
+    : m_strategy_id("Short"),
+      m_enable_short4(true),
       m_pip_limit(15),
       m_sig_lsma(NULL),
       m_sig_zema(NULL),
